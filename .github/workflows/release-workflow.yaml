@@ -1,9 +1,9 @@
-name: main-workflow
+name: release-workflow
 
 on:
   push:
     branches:
-      - 'feature/ci-cd'
+      - 'release'
 
 jobs:
   lint-job:
@@ -65,6 +65,8 @@ jobs:
       - run: chmod +x android/gradlew
       - run: ./gradlew assembleRelease --no-daemon -Dreact.internal.publishingGroup=com.facebook.react
         working-directory: android
+        env:
+          GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g"
 
       - uses: actions/upload-artifact@v4
         with:
