@@ -1,0 +1,65 @@
+name: android-build-workflow
+
+on:
+  push:
+    branches:
+      - 'feature/ci-cd'
+
+jobs:
+  android-build-job:
+    name: android build job
+    runs-on: ubuntu-slim
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'npm'
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - uses: actions/cache@v5
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - run: npm ci
+      - run: npx expo prebuild --platform android
+        env:
+          CI: 1
+      - run: |
+          # Decode keystore
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/release.keystore
+          cat > android/keystore.properties << EOF
+          storeFile=release.keystore
+          storePassword=$ANDROID_KEYSTORE_PASSWORD
+          keyAlias=$ANDROID_KEY_ALIAS
+          keyPassword=$ANDROID_KEY_PASSWORD
+          EOF
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+      - run: chmod +x android/gradlew
+      - run: ./gradlew assembleRelease --no-daemon
+        working-directory: android
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-apk-${{ github.sha }}
+          path: android/app/build/outputs/apk/release/*.apk
+          retention-days: 14
+
+      - run: |
+          rm -f android/app/release.keystore
+          rm -f android/keystore.properties
+        if: always()
