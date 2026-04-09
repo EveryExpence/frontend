@@ -1,4 +1,4 @@
-name: android-build-workflow
+name: main-workflow
 
 on:
   push:
@@ -6,10 +6,23 @@ on:
       - 'feature/ci-cd'
 
 jobs:
+  lint-job:
+    name: lint job
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run lint
+
   android-build-job:
     name: android build job
+    needs: lint-job
     runs-on: ubuntu-slim
-    timeout-minutes: 45
+    timeout-minutes: 90
 
     steps:
       - uses: actions/checkout@v6
@@ -50,7 +63,7 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
       - run: chmod +x android/gradlew
-      - run: ./gradlew assembleRelease --no-daemon
+      - run: ./gradlew assembleRelease --no-daemon -Dreact.internal.publishingGroup=com.facebook.react
         working-directory: android
 
       - uses: actions/upload-artifact@v4
