@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
-const index = () => {
+const LoginScreen = () => {
     const router = useRouter();
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
@@ -72,4 +72,4 @@ const index = () => {
     )
 }
 
-export default index
+export default LoginScreen
