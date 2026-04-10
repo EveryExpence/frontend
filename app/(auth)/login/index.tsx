@@ -60,11 +60,11 @@ const LoginScreen = () => {
                 <View className="absolute top-4 gap-2 w-full">
                     <Text
                         onPress={() => router.push("/sign-up")}
-                        className="text-lg text-center"
+                        className="text-lg text-center underline"
                     >Sign up</Text>
                     <Text
                         onPress={() => router.push("/password-reset")}
-                        className="text-lg text-center"
+                        className="text-lg text-center underline"
                     >Forgot password?</Text>
                 </View>
             </View>

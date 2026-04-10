@@ -11,8 +11,8 @@ const _layout = () => {
                 backgroundColor: "#4370C7",
                 width: 600,
                 height: 600,
-                top: -350,
-                left: -20,
+                top: -375,
+                left: -50,
             }}
         />
 
@@ -27,7 +27,9 @@ const _layout = () => {
             <Text className="text-2xl text-white text-right">Be aware of your expenses</Text>
         </View>
 
-        <Slot />
+        <View className="size-full">
+            <Slot />
+        </View>
     </View>
   )
 }
