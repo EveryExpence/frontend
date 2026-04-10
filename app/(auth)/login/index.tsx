@@ -1,8 +1,10 @@
 import { View, TextInput, Text, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 const index = () => {
+    const router = useRouter();
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [showPassword, setShowPassword] = useState(false);
@@ -52,6 +54,19 @@ const index = () => {
                 >
                     <Text className="text-xl text-center text-white">Login</Text>
                 </TouchableOpacity>
+            </View>
+
+            <View className="relative h-0 w-full">
+                <View className="absolute top-4 gap-2 w-full">
+                    <Text
+                        onPress={() => router.push("/sign-up")}
+                        className="text-lg text-center"
+                    >Sign up</Text>
+                    <Text
+                        onPress={() => router.push("/password-reset")}
+                        className="text-lg text-center"
+                    >Forgot password?</Text>
+                </View>
             </View>
         </View>
     )
