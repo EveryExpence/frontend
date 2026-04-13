@@ -9,6 +9,7 @@ const _layout = () => {
             style={{
                 flex: 1,
             }}
+            className="bg-theme-background"
         >
             <Slot />
         </View>
