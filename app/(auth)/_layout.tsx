@@ -29,7 +29,10 @@ const _layout = () => {
                 <Text className="text-2xl text-right text-theme-textLight">Be aware of your expenses</Text>
             </View>
 
-            <View className="size-full">
+            <View
+                className="flex-1" 
+                style={{ marginTop: 150 }}
+            >
                 <Slot />
             </View>
         </View>

@@ -13,7 +13,7 @@ const LoginScreen = () => {
     const colors = Colors[theme];
 
     return (
-        <View className="flex-1 items-center justify-center gap-3">
+        <View className="flex-1 justify-center gap-3">
             <View className="w-full px-8 justify-start">
                 <Text className="text-2xl pl-2 text-theme-text">Email</Text>
 
@@ -22,7 +22,7 @@ const LoginScreen = () => {
                     textContentType="emailAddress"
                     value={email}
                     onChangeText={setEmail}
-                    className="px-4 py-2 text-xl border rounded-md border-theme-text placeholder:text-theme-text"
+                    className="p-4 text-xl border rounded-md border-theme-text placeholder:text-theme-text"
                 />
             </View>
 
@@ -36,7 +36,7 @@ const LoginScreen = () => {
                         textContentType="password"
                         value={password}
                         onChangeText={setPassword}
-                        className="px-4 py-2 flex-1 text-xl border rounded-md border-theme-text placeholder:text-theme-text"
+                        className="p-4 flex-1 text-xl border rounded-md border-theme-text placeholder:text-theme-text"
                     />
 
                     <MaterialCommunityIcons
@@ -53,7 +53,7 @@ const LoginScreen = () => {
                 <TouchableOpacity
                     activeOpacity={0.8}
                     onPress={() => console.log('login...')}
-                    className="w-full justify-start py-3 rounded-md bg-theme-tint"
+                    className="w-full justify-start p-4 rounded-md bg-theme-tint"
                 >
                     <Text className="text-xl text-center text-theme-textLight">
                         Login
