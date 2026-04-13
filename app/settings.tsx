@@ -1,38 +1,51 @@
 import React from "react";
-import {View, Text, SectionList} from 'react-native';
+import {View, Text, SectionList, Pressable} from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { CiGlobe, CiLock, CiUser, CiBellOn } from "react-icons/ci";
+import { IoIosColorFilter, IoIosLogOut } from "react-icons/io";
 
-const DATA = [
-    {
-        title: "Account",
-        data: [
-            {title: 'Name', icon: ''},
-        ],
-    },
-    
-    {
-        title: "Preferences",
-        data: [
-            {title: 'Language', icon: ''},
-            {title: 'Theme', icon: ''},
-        ]
-    },
+type ItemType = "list" | "switch" | "logout";
 
-    {
-        title: "Notifications",
-        data: [
-            {title: 'Push Notifications', icon: ''},
-        ]
-    },
+type Item = {
+  title: string;
+  icon: any;
+  type: ItemType;
+};
 
-    {
-        title: "Security",
-        data: [
-            {title: 'Change Password', icon: ''}, 
-            {title: 'Log Out', icon: ''},
-        ]
-    },
-]
+const DATA: {
+  title: string;
+  data: Item[];
+}[] = [
+  {
+    title: "Account",
+    data: [
+      { title: "Name", icon: CiUser, type: "list" },
+    ],
+  },
+
+  {
+    title: "Preferences",
+    data: [
+      { title: "Language", icon: CiGlobe, type: "list" },
+      { title: "Theme", icon: IoIosColorFilter, type: "list" },
+    ],
+  },
+
+  {
+    title: "Notifications",
+    data: [
+      { title: "Push Notifications", icon: CiBellOn, type: "switch" },
+    ],
+  },
+
+  {
+    title: "Security",
+    data: [
+      { title: "Change Password", icon: CiLock, type: "list" },
+      { title: "Log Out", icon: IoIosLogOut, type: "logout" },
+    ],
+  },
+];
 
 const SettingsScreen = () => {
   return ( 
@@ -44,11 +57,18 @@ const SettingsScreen = () => {
                 renderSectionHeader = { ({section: {title}}) => ( 
                     <Text className= "text-3xl text-black font-semibold pl-4">{ title }</Text> 
                 )}
-                renderItem = { ({item}) => (
-                    <View style={{height: 100, backgroundColor: '#c9cccf', marginHorizontal: 16, borderRadius: 5}}>
-                        <Text className= "text-2xl pl-2 text-black py-7 font-semibold">{ item.title }</Text>
-                    </View>
-                )}
+                renderItem = { ({item}) => {
+                    const Icon = item.icon;
+
+                    return (
+                        <Pressable className="h-[80px] bg-[#e3e3ed] mx-4 rounded-md flex-row items-center px-3">
+                            <Icon size={40} className="mr-3" />
+                            <Text className="text-2xl font-semibold text-black">
+                                {item.title}
+                            </Text>
+                        </Pressable>
+                    );
+                }}
 
                 ItemSeparatorComponent = {() => (
                     <View style={{ height: 1, backgroundColor: '#333', marginHorizontal: 26 }} />
