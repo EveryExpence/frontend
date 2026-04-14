@@ -1,9 +1,10 @@
-import React, {useActionState, useState} from "react";
-import {View, Text, SectionList, Pressable, Switch} from 'react-native';
+import React, {useState, useRef} from "react";
+import {View, Text, SectionList, TouchableOpacity, Switch, Animated} from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { CiGlobe, CiLock, CiUser, CiBellOn } from "react-icons/ci";
 import { IoIosColorFilter, IoIosLogOut } from "react-icons/io";
 import { MdKeyboardArrowRight } from "react-icons/md";
+import { useRouter } from 'expo-router';
 
 type ItemType = "default" | "switch" | "logout" | "language" | "theme";
 type language = "eng" | "pl"
@@ -51,9 +52,11 @@ const DATA: {
 ];
 
 const SettingsScreen = () => {
+    const router = useRouter()
     const [currentLanguage, setLanguage] = useState<language>("eng") // current language
     const [currentTheme, setTheme] = useState<theme>("light") // current theme
-    const [currentNotifications, setNotifications ] = useState(true) // notifications state 
+    const [currentNotifications, setNotifications ] = useState(true) // notifications state
+    const scaleAnims = useRef<{[key: string]: Animated.Value}>({}) 
 
     const toggleNotifications = () => {
         setNotifications(previousState => !previousState)
@@ -68,7 +71,15 @@ const SettingsScreen = () => {
     }
 
     const toggleLogOut = () => {
-        null
+        router.push("/login")
+    }
+
+    const pushToChangePass = () => {
+        router.push("/change-password")
+    }
+
+    const pushToProfile = () => {
+        router.push("/profile")
     }
     
     return ( 
@@ -85,24 +96,48 @@ const SettingsScreen = () => {
                         { title } 
                     </Text> 
                 )}
-                renderItem = { ({item}) => {
+                renderItem = { ({item, index}) => {
                     const Icon = item.icon;
+                    const key = `${item.title}-${index}`;
+                    if (!scaleAnims.current[key]) {
+                        scaleAnims.current[key] = new Animated.Value(1);
+                    }
+                    const scaleAnim = scaleAnims.current[key];
+
+                    const animatePress = () => {
+                        Animated.sequence([
+                            Animated.timing(scaleAnim, {
+                                toValue: 0.95,
+                                duration: 100,
+                                useNativeDriver: false
+                            }),
+                            Animated.timing(scaleAnim, {
+                                toValue: 1,
+                                duration: 100,
+                                useNativeDriver: false
+                            })
+                        ]).start();
+                    };
 
                     return (
-                        <Pressable 
-                        className="h-[80px] bg-[#e3e3ed] mx-4 rounded-md flex-row items-center px-3 justify-between"
+                        <TouchableOpacity 
+                        activeOpacity={0.8}
+                        className="h-[80px] bg-[#e3e3ed] mx-4 rounded-md flex-row items-center px-3 justify-between"   
                         onPress = {() => {
-                                if(item.type == "language"){
+                                if(item.type === "language"){
                                     toggleLanguage()
                                 }
-                                if(item.type == "logout"){
+                                if(item.type === "logout"){
                                     toggleLogOut()
                                 }
-                                if(item.type == "switch"){
+                                if(item.type === "switch"){
                                     toggleNotifications()
                                 }
-                                if(item.type == "theme"){
+                                if(item.type === "theme"){
                                     toggleTheme()
+                                }
+                                if(item.type === "default"){
+                                    {item.title === "Name" ? pushToProfile() : pushToChangePass()}
                                 }
                             }
                         }
@@ -152,11 +187,13 @@ const SettingsScreen = () => {
 
                                 {item.type === "switch" && (
                                     <Switch 
+                                    trackColor={{false: '#767577', true: '#81b0ff'}}
+                                    thumbColor={currentNotifications ? '#f5dd4b' : '#f4f3f4'}
                                     value={currentNotifications} />
                                 )}
                             </View>
 
-                        </Pressable>
+                        </TouchableOpacity>
                     );
                 }}
 
