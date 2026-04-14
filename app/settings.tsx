@@ -1,11 +1,13 @@
-import React from "react";
+import React, {useActionState, useState} from "react";
 import {View, Text, SectionList, Pressable, Switch} from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { CiGlobe, CiLock, CiUser, CiBellOn } from "react-icons/ci";
 import { IoIosColorFilter, IoIosLogOut } from "react-icons/io";
 import { MdKeyboardArrowRight } from "react-icons/md";
 
-type ItemType = "list" | "switch" | "logout";
+type ItemType = "default" | "switch" | "logout" | "language" | "theme";
+type language = "eng" | "pl"
+type theme = "light" | "dark"
 
 type Item = {
   title: string;
@@ -20,15 +22,15 @@ const DATA: {
   {
     title: "Account",
     data: [
-      { title: "Name", icon: CiUser, type: "list" },
+      { title: "Name", icon: CiUser, type: "default" },
     ],
   },
 
   {
     title: "Preferences",
     data: [
-      { title: "Language", icon: CiGlobe, type: "list" },
-      { title: "Theme", icon: IoIosColorFilter, type: "list" },
+      { title: "Language", icon: CiGlobe, type: "language" },
+      { title: "Theme", icon: IoIosColorFilter, type: "theme" },
     ],
   },
 
@@ -42,41 +44,118 @@ const DATA: {
   {
     title: "Security",
     data: [
-      { title: "Change Password", icon: CiLock, type: "list" },
+      { title: "Change Password", icon: CiLock, type: "default" },
       { title: "Log Out", icon: IoIosLogOut, type: "logout" },
     ],
   },
 ];
 
 const SettingsScreen = () => {
-  return ( 
+    const [currentLanguage, setLanguage] = useState<language>("eng") // current language
+    const [currentTheme, setTheme] = useState<theme>("light") // current theme
+    const [currentNotifications, setNotifications ] = useState(true) // notifications state 
+
+    const toggleNotifications = () => {
+        setNotifications(previousState => !previousState)
+    }
+
+    const toggleTheme = () => {
+        setTheme(prev => (prev === "light" ? "dark" : "light"))
+    }
+
+    const toggleLanguage = () => {
+        setLanguage(prev => (prev === "eng" ? "pl" : "eng"))
+    }
+
+    const toggleLogOut = () => {
+        null
+    }
+    
+    return ( 
     <SafeAreaProvider >
         <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }} edges={['top']}>
             <SectionList
                 sections={DATA}
                 keyExtractor={(item, index) => item.title + index}
                 renderSectionHeader = { ({section: {title}}) => ( 
-                    <Text className= "text-3xl text-black font-semibold pl-4">{ title }</Text> 
+                    <Text 
+                    className= "text-3xl text-black font-semibold pl-4"
+                    selectable={false}
+                    >
+                        { title } 
+                    </Text> 
                 )}
                 renderItem = { ({item}) => {
                     const Icon = item.icon;
 
                     return (
-                        <Pressable className="h-[80px] bg-[#e3e3ed] mx-4 rounded-md flex-row items-center px-3 justify-between">
+                        <Pressable 
+                        className="h-[80px] bg-[#e3e3ed] mx-4 rounded-md flex-row items-center px-3 justify-between"
+                        onPress = {() => {
+                                if(item.type == "language"){
+                                    toggleLanguage()
+                                }
+                                if(item.type == "logout"){
+                                    toggleLogOut()
+                                }
+                                if(item.type == "switch"){
+                                    toggleNotifications()
+                                }
+                                if(item.type == "theme"){
+                                    toggleTheme()
+                                }
+                            }
+                        }
+                        >
                             <View className="flex-row items-center">
                                 <Icon size={40} className="mr-3" />
-                                <Text className={`text-xl font-semibold ${item.type === "logout" ? "text-red-600" : "text-black"}`}>
+                                <Text 
+                                className={`text-xl font-semibold ${item.type === "logout" ? "text-red-600" : "text-black"}`}
+                                selectable={false}
+                                >
                                     {item.title}
-                            </Text>
-
+                                </Text>
                             </View>
-                            {item.type === "list" && (
-                                <MdKeyboardArrowRight size={35}/>
-                            )}
 
-                            {item.type === "switch" && (
-                                <Switch value={false} />
-                            )}
+                            <View 
+                            className="flex-row items-center"
+                            >
+                                {item.type === "default" && // wraper for multiple components
+                                    <MdKeyboardArrowRight size={35}/> 
+                                }
+
+                                {item.type === "language" && // wraper for multiple components
+                                    <React.Fragment>  
+                                        <Text 
+                                        className="text-xl font-semibold text-gray-400"
+                                        selectable={false}
+                                        > 
+                                            {currentLanguage == "eng" ? "English" : "Polish"} 
+                                        </Text>
+
+                                        <MdKeyboardArrowRight size={35}/> 
+                                    </React.Fragment>
+                                }
+
+                                {item.type === "theme" && 
+                                    <React.Fragment>  
+                                        <Text 
+                                        className="text-xl font-semibold text-gray-400"
+                                        selectable={false}
+                                        > 
+                                            {currentTheme == "light" ? "Light" : "Dark"} 
+                                        </Text>
+                                        
+                                        <MdKeyboardArrowRight size={35}/> 
+                                    </React.Fragment>
+                                }
+
+                                {item.type === "switch" && (
+                                    <Switch 
+                                    value={currentNotifications} />
+                                )}
+                            </View>
+
                         </Pressable>
                     );
                 }}
@@ -92,7 +171,7 @@ const SettingsScreen = () => {
         </SafeAreaView>
     </SafeAreaProvider>
 
-  );
+    );
 }
 
 export default SettingsScreen
