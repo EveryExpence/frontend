@@ -1,11 +1,13 @@
 import React, {useState} from "react";
-import {View, Text, SectionList, TouchableOpacity, Switch} from 'react-native';
+import {View, Text, SectionList, TouchableOpacity} from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { CiGlobe, CiLock, CiBellOn } from "react-icons/ci";
-import { IoIosColorFilter, IoIosLogOut } from "react-icons/io";
+import { IoIosLogOut } from "react-icons/io";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { useRouter } from 'expo-router';
-import { PiUserCircle } from "react-icons/pi";
+import { VscColorMode } from "react-icons/vsc";
+import { FiUser } from "react-icons/fi";
+
 
 type ItemType = "password" | "switch" | "logout" | "language" | "theme" | "profile";
 type language = "eng" | "pl"
@@ -25,7 +27,7 @@ const DATA: {
   {
     title: "Account",
     data: [
-      { title: "Kowalus", email: "ananas@edu.p.lodz.pl", icon: PiUserCircle, type: "profile" },
+      { title: "Kowalus", email: "ananas@edu.p.lodz.pl", icon: FiUser, type: "profile" },
     ],
   },
 
@@ -33,7 +35,7 @@ const DATA: {
     title: "Preferences",
     data: [
       { title: "Language", icon: CiGlobe, type: "language" },
-      { title: "Theme", icon: IoIosColorFilter, type: "theme" },
+      { title: "Theme", icon: VscColorMode, type: "theme" },
     ],
   },
 
@@ -92,7 +94,7 @@ const SettingsScreen = () => {
                 keyExtractor={(item, index) => item.title + index}
                 renderSectionHeader = { ({section: {title}}) => ( 
                     <Text 
-                    className= "text-2xl text-black font-semibold pl-4"
+                    className= "text-2xl text-black font-bold pl-4"
                     selectable={false}
                     >
                         { title } 
@@ -104,7 +106,7 @@ const SettingsScreen = () => {
                     return (
                         <TouchableOpacity 
                         activeOpacity={0.8}
-                        className="h-[80px] bg-[#e3e3ed] mx-4  flex-row items-center px-3 justify-between"   
+                        className="h-[80px] bg-[#e3e3ed] mx-4 rounded-2xl flex-row items-center px-3 justify-between"   
                         onPress = {() => {
                                 if(item.type === "language"){
                                     toggleLanguage()
@@ -129,7 +131,9 @@ const SettingsScreen = () => {
                         >
                             <View className="flex-row items-center">
                                 {item.type === "profile" ? (
-                                <Icon size={60} className="mr-3" />
+                                <View className="w-14 h-14 rounded-full bg-white mr-3 items-center justify-center overflow-hidden">
+                                    <Icon size={40} color="#000000" />
+                                </View>
                                 ) : (
                                 <Icon size={40} className="mr-3" />
                                 )}
@@ -185,11 +189,20 @@ const SettingsScreen = () => {
                                 }
 
                                 {item.type === "switch" && (
-                                    <Switch 
-                                    trackColor={{false: '#767577', true: '#81b0ff'}}
-                                    thumbColor={currentNotifications ? '#fffffd' : '#f4f3f4'}
-                                    value={currentNotifications} />
+                                    <View
+                                    className={`w-12 h-6 rounded-full px-1 justify-center ${
+                                        currentNotifications ? "bg-blue-500" : "bg-gray-400"
+                                    }`}
+                                    >
+                                        <View
+                                        className={`w-6 h-5 rounded-full bg-white ${
+                                            currentNotifications ? "self-end" : "self-start"
+                                        }`}
+                                        />
+                                    </View>
                                 )}
+                            
+                                
                             </View>
 
                         </TouchableOpacity>
@@ -197,7 +210,8 @@ const SettingsScreen = () => {
                 }}
 
                 ItemSeparatorComponent = {() => (
-                    <View style={{ height: 1, backgroundColor: '#333', marginHorizontal: 17 }} />
+                    <View style={{ height: 8, backgroundColor: 'transparent' }} />
+                    
                 )}
 
                 SectionSeparatorComponent = {() => (
