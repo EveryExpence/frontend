@@ -87,10 +87,7 @@ const SettingsScreen = () => {
     <SafeAreaProvider >
         <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
             <SectionList
-<<<<<<< HEAD
                 style={{marginTop: 25}}
-=======
->>>>>>> 6d4e3d48d2f75444dd8ffb33db76c2c606c5cd31
                 sections={DATA}
                 keyExtractor={(item, index) => item.title + index}
                 renderSectionHeader = { ({section: {title}}) => ( 
