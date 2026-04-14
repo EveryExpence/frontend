@@ -1,12 +1,8 @@
 import React, {useState} from "react";
 import {View, Text, SectionList, TouchableOpacity} from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { CiGlobe, CiLock, CiBellOn } from "react-icons/ci";
-import { IoIosLogOut } from "react-icons/io";
-import { MdKeyboardArrowRight } from "react-icons/md";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from 'expo-router';
-import { VscColorMode } from "react-icons/vsc";
-import { FiUser } from "react-icons/fi";
 
 
 type ItemType = "password" | "switch" | "logout" | "language" | "theme" | "profile";
@@ -16,7 +12,7 @@ type theme = "light" | "dark"
 type Item = {
   title: string;
   email?: string;
-  icon: any;
+    icon: string;
   type: ItemType;
 };
 
@@ -27,30 +23,30 @@ const DATA: {
   {
     title: "Account",
     data: [
-      { title: "Kowalus", email: "ananas@edu.p.lodz.pl", icon: FiUser, type: "profile" },
+            { title: "Kowalus", email: "ananas@edu.p.lodz.pl", icon: "person-outline", type: "profile" },
     ],
   },
 
   {
     title: "Preferences",
     data: [
-      { title: "Language", icon: CiGlobe, type: "language" },
-      { title: "Theme", icon: VscColorMode, type: "theme" },
+            { title: "Language", icon: "language-outline", type: "language" },
+            { title: "Theme", icon: "contrast-outline", type: "theme" },
     ],
   },
 
   {
     title: "Notifications",
     data: [
-      { title: "Push Notifications", icon: CiBellOn, type: "switch" },
+            { title: "Push Notifications", icon: "notifications-outline", type: "switch" },
     ],
   },
 
   {
     title: "Security",
     data: [
-      { title: "Change Password", icon: CiLock, type: "password" },
-      { title: "Log Out", icon: IoIosLogOut, type: "logout" },
+            { title: "Change Password", icon: "lock-closed-outline", type: "password" },
+            { title: "Log Out", icon: "log-out-outline", type: "logout" },
     ],
   },
 ];
@@ -101,7 +97,6 @@ const SettingsScreen = () => {
                     </Text> 
                 )}
                 renderItem = { ({item, index, section}) => {
-                    const Icon = item.icon;
                     const isFirst = index === 0;
                     const isLast = index === section.data.length - 1;
 
@@ -140,10 +135,16 @@ const SettingsScreen = () => {
                             <View className="flex-row items-center">
                                 {item.type === "profile" ? (
                                 <View className="w-14 h-14 rounded-full bg-white mr-3 items-center justify-center overflow-hidden">
-                                    <Icon size={40} color="#000000" />
+                                    <Ionicons name={item.icon as any} size={40} color="#000000" />
                                 </View>
                                 ) : (
-                                <Icon size={40} className="mr-3" />
+                                <View style={{ marginRight: 12 }}>
+                                    <Ionicons
+                                        name={item.icon as any}
+                                        size={30}
+                                        color={item.type === "logout" ? "#dc2626" : "#000000"}
+                                    />
+                                </View>
                                 )}
                                 <View>
                                     <Text
@@ -167,7 +168,7 @@ const SettingsScreen = () => {
                             className="flex-row items-center"
                             >
                                 {(item.type === "profile" || item.type === "password") && // wraper for multiple components
-                                    <MdKeyboardArrowRight size={35}/> 
+                                    <Ionicons name="chevron-forward" size={28} color="#000000" /> 
                                 }
 
                                 {item.type === "language" && 
@@ -179,7 +180,7 @@ const SettingsScreen = () => {
                                             {currentLanguage === "eng" ? "English" : "Polish"} 
                                         </Text>
 
-                                        <MdKeyboardArrowRight size={35}/> 
+                                        <Ionicons name="chevron-forward" size={28} color="#000000" /> 
                                     </React.Fragment>
                                 }
 
@@ -192,7 +193,7 @@ const SettingsScreen = () => {
                                             {currentTheme === "light" ? "Light" : "Dark"} 
                                         </Text>
                                         
-                                        <MdKeyboardArrowRight size={35}/> 
+                                        <Ionicons name="chevron-forward" size={28} color="#000000" /> 
                                     </React.Fragment>
                                 }
 
