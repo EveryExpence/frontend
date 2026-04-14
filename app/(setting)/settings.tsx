@@ -100,7 +100,9 @@ const SettingsScreen = () => {
                     const isFirst = index === 0;
                     const isLast = index === section.data.length - 1;
 
-                    const cornerStyle = isFirst
+                    const cornerStyle = section.data.length === 1
+                        ? "rounded-xl"    
+                        : isFirst  
                         ? "rounded-t-xl"
                         : isLast
                             ? "rounded-b-xl"
