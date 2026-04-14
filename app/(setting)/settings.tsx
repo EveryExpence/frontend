@@ -1,7 +1,7 @@
-import React, {useState, useRef} from "react";
+import React, {useState} from "react";
 import {View, Text, SectionList, TouchableOpacity, Switch} from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { CiGlobe, CiLock, CiUser, CiBellOn } from "react-icons/ci";
+import { CiGlobe, CiLock, CiBellOn } from "react-icons/ci";
 import { IoIosColorFilter, IoIosLogOut } from "react-icons/io";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { useRouter } from 'expo-router';
@@ -163,7 +163,7 @@ const SettingsScreen = () => {
                                         className="text-xl font-semibold text-gray-400"
                                         selectable={false}
                                         > 
-                                            {currentLanguage == "eng" ? "English" : "Polish"} 
+                                            {currentLanguage === "eng" ? "English" : "Polish"} 
                                         </Text>
 
                                         <MdKeyboardArrowRight size={35}/> 
@@ -176,7 +176,7 @@ const SettingsScreen = () => {
                                         className="text-xl font-semibold text-gray-400"
                                         selectable={false}
                                         > 
-                                            {currentTheme == "light" ? "Light" : "Dark"} 
+                                            {currentTheme === "light" ? "Light" : "Dark"} 
                                         </Text>
                                         
                                         <MdKeyboardArrowRight size={35}/> 
