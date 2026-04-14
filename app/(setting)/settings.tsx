@@ -100,13 +100,21 @@ const SettingsScreen = () => {
                         { title } 
                     </Text> 
                 )}
-                renderItem = { ({item, index}) => {
+                renderItem = { ({item, index, section}) => {
                     const Icon = item.icon;
+                    const isFirst = index === 0;
+                    const isLast = index === section.data.length - 1;
+
+                    const cornerStyle = isFirst
+                        ? "rounded-t-xl"
+                        : isLast
+                            ? "rounded-b-xl"
+                            : "rounded-none";
 
                     return (
                         <TouchableOpacity 
                         activeOpacity={0.8}
-                        className="h-[80px] bg-[#e3e3ed] mx-4 rounded-2xl flex-row items-center px-3 justify-between"   
+                        className={`h-[80px] bg-[#e3e3ed] mx-4 flex-row items-center px-3 justify-between ${cornerStyle}`}
                         onPress = {() => {
                                 if(item.type === "language"){
                                     toggleLanguage()
@@ -205,14 +213,13 @@ const SettingsScreen = () => {
                                 
                             </View>
 
+                            {!isLast && (
+                                <View className="absolute bottom-0 left-6 right-6 h-px bg-[#8e8e98]" />
+                            )}
+
                         </TouchableOpacity>
                     );
                 }}
-
-                ItemSeparatorComponent = {() => (
-                    <View style={{ height: 8, backgroundColor: 'transparent' }} />
-                    
-                )}
 
                 SectionSeparatorComponent = {() => (
                     <View style={{ height: 10, backgroundColor: '#ffffff' }} />
