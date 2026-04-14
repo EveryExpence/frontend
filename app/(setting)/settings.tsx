@@ -1,17 +1,19 @@
 import React, {useState, useRef} from "react";
-import {View, Text, SectionList, TouchableOpacity, Switch, Animated} from 'react-native';
+import {View, Text, SectionList, TouchableOpacity, Switch} from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { CiGlobe, CiLock, CiUser, CiBellOn } from "react-icons/ci";
 import { IoIosColorFilter, IoIosLogOut } from "react-icons/io";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { useRouter } from 'expo-router';
+import { PiUserCircle } from "react-icons/pi";
 
-type ItemType = "default" | "switch" | "logout" | "language" | "theme";
+type ItemType = "password" | "switch" | "logout" | "language" | "theme" | "profile";
 type language = "eng" | "pl"
 type theme = "light" | "dark"
 
 type Item = {
   title: string;
+  email?: string;
   icon: any;
   type: ItemType;
 };
@@ -23,7 +25,7 @@ const DATA: {
   {
     title: "Account",
     data: [
-      { title: "Name", icon: CiUser, type: "default" },
+      { title: "Kowalus", email: "ananas@edu.p.lodz.pl", icon: PiUserCircle, type: "profile" },
     ],
   },
 
@@ -45,7 +47,7 @@ const DATA: {
   {
     title: "Security",
     data: [
-      { title: "Change Password", icon: CiLock, type: "default" },
+      { title: "Change Password", icon: CiLock, type: "password" },
       { title: "Log Out", icon: IoIosLogOut, type: "logout" },
     ],
   },
@@ -56,7 +58,6 @@ const SettingsScreen = () => {
     const [currentLanguage, setLanguage] = useState<language>("eng") // current language
     const [currentTheme, setTheme] = useState<theme>("light") // current theme
     const [currentNotifications, setNotifications ] = useState(true) // notifications state
-    const scaleAnims = useRef<{[key: string]: Animated.Value}>({}) 
 
     const toggleNotifications = () => {
         setNotifications(previousState => !previousState)
@@ -84,13 +85,13 @@ const SettingsScreen = () => {
     
     return ( 
     <SafeAreaProvider >
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }} edges={['top']}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
             <SectionList
                 sections={DATA}
                 keyExtractor={(item, index) => item.title + index}
                 renderSectionHeader = { ({section: {title}}) => ( 
                     <Text 
-                    className= "text-3xl text-black font-semibold pl-4"
+                    className= "text-2xl text-black font-semibold pl-4"
                     selectable={false}
                     >
                         { title } 
@@ -98,31 +99,11 @@ const SettingsScreen = () => {
                 )}
                 renderItem = { ({item, index}) => {
                     const Icon = item.icon;
-                    const key = `${item.title}-${index}`;
-                    if (!scaleAnims.current[key]) {
-                        scaleAnims.current[key] = new Animated.Value(1);
-                    }
-                    const scaleAnim = scaleAnims.current[key];
-
-                    const animatePress = () => {
-                        Animated.sequence([
-                            Animated.timing(scaleAnim, {
-                                toValue: 0.95,
-                                duration: 100,
-                                useNativeDriver: false
-                            }),
-                            Animated.timing(scaleAnim, {
-                                toValue: 1,
-                                duration: 100,
-                                useNativeDriver: false
-                            })
-                        ]).start();
-                    };
 
                     return (
                         <TouchableOpacity 
                         activeOpacity={0.8}
-                        className="h-[80px] bg-[#e3e3ed] mx-4 rounded-md flex-row items-center px-3 justify-between"   
+                        className="h-[80px] bg-[#e3e3ed] mx-4  flex-row items-center px-3 justify-between"   
                         onPress = {() => {
                                 if(item.type === "language"){
                                     toggleLanguage()
@@ -136,30 +117,47 @@ const SettingsScreen = () => {
                                 if(item.type === "theme"){
                                     toggleTheme()
                                 }
-                                if(item.type === "default"){
-                                    {item.title === "Name" ? pushToProfile() : pushToChangePass()}
+                                if(item.type === "profile"){
+                                    pushToProfile()
+                                }
+                                if(item.type === "password"){
+                                    pushToChangePass()
                                 }
                             }
                         }
                         >
                             <View className="flex-row items-center">
+                                {item.type === "profile" ? (
+                                <Icon size={60} className="mr-3" />
+                                ) : (
                                 <Icon size={40} className="mr-3" />
-                                <Text 
-                                className={`text-xl font-semibold ${item.type === "logout" ? "text-red-600" : "text-black"}`}
-                                selectable={false}
-                                >
-                                    {item.title}
-                                </Text>
+                                )}
+                                <View>
+                                    <Text
+                                        className={`text-xl font-bold ${
+                                        item.type === "logout" ? "text-red-600" : "text-black"
+                                        }`}
+                                        selectable={false}
+                                    >
+                                        {item.title}
+                                    </Text>
+
+                                    {item.type === "profile" && (
+                                        <Text className="text-base text-gray-500 mt-1 font-semibold" selectable={false}>
+                                            {item.email}
+                                        </Text>
+                                    )}
+                                </View>
                             </View>
 
                             <View 
                             className="flex-row items-center"
                             >
-                                {item.type === "default" && // wraper for multiple components
+                                {(item.type === "profile" || item.type === "password") && // wraper for multiple components
                                     <MdKeyboardArrowRight size={35}/> 
                                 }
 
-                                {item.type === "language" && // wraper for multiple components
+                                {item.type === "language" && 
                                     <React.Fragment>  
                                         <Text 
                                         className="text-xl font-semibold text-gray-400"
@@ -188,7 +186,7 @@ const SettingsScreen = () => {
                                 {item.type === "switch" && (
                                     <Switch 
                                     trackColor={{false: '#767577', true: '#81b0ff'}}
-                                    thumbColor={currentNotifications ? '#f5dd4b' : '#f4f3f4'}
+                                    thumbColor={currentNotifications ? '#fffffd' : '#f4f3f4'}
                                     value={currentNotifications} />
                                 )}
                             </View>
@@ -198,11 +196,11 @@ const SettingsScreen = () => {
                 }}
 
                 ItemSeparatorComponent = {() => (
-                    <View style={{ height: 1, backgroundColor: '#333', marginHorizontal: 26 }} />
+                    <View style={{ height: 1, backgroundColor: '#333', marginHorizontal: 17 }} />
                 )}
 
                 SectionSeparatorComponent = {() => (
-                    <View style={{ height: 15, backgroundColor: '#ffffff' }} />
+                    <View style={{ height: 10, backgroundColor: '#ffffff' }} />
                 )}
             />
         </SafeAreaView>
