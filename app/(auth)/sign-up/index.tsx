@@ -21,10 +21,11 @@ const SignUpScreen = () => {
 
                 <TextInput
                     placeholder='Enter email'
+                    placeholderTextColor={colors.text}
                     textContentType="emailAddress"
                     value={email}
                     onChangeText={setEmail}
-                    className="p-4 text-xl border rounded-md border-theme-text placeholder:text-theme-text"
+                    className="p-4 text-xl border rounded-md border-theme-text"
                 />
             </View>
 
@@ -34,11 +35,12 @@ const SignUpScreen = () => {
                 <View className="flex-row items-center gap-3">
                     <TextInput
                         secureTextEntry={!showPassword}
+                        placeholderTextColor={colors.text}
                         placeholder='Enter password'
                         textContentType="password"
                         value={password}
                         onChangeText={setPassword}
-                        className="p-4 flex-1 text-xl border rounded-md border-theme-text placeholder:text-theme-text"
+                        className="p-4 flex-1 text-xl border rounded-md border-theme-text"
                     />
 
                     <MaterialCommunityIcons
@@ -58,10 +60,11 @@ const SignUpScreen = () => {
                     <TextInput
                         secureTextEntry={!showPassword}
                         placeholder='Confirm password'
+                        placeholderTextColor={colors.text}
                         textContentType="password"
                         value={passwordConfirmation}
                         onChangeText={setPasswordConfirmation}
-                        className="p-4 flex-1 text-xl border rounded-md border-theme-text placeholder:text-theme-text"
+                        className="p-4 flex-1 text-xl border rounded-md border-theme-text"
                     />
 
                     <MaterialCommunityIcons
