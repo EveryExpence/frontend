@@ -1,10 +1,13 @@
-import { View, TextInput, Text, TouchableOpacity } from 'react-native'
+import { View, TextInput, Text, TouchableOpacity, useColorScheme } from 'react-native'
 import React, { useState } from 'react'
 import { useRouter } from 'expo-router';
+import { Colors } from '@/constants/theme';
 
 const PasswordResetScreen = () => {
     const router = useRouter();
     const [email, setEmail] = useState<string>('');
+    const theme = useColorScheme() || 'light';
+    const colors = Colors[theme];
 
     return (
         <View className="flex-1 justify-center gap-3">
@@ -13,10 +16,11 @@ const PasswordResetScreen = () => {
 
                 <TextInput
                     placeholder='Enter email'
+                    placeholderTextColor={colors.text}
                     textContentType="emailAddress"
                     value={email}
                     onChangeText={setEmail}
-                    className="p-4 text-xl border rounded-md border-theme-text placeholder:text-theme-text"
+                    className="p-4 text-xl border rounded-md border-theme-text"
                 />
             </View>
 
