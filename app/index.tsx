@@ -1,8 +1,11 @@
 import React from 'react'
-import { Redirect } from 'expo-router'
+import { useAuth } from '@/context/authContext';
+import { Text } from 'react-native';
 
 const Main = () => {
-  return <Redirect href="/login" />;
+  const { user } = useAuth();
+
+  return <Text>{ user?.email }</Text>;
 }
 
 export default Main

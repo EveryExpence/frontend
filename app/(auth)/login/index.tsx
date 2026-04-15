@@ -1,8 +1,9 @@
-import { View, TextInput, Text, TouchableOpacity, useColorScheme } from 'react-native'
+import { View, TextInput, Text, TouchableOpacity, useColorScheme, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/theme';
+import { useAuth } from '@/context/authContext';
 
 const LoginScreen = () => {
     const router = useRouter();
@@ -11,6 +12,20 @@ const LoginScreen = () => {
     const [showPassword, setShowPassword] = useState(false);
     const theme = useColorScheme() || 'light';
     const colors = Colors[theme];
+
+    const { login, isLoading } = useAuth();
+    
+    const onPress = async () => {
+        await login(email, password);
+    }
+
+    if (isLoading) {
+        return (
+            <View className="flex flex-1 justify-center items-center">
+                <ActivityIndicator size={32} />
+            </View>
+        )
+    }
 
     return (
         <View className="flex-1 justify-center gap-3">
@@ -52,7 +67,7 @@ const LoginScreen = () => {
             <View className="w-full px-8 mt-4">
                 <TouchableOpacity
                     activeOpacity={0.8}
-                    onPress={() => console.log('login...')}
+                    onPress={onPress}
                     className="w-full justify-start p-4 rounded-md bg-theme-tint"
                 >
                     <Text className="text-xl text-center text-theme-textLight">

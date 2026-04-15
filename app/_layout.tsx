@@ -1,9 +1,10 @@
 import { View } from 'react-native'
-import React from 'react'
-import { Slot } from 'expo-router'
+import React, { useEffect } from 'react'
+import { Redirect, Slot, useRootNavigationState, useRouter, useSegments } from 'expo-router'
 import './global.css'
+import { AuthProvider, useAuth } from '@/context/authContext'
 
-const _layout = () => {
+const RooLayout = () => {
     return (
         <View
             style={{
@@ -11,9 +12,38 @@ const _layout = () => {
             }}
             className="bg-theme-background"
         >
-            <Slot />
+            <AuthProvider>
+                <Helper />
+            </AuthProvider>
         </View>
     )
 }
 
-export default _layout
+const Helper = () => {
+    const { user } = useAuth();
+    const segments = useSegments();
+    const router = useRouter();
+    const navigationState = useRootNavigationState();
+
+    const inAuthGroup = segments[0] === '(auth)';
+
+    useEffect(() => {
+        if (!navigationState?.key) return;
+
+        if (user === null && !inAuthGroup) {
+            setTimeout(() => {
+                router.replace("/login");
+            }, 0);
+        }
+    
+        if (user !== null && inAuthGroup) {
+            setTimeout(() => {
+                router.replace("/");
+            }, 0);
+        }
+    }, [user, inAuthGroup, navigationState])
+
+    return <Slot />;
+}
+
+export default RooLayout
