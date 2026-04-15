@@ -1,12 +1,20 @@
 import React from 'react'
 import { useAuth } from '@/context/authContext';
 import { TouchableOpacity, Text, View } from 'react-native';
+import { Snackbar } from 'react-native-snackbar';
 
 const Main = () => {
   const { user, logout } = useAuth();
 
   const onPress = async () => {
-    await logout();
+    try {
+      await logout();
+    } catch (error) {
+      Snackbar.show({
+          text: `${error}`,
+          duration: Snackbar.LENGTH_LONG,
+      });
+    }
   };
 
   return (

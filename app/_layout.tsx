@@ -20,14 +20,14 @@ const RooLayout = () => {
 }
 
 const Helper = () => {
-    const { user, isLoading } = useAuth();
+    const { user, isInitializing } = useAuth();
     const segments = useSegments();
     const router = useRouter();
     const navigationState = useRootNavigationState();
     const inAuthGroup = segments[0] === '(auth)';
 
     useEffect(() => {
-        if (isLoading) {
+        if (isInitializing) {
             return;
         }
 
@@ -48,7 +48,7 @@ const Helper = () => {
         }
     }, [user, inAuthGroup, navigationState])
 
-    if (isLoading) {
+    if (isInitializing) {
         return (
             <View className="flex flex-1 justify-center items-center">
                 <ActivityIndicator size={32} />

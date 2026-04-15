@@ -7,6 +7,7 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 
 export interface IAuthContext {
     user: User | null;
+    isInitializing: boolean;
     isLoading: boolean;
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
@@ -35,7 +36,8 @@ const getUserData = async (accessToken: string): Promise<GetUserDataDTO> => {
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(true); 
+    const [isInitializing, setIsInitializing] = useState<boolean>(true); 
+    const [isLoading, setIsLoading] = useState<boolean>(false); 
     
     useEffect(() => {
         const checkSessionOnBoot = async () => {
@@ -49,7 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             } catch (error) {
                 console.error("Failed to restore session on boot:", error);
             } finally {
-                setIsLoading(false);
+                setIsInitializing(false);
             }
         };
 
@@ -58,31 +60,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const login = async (email: string, password: string) => {
         setIsLoading(true);
+        setUser(null);
 
-        const response = await fetch(loginEndpoint, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-            },
-            body: JSON.stringify({ email, password }),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            const errorMessage = errorData.message || response.statusText;
-            throw new Error(`${errorMessage} (${response.status})`);
+        try {
+            const response = await fetch(loginEndpoint, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                },
+                body: JSON.stringify({ email, password }),
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                const errorMessage = errorData.message || response.statusText;
+                throw new Error(`${errorMessage} (${response.status})`);
+            }
+    
+            const { accessToken, refreshToken } = await response.json();
+    
+            await EncryptedStorage.setItem(refreshTokenKey, refreshToken);
+            await EncryptedStorage.setItem(accessTokenKey, accessToken);
+    
+            const userData = await getUserData(accessToken);
+            setUser({ ...userData, accessToken });
+        } catch (error) {
+            throw new Error(`Login failed: ${error}`);
+        } finally {
+            setIsLoading(false);
         }
-
-        const { accessToken, refreshToken } = await response.json();
-
-        await EncryptedStorage.setItem(refreshTokenKey, refreshToken);
-        await EncryptedStorage.setItem(accessTokenKey, accessToken);
-
-        const userData = await getUserData(accessToken);
-        setUser({ ...userData, accessToken });
-
-        setIsLoading(false);
     }
 
     const logout = async () => {
@@ -93,7 +100,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 return;
             }
 
-            const response = await fetch(logoutEndpoint, {
+            await fetch(logoutEndpoint, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -105,10 +112,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             await EncryptedStorage.removeItem(accessTokenKey);
             setUser(null);
         } catch (error) {
-            console.error(`Failed to logout: ${error}`)
             await EncryptedStorage.removeItem(refreshTokenKey);
             await EncryptedStorage.removeItem(accessTokenKey);
             setUser(null);
+            throw new Error(`failed to logout: ${error}`)
         } finally {
             setIsLoading(false);
         }
@@ -117,25 +124,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const register = async (email: string, password: string) => {
         setIsLoading(true);
 
-        const response = await fetch(registerEndpoint, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-            },
-            body: JSON.stringify({ email, password }),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            const errorMessage = errorData.message || response.statusText;
-            throw new Error(`${errorMessage} (${response.status})`);
+        try {
+            const response = await fetch(registerEndpoint, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                },
+                body: JSON.stringify({ email, password }),
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                const errorMessage = errorData.message || response.statusText;
+                throw new Error(`${errorMessage} (${response.status})`);
+            }
+        } catch (error) {
+            throw new Error(`Register failed: ${error}`);
+        } finally {
+            setIsLoading(false);
         }
-        
-        setIsLoading(false);
     }
 
-    return <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>{children}</AuthContext.Provider>
+    return <AuthContext.Provider value={{ user, isInitializing, isLoading, login, register, logout }}>{children}</AuthContext.Provider>
 };
 
 export const useAuth = () => {

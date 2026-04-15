@@ -1,9 +1,10 @@
-import { View, TextInput, Text, TouchableOpacity, useColorScheme } from 'react-native'
+import { View, TextInput, Text, TouchableOpacity, useColorScheme, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/context/authContext';
+import { Snackbar } from 'react-native-snackbar';
 
 const LoginScreen = () => {
     const router = useRouter();
@@ -13,14 +14,25 @@ const LoginScreen = () => {
     const theme = useColorScheme() || 'light';
     const colors = Colors[theme];
 
-    const { login } = useAuth();
+    const { isLoading, login } = useAuth();
     
     const onPress = async () => {
         try {
             await login(email, password);
         } catch (error) {
-            console.error(`Failed to login: ${error}`);
+            Snackbar.show({
+                text: `${error}`,
+                duration: Snackbar.LENGTH_LONG,
+            });
         }
+    }
+
+    if (isLoading) {
+        return (
+            <View className="flex flex-1 justify-center items-center">
+                <ActivityIndicator size={32} />
+            </View>
+        )
     }
 
     return (
