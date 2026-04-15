@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/theme';
+import { useAuth } from '@/context/authContext';
 
 const SignUpScreen = () => {
     const router = useRouter();
@@ -13,6 +14,22 @@ const SignUpScreen = () => {
     const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
     const theme = useColorScheme() || 'light';
     const colors = Colors[theme];
+
+    const { register } = useAuth();
+
+    const onPress = async () => {
+        if (password !== passwordConfirmation) {
+            console.warn('Passwords are not the same');
+            return;
+        }
+
+        try {
+            await register(email, password);
+            router.replace('/login');
+        } catch (error) {
+            console.error(`Failed to register: ${error}`);
+        }
+    }
 
     return (
         <View className="flex-1 justify-center gap-3">
@@ -77,7 +94,7 @@ const SignUpScreen = () => {
             <View className="w-full px-8 mt-4">
                 <TouchableOpacity
                     activeOpacity={0.8}
-                    onPress={() => console.log('sign up...')}
+                    onPress={onPress}
                     className="w-full justify-start p-4 rounded-md bg-theme-tint"
                 >
                     <Text className="text-xl text-center text-theme-textLight">
@@ -89,7 +106,7 @@ const SignUpScreen = () => {
             <View className="relative h-0 w-full">
                 <View className="absolute top-4 gap-2 w-full">
                     <Text
-                        onPress={() => router.push("/login")}
+                        onPress={() => router.replace("/login")}
                         className="text-lg text-center underline text-theme-text"
                     >Already have an account?</Text>
                 </View>

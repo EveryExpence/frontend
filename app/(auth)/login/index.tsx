@@ -16,7 +16,11 @@ const LoginScreen = () => {
     const { login } = useAuth();
     
     const onPress = async () => {
-        await login(email, password);
+        try {
+            await login(email, password);
+        } catch (error) {
+            console.error(`Failed to login: ${error}`);
+        }
     }
 
     return (
