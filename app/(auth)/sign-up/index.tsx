@@ -26,6 +26,12 @@ const SignUpScreen = () => {
 
         try {
             await register(email, password);
+            Snackbar.show({
+                text: "Signed up successfully",
+                duration: Snackbar.LENGTH_SHORT,
+                backgroundColor: colors.tint,
+                textColor: colors.textLight,
+            })
             router.replace('/login');
         } catch (error) {
             Snackbar.show({

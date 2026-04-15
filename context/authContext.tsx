@@ -2,6 +2,7 @@ import { refreshTokenKey, accessTokenKey } from "@/constants/encryptedStorageKey
 import { getUserDataEndpoint, loginEndpoint, logoutEndpoint, registerEndpoint } from "@/constants/endpoints";
 import { GetUserDataDTO } from "@/types/auth/dto";
 import { User } from "@/types/User";
+import { apiFetch } from "@/utils/apiFetch";
 import { createContext, useContext, useState, useEffect } from "react";
 import EncryptedStorage from 'react-native-encrypted-storage';
 
@@ -17,7 +18,7 @@ export interface IAuthContext {
 export const AuthContext = createContext<IAuthContext>({} as IAuthContext);
 
 const getUserData = async (accessToken: string): Promise<GetUserDataDTO> => {
-    const response = await fetch(getUserDataEndpoint, {
+    const response = await apiFetch(getUserDataEndpoint, {
         method: "GET",
         headers: {
             "Accept": "application/json",
@@ -46,7 +47,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 
                 if (accessToken) {
                     const userData = await getUserData(accessToken);
-                    setUser({ ...userData, accessToken: accessToken });
+                    setUser({ ...userData });
                 }
             } catch (error) {
                 console.error("Failed to restore session on boot:", error);
@@ -84,7 +85,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             await EncryptedStorage.setItem(accessTokenKey, accessToken);
     
             const userData = await getUserData(accessToken);
-            setUser({ ...userData, accessToken });
+            setUser({ ...userData });
         } catch (error) {
             throw new Error(`Login failed: ${error}`);
         } finally {
