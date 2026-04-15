@@ -39,11 +39,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     useEffect(() => {
         const checkSessionOnBoot = async () => {
             try {
-                const storedAccessToken = await EncryptedStorage.getItem(accessTokenKey);
+                const accessToken = await EncryptedStorage.getItem(accessTokenKey);
                 
-                if (storedAccessToken) {
-                    const userData = await getUserData(storedAccessToken);
-                    setUser({ ...userData, accessToken: storedAccessToken });
+                if (accessToken) {
+                    const userData = await getUserData(accessToken);
+                    setUser({ ...userData, accessToken: accessToken });
                 }
             } catch (error) {
                 console.error("Failed to restore session on boot:", error);

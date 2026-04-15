@@ -1,4 +1,4 @@
-import { View, TextInput, Text, TouchableOpacity, useColorScheme, ActivityIndicator } from 'react-native'
+import { View, TextInput, Text, TouchableOpacity, useColorScheme } from 'react-native'
 import React, { useState } from 'react'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -13,18 +13,10 @@ const LoginScreen = () => {
     const theme = useColorScheme() || 'light';
     const colors = Colors[theme];
 
-    const { login, isLoading } = useAuth();
+    const { login } = useAuth();
     
     const onPress = async () => {
         await login(email, password);
-    }
-
-    if (isLoading) {
-        return (
-            <View className="flex flex-1 justify-center items-center">
-                <ActivityIndicator size={32} />
-            </View>
-        )
     }
 
     return (

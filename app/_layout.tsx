@@ -1,4 +1,4 @@
-import { View } from 'react-native'
+import { ActivityIndicator, View } from 'react-native'
 import React, { useEffect } from 'react'
 import { Redirect, Slot, useRootNavigationState, useRouter, useSegments } from 'expo-router'
 import './global.css'
@@ -20,15 +20,20 @@ const RooLayout = () => {
 }
 
 const Helper = () => {
-    const { user } = useAuth();
+    const { user, isLoading } = useAuth();
     const segments = useSegments();
     const router = useRouter();
     const navigationState = useRootNavigationState();
-
     const inAuthGroup = segments[0] === '(auth)';
 
     useEffect(() => {
-        if (!navigationState?.key) return;
+        if (isLoading) {
+            return;
+        }
+
+        if (!navigationState?.key) {
+            return;
+        }
 
         if (user === null && !inAuthGroup) {
             setTimeout(() => {
@@ -42,6 +47,14 @@ const Helper = () => {
             }, 0);
         }
     }, [user, inAuthGroup, navigationState])
+
+    if (isLoading) {
+        return (
+            <View className="flex flex-1 justify-center items-center">
+                <ActivityIndicator size={32} />
+            </View>
+        )
+    }
 
     return <Slot />;
 }
