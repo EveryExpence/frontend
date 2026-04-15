@@ -1,6 +1,6 @@
 import { ActivityIndicator, View } from 'react-native'
 import React, { useEffect } from 'react'
-import { Redirect, Slot, useRootNavigationState, useRouter, useSegments } from 'expo-router'
+import { Slot, useRootNavigationState, useRouter, useSegments } from 'expo-router'
 import './global.css'
 import { AuthProvider, useAuth } from '@/context/authContext'
 
@@ -46,7 +46,7 @@ const Helper = () => {
                 router.replace("/");
             }, 0);
         }
-    }, [user, inAuthGroup, navigationState])
+    }, [user, inAuthGroup, navigationState,, isInitializing, router])
 
     if (isInitializing) {
         return (
