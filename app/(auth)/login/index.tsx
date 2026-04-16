@@ -42,10 +42,11 @@ const LoginScreen = () => {
 
                 <TextInput
                     placeholder='Enter email'
+                    placeholderTextColor={colors.text}
                     textContentType="emailAddress"
                     value={email}
                     onChangeText={setEmail}
-                    className="text-theme-text p-4 text-xl border rounded-md border-theme-text"
+                    className="p-4 text-xl border rounded-md border-theme-text text-theme-text"
                 />
             </View>
 
@@ -56,6 +57,7 @@ const LoginScreen = () => {
                     <TextInput
                         secureTextEntry={!showPassword}
                         placeholder='Enter password'
+                        placeholderTextColor={colors.text}
                         textContentType="password"
                         value={password}
                         onChangeText={setPassword}

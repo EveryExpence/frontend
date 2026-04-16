@@ -23,10 +23,10 @@ const _layout = () => {
                 }}
             >
                 <Text
-                    className="text-6xl font-bold text-theme-textLight text-right"
+                    className="text-6xl font-bold text-theme-textLight text-right leading-tight"
                 >EveryExpense</Text>
                 
-                <Text className="text-2xl text-right text-theme-textLight">Be aware of your expenses</Text>
+                <Text className="text-2xl text-right text-theme-textLight leading-tight">Be aware of your expenses</Text>
             </View>
 
             <View

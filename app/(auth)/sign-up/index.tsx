@@ -56,6 +56,7 @@ const SignUpScreen = () => {
 
                 <TextInput
                     placeholder='Enter email'
+                    placeholderTextColor={colors.text}
                     textContentType="emailAddress"
                     value={email}
                     onChangeText={setEmail}
@@ -69,6 +70,7 @@ const SignUpScreen = () => {
                 <View className="flex-row items-center gap-3">
                     <TextInput
                         secureTextEntry={!showPassword}
+                        placeholderTextColor={colors.text}
                         placeholder='Enter password'
                         textContentType="password"
                         value={password}
@@ -93,6 +95,7 @@ const SignUpScreen = () => {
                     <TextInput
                         secureTextEntry={!showPasswordConfirmation}
                         placeholder='Confirm password'
+                        placeholderTextColor={colors.text}
                         textContentType="password"
                         value={passwordConfirmation}
                         onChangeText={setPasswordConfirmation}
