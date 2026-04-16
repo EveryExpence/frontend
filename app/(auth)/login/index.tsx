@@ -1,8 +1,10 @@
-import { View, TextInput, Text, TouchableOpacity, useColorScheme } from 'react-native'
+import { View, TextInput, Text, TouchableOpacity, useColorScheme, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/theme';
+import { useAuth } from '@/context/authContext';
+import { Snackbar } from 'react-native-snackbar';
 
 const LoginScreen = () => {
     const router = useRouter();
@@ -11,6 +13,27 @@ const LoginScreen = () => {
     const [showPassword, setShowPassword] = useState(false);
     const theme = useColorScheme() || 'light';
     const colors = Colors[theme];
+
+    const { isLoading, login } = useAuth();
+    
+    const onPress = async () => {
+        try {
+            await login(email, password);
+        } catch (error) {
+            Snackbar.show({
+                text: `${error}`,
+                duration: Snackbar.LENGTH_LONG,
+            });
+        }
+    }
+
+    if (isLoading) {
+        return (
+            <View className="flex flex-1 justify-center items-center">
+                <ActivityIndicator size={32} />
+            </View>
+        )
+    }
 
     return (
         <View className="flex-1 justify-center gap-3">
@@ -38,7 +61,7 @@ const LoginScreen = () => {
                         textContentType="password"
                         value={password}
                         onChangeText={setPassword}
-                        className="p-4 flex-1 text-xl border rounded-md border-theme-text"
+                        className="p-4 flex-1 text-xl border rounded-md border-theme-text text-theme-text"
                     />
 
                     <MaterialCommunityIcons
@@ -54,7 +77,7 @@ const LoginScreen = () => {
             <View className="w-full px-8 mt-4">
                 <TouchableOpacity
                     activeOpacity={0.8}
-                    onPress={() => console.log('login...')}
+                    onPress={onPress}
                     className="w-full justify-start p-4 rounded-md bg-theme-tint"
                 >
                     <Text className="text-xl text-center text-theme-textLight">

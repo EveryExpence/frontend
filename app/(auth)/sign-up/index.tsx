@@ -1,8 +1,10 @@
-import { View, TextInput, Text, TouchableOpacity, useColorScheme } from 'react-native'
+import { View, TextInput, Text, TouchableOpacity, useColorScheme, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/theme';
+import { useAuth } from '@/context/authContext';
+import { Snackbar } from 'react-native-snackbar';
 
 const SignUpScreen = () => {
     const router = useRouter();
@@ -13,6 +15,39 @@ const SignUpScreen = () => {
     const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
     const theme = useColorScheme() || 'light';
     const colors = Colors[theme];
+
+    const { isLoading, register } = useAuth();
+
+    const onPress = async () => {
+        if (password !== passwordConfirmation) {
+            console.warn('Passwords are not the same');
+            return;
+        }
+
+        try {
+            await register(email, password);
+            Snackbar.show({
+                text: "Signed up successfully",
+                duration: Snackbar.LENGTH_SHORT,
+                backgroundColor: colors.tint,
+                textColor: colors.textLight,
+            })
+            router.replace('/login');
+        } catch (error) {
+            Snackbar.show({
+                text: `${error}`,
+                duration: Snackbar.LENGTH_LONG,
+            });
+        }
+    }
+
+    if (isLoading) {
+        return (
+            <View className="flex flex-1 justify-center items-center">
+                <ActivityIndicator size={32} />
+            </View>
+        )
+    }
 
     return (
         <View className="flex-1 justify-center gap-3">
@@ -25,7 +60,7 @@ const SignUpScreen = () => {
                     textContentType="emailAddress"
                     value={email}
                     onChangeText={setEmail}
-                    className="p-4 text-xl border rounded-md border-theme-text"
+                    className="p-4 text-xl border rounded-md border-theme-text text-theme-text"
                 />
             </View>
 
@@ -40,7 +75,7 @@ const SignUpScreen = () => {
                         textContentType="password"
                         value={password}
                         onChangeText={setPassword}
-                        className="p-4 flex-1 text-xl border rounded-md border-theme-text"
+                        className="p-4 flex-1 text-xl border rounded-md border-theme-text text-theme-text"
                     />
 
                     <MaterialCommunityIcons
@@ -58,13 +93,13 @@ const SignUpScreen = () => {
 
                 <View className="flex-row items-center gap-3">
                     <TextInput
-                        secureTextEntry={!showPassword}
+                        secureTextEntry={!showPasswordConfirmation}
                         placeholder='Confirm password'
                         placeholderTextColor={colors.text}
                         textContentType="password"
                         value={passwordConfirmation}
                         onChangeText={setPasswordConfirmation}
-                        className="p-4 flex-1 text-xl border rounded-md border-theme-text"
+                        className="p-4 flex-1 text-xl border rounded-md border-theme-text text-theme-text"
                     />
 
                     <MaterialCommunityIcons
@@ -80,7 +115,7 @@ const SignUpScreen = () => {
             <View className="w-full px-8 mt-4">
                 <TouchableOpacity
                     activeOpacity={0.8}
-                    onPress={() => console.log('sign up...')}
+                    onPress={onPress}
                     className="w-full justify-start p-4 rounded-md bg-theme-tint"
                 >
                     <Text className="text-xl text-center text-theme-textLight">
@@ -92,7 +127,7 @@ const SignUpScreen = () => {
             <View className="relative h-0 w-full">
                 <View className="absolute top-4 gap-2 w-full">
                     <Text
-                        onPress={() => router.push("/login")}
+                        onPress={() => router.replace("/login")}
                         className="text-lg text-center underline text-theme-text"
                     >Already have an account?</Text>
                 </View>
