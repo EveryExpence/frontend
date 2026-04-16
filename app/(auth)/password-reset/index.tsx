@@ -16,7 +16,7 @@ const PasswordResetScreen = () => {
                     textContentType="emailAddress"
                     value={email}
                     onChangeText={setEmail}
-                    className="p-4 text-xl border rounded-md border-theme-text placeholder:text-theme-text"
+                    className="p-4 text-xl border rounded-md border-theme-text text-theme-text"
                 />
             </View>
 

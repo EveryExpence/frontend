@@ -59,7 +59,7 @@ const SignUpScreen = () => {
                     textContentType="emailAddress"
                     value={email}
                     onChangeText={setEmail}
-                    className="p-4 text-xl border rounded-md border-theme-text placeholder:text-theme-text"
+                    className="p-4 text-xl border rounded-md border-theme-text text-theme-text"
                 />
             </View>
 
@@ -73,7 +73,7 @@ const SignUpScreen = () => {
                         textContentType="password"
                         value={password}
                         onChangeText={setPassword}
-                        className="p-4 flex-1 text-xl border rounded-md border-theme-text placeholder:text-theme-text"
+                        className="p-4 flex-1 text-xl border rounded-md border-theme-text text-theme-text"
                     />
 
                     <MaterialCommunityIcons
@@ -91,12 +91,12 @@ const SignUpScreen = () => {
 
                 <View className="flex-row items-center gap-3">
                     <TextInput
-                        secureTextEntry={!showPassword}
+                        secureTextEntry={!showPasswordConfirmation}
                         placeholder='Confirm password'
                         textContentType="password"
                         value={passwordConfirmation}
                         onChangeText={setPasswordConfirmation}
-                        className="p-4 flex-1 text-xl border rounded-md border-theme-text placeholder:text-theme-text"
+                        className="p-4 flex-1 text-xl border rounded-md border-theme-text text-theme-text"
                     />
 
                     <MaterialCommunityIcons
