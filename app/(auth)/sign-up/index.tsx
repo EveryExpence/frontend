@@ -34,8 +34,12 @@ const SignUpScreen = () => {
             })
             router.replace('/login');
         } catch (error) {
+            let msg = error;
+            if (error === 'Duplicate data') {
+                msg = 'Email already in use';
+            }
             Snackbar.show({
-                text: `${error}`,
+                text: `Failed to sign up: ${msg}`,
                 duration: Snackbar.LENGTH_LONG,
             });
         }
