@@ -21,7 +21,7 @@ const LoginScreen = () => {
             await login(email, password);
         } catch (error) {
             Snackbar.show({
-                text: `${error}`,
+                text: `Login failed: ${error}`,
                 duration: Snackbar.LENGTH_LONG,
             });
         }

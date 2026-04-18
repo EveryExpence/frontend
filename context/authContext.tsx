@@ -28,8 +28,8 @@ const getUserData = async (accessToken: string): Promise<GetUserDataDTO> => {
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.message || response.statusText;
-        throw new Error(`getUserData: ${errorMessage} (${response.status})`);
+        const errorMessage = errorData.detail ?? errorData.message ?? errorData.title;
+        throw errorMessage;
     }
 
     return await response.json();
@@ -75,8 +75,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                const errorMessage = errorData.message || response.statusText;
-                throw new Error(`${errorMessage} (${response.status})`);
+                const errorMessage = errorData.detail ?? errorData.message ?? errorData.title;
+                throw errorMessage;
             }
     
             const { accessToken, refreshToken } = await response.json();
@@ -86,8 +86,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     
             const userData = await getUserData(accessToken);
             setUser({ ...userData });
-        } catch (error) {
-            throw new Error(`Login failed: ${error}`);
         } finally {
             setIsLoading(false);
         }
@@ -116,7 +114,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             await EncryptedStorage.removeItem(refreshTokenKey);
             await EncryptedStorage.removeItem(accessTokenKey);
             setUser(null);
-            throw new Error(`failed to logout: ${error}`)
+            throw error;
         } finally {
             setIsLoading(false);
         }
@@ -137,11 +135,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                const errorMessage = errorData.message || response.statusText;
-                throw new Error(`${errorMessage} (${response.status})`);
+                const errorMessage = errorData.detail ?? errorData.message ?? errorData.title;
+                throw errorMessage;
             }
-        } catch (error) {
-            throw new Error(`Register failed: ${error}`);
         } finally {
             setIsLoading(false);
         }
