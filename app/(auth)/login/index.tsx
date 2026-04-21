@@ -4,7 +4,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/context/authContext';
-import { Snackbar } from 'react-native-snackbar';
+import Toast from 'react-native-toast-message';
 
 const LoginScreen = () => {
     const router = useRouter();
@@ -19,11 +19,11 @@ const LoginScreen = () => {
     const onPress = async () => {
         try {
             await login(email, password);
+            setTimeout(() => {
+                Toast.show({ text1: 'Logged in successfully' });
+            }, 100);
         } catch (error) {
-            Snackbar.show({
-                text: `Login failed: ${error}`,
-                duration: Snackbar.LENGTH_LONG,
-            });
+            Toast.show({ text1: `Login failed: ${error}`, type: "error" });
         }
     }
 

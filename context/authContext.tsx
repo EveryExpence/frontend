@@ -50,7 +50,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     setUser({ ...userData });
                 }
             } catch (error) {
-                console.error("Failed to restore session on boot:", error);
+                await EncryptedStorage.removeItem(refreshTokenKey);
+                await EncryptedStorage.removeItem(accessTokenKey);
+                setUser(null);
             } finally {
                 setIsInitializing(false);
             }
@@ -105,7 +107,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({ refreshToken }),
-            })
+            });
 
             await EncryptedStorage.removeItem(refreshTokenKey);
             await EncryptedStorage.removeItem(accessTokenKey);
