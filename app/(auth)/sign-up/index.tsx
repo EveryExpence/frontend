@@ -5,7 +5,6 @@ import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/context/authContext';
 import { Snackbar } from 'react-native-snackbar';
-import { validateEmail, validatePassword, validatePasswordMatch } from '@/utils/auth/formValidation';
 import * as z from 'zod'
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
