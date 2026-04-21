@@ -6,37 +6,56 @@ import { Colors } from '@/constants/theme';
 import { useAuth } from '@/context/authContext';
 import { Snackbar } from 'react-native-snackbar';
 import { validateEmail, validatePassword, validatePasswordMatch } from '@/utils/auth/formValidation';
+import * as z from 'zod'
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+export const formSchema = z.object({
+  email: z.email("Must be a valid email"),
+  password: z
+    .string()
+    .nonempty("Password is required")
+    .min(8, "Must be at least 8 character long")
+    .max(64, "Must be shorter than 64 characters")
+    .regex(/[a-z]/, "Must include at least 1 lowercase character")
+    .regex(/[A-Z]/, "Must include at least 1 uppercase character")
+    .regex(/[0-9]/, "Must include at least 1 digit")
+    .regex(/[^a-zA-Z0-9]/, "Must include at least 1 special character"),
+  passwordConfirmation: z.string(),
+}).superRefine(({ password, passwordConfirmation }, ctx) => {
+  if (password !== passwordConfirmation) {
+    ctx.addIssue({
+      code: "custom",
+      message: "Passwords do not match",
+      path: ["passwordConfirmation"],
+    })
+  }
+});
+
+type FormSchema = z.infer<typeof formSchema>;
 
 const SignUpScreen = () => {
     const router = useRouter();
     const theme = useColorScheme() || 'light';
     const colors = Colors[theme];
-    const { isLoading, register } = useAuth();
-
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [passwordConfirmation, setPasswordConfirmation] = useState('');
-    
     const [showPassword, setShowPassword] = useState(false);
     const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
-    
-    const [errors, setErrors] = useState<{
-        email: string | null;
-        password: string | null;
-        confirm: string | null;
-    }>({ 
-        email: null, 
-        password: null, 
-        confirm: null 
-    });
+    const { isLoading, register } = useAuth();
+    const form = useForm<FormSchema>({
+        resolver: zodResolver(formSchema),
+        mode: "onChange",
+        defaultValues: {
+            email: "",
+            password: "",
+            passwordConfirmation: "",
+        },
+    })
 
-    const isFormValid = 
-        email !== '' && password !== '' && passwordConfirmation !== '' &&
-        validateEmail(email) === null &&
-        validatePassword(password) === null &&
-        validatePasswordMatch(password, passwordConfirmation) === null;
+    const onSubmit = async ({ email, password, passwordConfirmation }: FormSchema) => {
+        if (password !== passwordConfirmation) {
+            return;
+        }
 
-    const onSubmit = async () => {
         try {
             await register(email, password);
             Snackbar.show({
@@ -65,45 +84,52 @@ const SignUpScreen = () => {
         <View className="flex-1 justify-center gap-3">
             <View className="w-full px-8 justify-start">
                 <Text className="text-2xl pl-2 text-theme-text">Email</Text>
-                <TextInput
-                    placeholder='Enter email'
-                    placeholderTextColor={colors.text}
-                    textContentType="emailAddress"
-                    autoCapitalize="none"
-                    value={email}
-                    onChangeText={(text) => {
-                        setEmail(text);
-                        if (errors.email) setErrors(prev => ({ ...prev, email: null }));
-                    }}
-                    onBlur={() => setErrors(prev => ({ ...prev, email: validateEmail(email) }))}
-                    className={`p-4 text-xl border rounded-md text-theme-text ${
-                        errors.email ? 'border-red-500' : 'border-theme-text'
-                    }`}
+                <Controller
+                    control={form.control}
+                    name="email"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                        <TextInput
+                            placeholder='Enter email'
+                            placeholderTextColor={colors.text}
+                            textContentType="emailAddress"
+                            autoCapitalize="none"
+                            value={value}
+                            onChangeText={onChange}
+                            onBlur={onBlur}
+                            className={`p-4 text-xl border rounded-md text-theme-text ${
+                                form.formState.errors.email ? 'border-red-500' : 'border-theme-text'
+                            }`}
+                        />
+                    )}
                 />
-                {errors.email && <Text className="text-red-500 text-sm pl-2 mt-1">{errors.email}</Text>}
+                {form.formState.errors.email && (
+                    <Text className="text-red-500 text-sm pl-2 mt-1">
+                        {form.formState.errors.email.message}
+                    </Text>
+                )}
             </View>
 
             <View className="w-full px-8 justify-start">
                 <Text className="text-2xl pl-2 text-theme-text">Password</Text>
+
                 <View className="flex-row items-center gap-3">
-                    <TextInput
-                        secureTextEntry={!showPassword}
-                        placeholderTextColor={colors.text}
-                        placeholder='Enter password'
-                        textContentType="password"
-                        value={password}
-                        onChangeText={(text) => {
-                            setPassword(text);
-                            if (errors.password) setErrors(prev => ({ ...prev, password: null }));
-                        }}
-                        onBlur={() => setErrors(prev => ({ 
-                            ...prev, 
-                            password: validatePassword(password),
-                            ...(passwordConfirmation ? { confirm: validatePasswordMatch(password, passwordConfirmation) } : {})
-                        }))}
-                        className={`p-4 flex-1 text-xl border rounded-md text-theme-text ${
-                            errors.password ? 'border-red-500' : 'border-theme-text'
-                        }`}
+                    <Controller
+                        control={form.control}
+                        name="password"
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <TextInput
+                                secureTextEntry={!showPassword}
+                                placeholder='Enter password'
+                                placeholderTextColor={colors.text}
+                                textContentType="password"
+                                value={value}
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                className={`w-full p-4 text-xl border rounded-md text-theme-text ${
+                                    form.formState.errors.password ? 'border-red-500' : 'border-theme-text'
+                                }`}
+                            />
+                        )}
                     />
                     <MaterialCommunityIcons
                         name={showPassword ? 'eye-off' : 'eye'}
@@ -113,26 +139,34 @@ const SignUpScreen = () => {
                         className="absolute right-4 text-theme-icon"
                     />
                 </View>
-                {errors.password && <Text className="text-red-500 text-sm pl-2 mt-1">{errors.password}</Text>}
+                {form.formState.errors.password && (
+                    <Text className="text-red-500 text-sm pl-2 mt-1">
+                        {form.formState.errors.password.message}
+                    </Text>
+                )}
             </View>
 
             <View className="w-full px-8 justify-start">
-                <Text className="text-2xl pl-2 text-theme-text">Confirm Password</Text>
+                <Text className="text-2xl pl-2 text-theme-text">Password</Text>
+
                 <View className="flex-row items-center gap-3">
-                    <TextInput
-                        secureTextEntry={!showPasswordConfirmation}
-                        placeholder='Confirm password'
-                        placeholderTextColor={colors.text}
-                        textContentType="password"
-                        value={passwordConfirmation}
-                        onChangeText={(text) => {
-                            setPasswordConfirmation(text);
-                            if (errors.confirm) setErrors(prev => ({ ...prev, confirm: null }));
-                        }}
-                        onBlur={() => setErrors(prev => ({ ...prev, confirm: validatePasswordMatch(password, passwordConfirmation) }))}
-                        className={`p-4 flex-1 text-xl border rounded-md text-theme-text ${
-                            errors.confirm ? 'border-red-500' : 'border-theme-text'
-                        }`}
+                    <Controller
+                        control={form.control}
+                        name="passwordConfirmation"
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <TextInput
+                                secureTextEntry={!showPasswordConfirmation}
+                                placeholder='Enter password again'
+                                placeholderTextColor={colors.text}
+                                textContentType="password"
+                                value={value}
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                className={`w-full p-4 text-xl border rounded-md text-theme-text ${
+                                    form.formState.errors.password ? 'border-red-500' : 'border-theme-text'
+                                }`}
+                            />
+                        )}
                     />
                     <MaterialCommunityIcons
                         name={showPasswordConfirmation ? 'eye-off' : 'eye'}
@@ -142,16 +176,20 @@ const SignUpScreen = () => {
                         className="absolute right-4 text-theme-icon"
                     />
                 </View>
-                {errors.confirm && <Text className="text-red-500 text-sm pl-2 mt-1">{errors.confirm}</Text>}
+                {form.formState.errors.passwordConfirmation && (
+                    <Text className="text-red-500 text-sm pl-2 mt-1">
+                        {form.formState.errors.passwordConfirmation.message}
+                    </Text>
+                )}
             </View>
 
             <View className="w-full px-8 mt-4">
                 <TouchableOpacity
                     activeOpacity={0.8}
-                    onPress={onSubmit}
-                    disabled={!isFormValid}
+                    onPress={form.handleSubmit(onSubmit)}
+                    disabled={!form.formState.isValid}
                     className={`w-full justify-start p-4 rounded-md bg-theme-tint ${
-                        !isFormValid ? 'opacity-50' : 'opacity-100'
+                        !form.formState.isValid ? 'opacity-50' : 'opacity-100'
                     }`}
                 >
                     <Text className="text-xl text-center text-theme-textLight">
