@@ -3,6 +3,7 @@ import React, { useEffect } from 'react'
 import { Slot, useRootNavigationState, useRouter, useSegments } from 'expo-router'
 import './global.css'
 import { AuthProvider, useAuth } from '@/context/authContext'
+import CustomizedToast from '@/components/Toast'
 
 const RooLayout = () => {
     return (
@@ -15,6 +16,7 @@ const RooLayout = () => {
             <AuthProvider>
                 <Helper />
             </AuthProvider>
+            <CustomizedToast />
         </View>
     )
 }

@@ -19,6 +19,9 @@ export const Colors = {
     tabIconSelected: tintColorLight,
     textLight: '#FFFFFF',
     textDark: '#2C3033',
+    error: '#C02C2C',
+    warning: '#F0C62F',
+    success: '#5AAF58',
   },
   dark: {
     text: '#FFFFFF',
@@ -30,6 +33,9 @@ export const Colors = {
     tabIconSelected: tintColorDark,
     textLight: '#FFFFFF',
     textDark: '#2C3033',
+    error: '#C02C2C',
+    warning: '#F0C62F',
+    success: '#5AAF58',
   },
 };
 

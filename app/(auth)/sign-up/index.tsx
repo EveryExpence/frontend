@@ -4,10 +4,10 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/context/authContext';
-import { Snackbar } from 'react-native-snackbar';
 import * as z from 'zod'
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Toast from 'react-native-toast-message';
 
 export const formSchema = z.object({
   email: z.email("Must be a valid email"),
@@ -57,17 +57,14 @@ const SignUpScreen = () => {
 
         try {
             await register(email, password);
-            Snackbar.show({
-                text: "Signed up successfully",
-                duration: Snackbar.LENGTH_SHORT,
-                backgroundColor: colors.tint,
-                textColor: colors.textLight,
-            });
+            Toast.show({ text1: "Signed up successfully" });
             router.replace('/login');
         } catch (error) {
             let msg = error;
-            if (error === 'Duplicate data') msg = 'Email already in use';
-            Snackbar.show({ text: `Failed to sign up: ${msg}`, duration: Snackbar.LENGTH_LONG });
+            if (error === 'Duplicate data') {
+                msg = 'Email already in use';
+            };
+            Toast.show({ text1: `Failed to sign up: ${msg}`, type: "error" });
         }
     };
 

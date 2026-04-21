@@ -13,6 +13,9 @@ module.exports = {
           icon: 'var(--theme-icon)',
           textLight: 'var(--theme-text-light)',
           textDark: 'var(--theme-text-dark)',
+          error: 'var(--theme-error)',
+          warning: 'var(--theme-warning)',
+          success: 'var(--theme-success)',
         }
       }
     },

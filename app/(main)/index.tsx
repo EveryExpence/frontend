@@ -1,7 +1,7 @@
 import React from 'react'
 import { useAuth } from '@/context/authContext';
 import { TouchableOpacity, Text, View } from 'react-native';
-import { Snackbar } from 'react-native-snackbar';
+import Toast from 'react-native-toast-message';
 
 const Main = () => {
   const { user, logout } = useAuth();
@@ -10,10 +10,7 @@ const Main = () => {
     try {
       await logout();
     } catch (error) {
-      Snackbar.show({
-          text: `${error}`,
-          duration: Snackbar.LENGTH_LONG,
-      });
+      Toast.show({ text1: `${error}`, type: "error" });
     }
   };
 

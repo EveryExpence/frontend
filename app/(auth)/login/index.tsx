@@ -4,10 +4,10 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/context/authContext';
-import { Snackbar } from 'react-native-snackbar';
 import * as z from 'zod'
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Toast from 'react-native-toast-message';
 
 const formSchema = z.object({
     email: z.email("Must be a valid email"),
@@ -35,11 +35,11 @@ const LoginScreen = () => {
     const onPress = async ({ email, password }: FormSchema) => {
         try {
             await login(email, password);
+            setTimeout(() => {
+                Toast.show({ text1: 'Logged in successfully' });
+            }, 100);
         } catch (error) {
-            Snackbar.show({
-                text: `Login failed: ${error}`,
-                duration: Snackbar.LENGTH_LONG,
-            });
+            Toast.show({ text1: `Login failed: ${error}`, type: "error" });
         }
     }
 
