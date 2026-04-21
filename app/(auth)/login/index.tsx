@@ -32,7 +32,7 @@ const LoginScreen = () => {
 
     const { isLoading, login } = useAuth();
     
-    const onPress = async ({ email, password }: FormSchema) => {
+    const onSubmit = async ({ email, password }: FormSchema) => {
         try {
             await login(email, password);
             setTimeout(() => {
@@ -120,9 +120,11 @@ const LoginScreen = () => {
             <View className="w-full px-8 mt-4">
                 <TouchableOpacity
                     activeOpacity={0.8}
-                    onPress={form.handleSubmit(onPress)}
+                    onPress={form.handleSubmit(onSubmit)}
                     disabled={!form.formState.isValid}
-                    className="w-full justify-start p-4 rounded-md bg-theme-tint"
+                    className={`w-full justify-start p-4 rounded-md bg-theme-tint ${
+                        !form.formState.isValid ? 'opacity-50' : 'opacity-100'
+                    }`}
                 >
                     <Text className="text-xl text-center text-theme-textLight">
                         Login
