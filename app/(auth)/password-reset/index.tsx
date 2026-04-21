@@ -24,8 +24,8 @@ const PasswordResetScreen = () => {
         },
     });
 
-    const onSubmit = () => {
-        console.log('reset password...');
+    const onSubmit = ({ email }: FormSchema) => {
+        console.log('reset password: ' + email);
     };
 
     return (
@@ -61,7 +61,7 @@ const PasswordResetScreen = () => {
             <View className="w-full px-8 mt-4">
                 <TouchableOpacity
                     activeOpacity={0.8}
-                    onPress={onSubmit}
+                    onPress={form.handleSubmit(onSubmit)}
                     disabled={!form.formState.isValid}
                     className={`w-full justify-start p-4 rounded-md bg-theme-tint ${
                         !form.formState.isValid ? 'opacity-50' : 'opacity-100'
