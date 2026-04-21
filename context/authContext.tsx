@@ -107,7 +107,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({ refreshToken }),
-            })
+            });
 
             await EncryptedStorage.removeItem(refreshTokenKey);
             await EncryptedStorage.removeItem(accessTokenKey);
