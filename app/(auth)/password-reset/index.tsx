@@ -1,18 +1,28 @@
 import { View, TextInput, Text, TouchableOpacity, useColorScheme } from 'react-native';
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/theme';
-import { validateEmail } from '@/utils/auth/formValidation';
+import * as z from 'zod'
+import { Controller, useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+
+const formSchema = z.object({
+    email: z.email("Must be a valid email")
+});
+
+type FormSchema = z.infer<typeof formSchema>;
 
 const PasswordResetScreen = () => {
     const router = useRouter();
     const theme = useColorScheme() || 'light';
     const colors = Colors[theme];
-
-    const [email, setEmail] = useState('');
-    const [error, setError] = useState<string | null>(null);
-
-    const isFormValid = email !== '' && validateEmail(email) === null;
+    const form = useForm<FormSchema>({
+        resolver: zodResolver(formSchema),
+        mode: "onChange",
+        defaultValues: {
+            email: "",
+        },
+    });
 
     const onSubmit = () => {
         console.log('reset password...');
@@ -23,31 +33,38 @@ const PasswordResetScreen = () => {
             <View className="w-full px-8 justify-start">
                 <Text className="text-2xl pl-2 text-theme-text">Email</Text>
 
-                <TextInput
-                    placeholder='Enter email'
-                    placeholderTextColor={colors.text}
-                    textContentType="emailAddress"
-                    autoCapitalize="none"
-                    value={email}
-                    onChangeText={(text) => {
-                        setEmail(text);
-                        if (error) setError(null);
-                    }}
-                    onBlur={() => setError(validateEmail(email))}
-                    className={`p-4 text-xl border rounded-md text-theme-text ${
-                        error ? 'border-red-500' : 'border-theme-text'
-                    }`}
+                <Controller
+                    control={form.control}
+                    name="email"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                        <TextInput
+                            placeholder='Enter email'
+                            placeholderTextColor={colors.text}
+                            textContentType="emailAddress"
+                            autoCapitalize="none"
+                            value={value}
+                            onChangeText={onChange}
+                            onBlur={onBlur}
+                            className={`p-4 text-xl border rounded-md text-theme-text ${
+                                form.formState.errors.email ? 'border-red-500' : 'border-theme-text'
+                            }`}
+                        />
+                    )}
                 />
-                {error && <Text className="text-red-500 text-sm pl-2 mt-1">{error}</Text>}
+                {form.formState.errors.email && (
+                    <Text className="text-red-500 text-sm pl-2 mt-1">
+                        {form.formState.errors.email.message}
+                    </Text>
+                )}
             </View>
 
             <View className="w-full px-8 mt-4">
                 <TouchableOpacity
                     activeOpacity={0.8}
                     onPress={onSubmit}
-                    disabled={!isFormValid}
+                    disabled={!form.formState.isValid}
                     className={`w-full justify-start p-4 rounded-md bg-theme-tint ${
-                        !isFormValid ? 'opacity-50' : 'opacity-100'
+                        !form.formState.isValid ? 'opacity-50' : 'opacity-100'
                     }`}
                 >
                     <Text className="text-xl text-center text-theme-textLight">
