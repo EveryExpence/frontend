@@ -4,19 +4,35 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/context/authContext';
+import * as z from 'zod'
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import Toast from 'react-native-toast-message';
+
+const formSchema = z.object({
+    email: z.email("Must be a valid email"),
+    password: z.string().nonempty("Password is required"),
+});
+
+type FormSchema = z.infer<typeof formSchema>;
 
 const LoginScreen = () => {
     const router = useRouter();
-    const [email, setEmail] = useState<string>('');
-    const [password, setPassword] = useState<string>('');
     const [showPassword, setShowPassword] = useState(false);
     const theme = useColorScheme() || 'light';
     const colors = Colors[theme];
+    const form = useForm<FormSchema>({
+        resolver: zodResolver(formSchema),
+        mode: "onChange",
+        defaultValues: {
+            email: "",
+            password: ""
+        },
+    });
 
     const { isLoading, login } = useAuth();
     
-    const onPress = async () => {
+    const onSubmit = async ({ email, password }: FormSchema) => {
         try {
             await login(email, password);
             setTimeout(() => {
@@ -40,30 +56,52 @@ const LoginScreen = () => {
             <View className="w-full px-8 justify-start">
                 <Text className="text-2xl pl-2 text-theme-text">Email</Text>
 
-                <TextInput
-                    placeholder='Enter email'
-                    placeholderTextColor={colors.text}
-                    textContentType="emailAddress"
-                    value={email}
-                    onChangeText={setEmail}
-                    className="p-4 text-xl border rounded-md border-theme-text text-theme-text"
+                <Controller
+                    control={form.control}
+                    name="email"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                        <TextInput
+                            placeholder='Enter email'
+                            placeholderTextColor={colors.text}
+                            textContentType="emailAddress"
+                            value={value}
+                            onChangeText={onChange}
+                            onBlur={onBlur}
+                            className={`p-4 text-xl border rounded-md text-theme-text ${
+                                form.formState.errors.email ? 'border-red-500' : 'border-theme-text'
+                            }`}
+                        />
+                    )}
                 />
+                {form.formState.errors.email && (
+                    <Text className="text-red-500 text-sm pl-2 mt-1">
+                        {form.formState.errors.email.message}
+                    </Text>
+                )}
             </View>
 
             <View className="w-full px-8 justify-start">
                 <Text className="text-2xl pl-2 text-theme-text">Password</Text>
 
                 <View className="flex-row items-center gap-3">
-                    <TextInput
-                        secureTextEntry={!showPassword}
-                        placeholder='Enter password'
-                        placeholderTextColor={colors.text}
-                        textContentType="password"
-                        value={password}
-                        onChangeText={setPassword}
-                        className="p-4 flex-1 text-xl border rounded-md border-theme-text text-theme-text"
+                    <Controller
+                        control={form.control}
+                        name="password"
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <TextInput
+                                secureTextEntry={!showPassword}
+                                placeholder='Enter password'
+                                placeholderTextColor={colors.text}
+                                textContentType="password"
+                                value={value}
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                className={`w-full p-4 text-xl border rounded-md text-theme-text ${
+                                    form.formState.errors.password ? 'border-red-500' : 'border-theme-text'
+                                }`}
+                            />
+                        )}
                     />
-
                     <MaterialCommunityIcons
                         name={showPassword ? 'eye-off' : 'eye'}
                         size={24}
@@ -72,13 +110,21 @@ const LoginScreen = () => {
                         className="absolute right-4 text-theme-icon"
                     />
                 </View>
+                {form.formState.errors.password && (
+                    <Text className="text-red-500 text-sm pl-2 mt-1">
+                        {form.formState.errors.password.message}
+                    </Text>
+                )}
             </View>
 
             <View className="w-full px-8 mt-4">
                 <TouchableOpacity
                     activeOpacity={0.8}
-                    onPress={onPress}
-                    className="w-full justify-start p-4 rounded-md bg-theme-tint"
+                    onPress={form.handleSubmit(onSubmit)}
+                    disabled={!form.formState.isValid}
+                    className={`w-full justify-start p-4 rounded-md bg-theme-tint ${
+                        !form.formState.isValid ? 'opacity-50' : 'opacity-100'
+                    }`}
                 >
                     <Text className="text-xl text-center text-theme-textLight">
                         Login
