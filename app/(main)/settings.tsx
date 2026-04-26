@@ -71,9 +71,9 @@ const DATA: {
 
 const SettingsScreen = () => {
   const router = useRouter();
-  const [currentLanguage, setLanguage] = useState<language>("eng"); // current language
-  const [currentTheme, setTheme] = useState<theme>("light"); // current theme
-  const [currentNotifications, setNotifications] = useState(true); // notifications state
+  const [currentLanguage, setLanguage] = useState<language>("eng");
+  const [currentTheme, setTheme] = useState<theme>("light"); 
+  const [currentNotifications, setNotifications] = useState(true); 
 
   const toggleNotifications = () => {
     setNotifications((previousState) => !previousState);
