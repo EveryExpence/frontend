@@ -143,31 +143,6 @@ const SettingsScreen = () => {
   const [currentTheme, setTheme] = useState<AppTheme>("light");
   const [currentNotifications, setNotifications] = useState(true);
 
-  const sections = useMemo(
-    () =>
-      SETTINGS_SECTIONS.map((section) => {
-        if (section.title !== "Account") {
-          return section;
-        }
-
-        return {
-          ...section,
-          data: section.data.map((item) => {
-            if (item.type !== "profile") {
-              return item;
-            }
-
-            return {
-              ...item,
-              title: user?.publicUsername ?? user?.email ?? item.title,
-              subtitle: user?.email ?? item.subtitle,
-            };
-          }),
-        };
-      }),
-    [user],
-  );
-
   const handlers: Record<SettingItemType, () => void> = {
     language: () => setLanguage((prev) => (prev === "eng" ? "pl" : "eng")),
     theme: () => setTheme((prev) => (prev === "light" ? "dark" : "light")),
@@ -187,7 +162,7 @@ const SettingsScreen = () => {
     <SafeAreaView style={{ flex: 1, backgroundColor: "#ffffff" }}>
       <SectionList
         style={{ marginTop: 25 }}
-        sections={sections}
+        sections={SETTINGS_SECTIONS}
         keyExtractor={(item) => item.id}
         renderSectionHeader={({ section: { title } }) => (
           <Text className="text-2xl text-black font-bold pl-4" selectable={false}>
