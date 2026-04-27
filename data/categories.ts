@@ -16,7 +16,7 @@ export const createCategory = async (db: SQLiteDatabase, categoryDTO: CategoryIn
 };
 
 export const getAllCategories = async (db: SQLiteDatabase): Promise<Category[]> => {
-    return await db.getAllAsync<Category>("SELECT * FROM categories");
+    return await db.getAllAsync<Category>("SELECT * FROM categories WHERE syncState != 'deleted'");
 };
 
 export const updateCategory = async (db: SQLiteDatabase, id: string, categoryDTO: CategoryInputDTO) => {
@@ -41,7 +41,7 @@ export const updateCategory = async (db: SQLiteDatabase, id: string, categoryDTO
 
 export const deleteCategory = async (db: SQLiteDatabase, id: string) => {
     const stmt = await db.prepareAsync(`
-        DELETE FROM categories WHERE id = $id;
+        UPDATE categories SET syncState = 'deleted' WHERE id = $id
     `);
     await db.withExclusiveTransactionAsync(async () => {
         await stmt.executeAsync({

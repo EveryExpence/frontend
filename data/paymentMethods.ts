@@ -15,7 +15,7 @@ export const createPaymentMethod = async (db: SQLiteDatabase, paymentMethodDTO: 
 };
 
 export const getAllPaymentMethods = async (db: SQLiteDatabase): Promise<PaymentMethod[]> => {
-    return await db.getAllAsync<PaymentMethod>("SELECT * FROM payment_methods");
+    return await db.getAllAsync<PaymentMethod>("SELECT * FROM payment_methods WHERE syncState != 'deleted'");
 };
 
 export const updatePaymentMethod = async (db: SQLiteDatabase, id: string, paymentMethodDTO: PaymentMethodInputDTO) => {
@@ -38,7 +38,7 @@ export const updatePaymentMethod = async (db: SQLiteDatabase, id: string, paymen
 
 export const deletePaymentMethod = async (db: SQLiteDatabase, id: string) => {
     const stmt = await db.prepareAsync(`
-        DELETE FROM payment_methods WHERE id = $id;
+        UPDATE payment_methods SET syncState = 'deleted' WHERE id = $id
     `);
     await db.withExclusiveTransactionAsync(async () => {
         await stmt.executeAsync({

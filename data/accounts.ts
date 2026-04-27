@@ -41,7 +41,7 @@ export const getAccountBalance = async (db: SQLiteDatabase, id: string): Promise
 };
 
 export const getAllAccounts = async (db: SQLiteDatabase): Promise<Account[]> => {
-    return await db.getAllAsync<Account>("SELECT * FROM accounts");
+    return await db.getAllAsync<Account>("SELECT * FROM accounts WHERE syncState != 'deleted'");
 };
 
 export const updateAccount = async (db: SQLiteDatabase, id: string, accountDTO: AccountInputDTO) => {
@@ -68,7 +68,7 @@ export const updateAccount = async (db: SQLiteDatabase, id: string, accountDTO: 
 
 export const deleteAccount = async (db: SQLiteDatabase, id: string) => {
     const stmt = await db.prepareAsync(`
-        DELETE FROM accounts WHERE id = $id;
+        UPDATE accounts SET syncState = 'deleted' WHERE id = $id
     `);
     await db.withExclusiveTransactionAsync(async () => {
         await stmt.executeAsync({
