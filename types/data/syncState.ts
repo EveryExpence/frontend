@@ -1,0 +1,1 @@
+export type SyncState = "synchronized" | "created" | "updated" | "deleted"
