@@ -1,4 +1,4 @@
-import { createAccount, deleteAccount, getAllAccounts, updateAccount } from "@/data/accounts";
+import { createAccount, deleteAccount, getAccountBalance, getAllAccounts, updateAccount } from "@/data/accounts";
 import { createCategory, deleteCategory, getAllCategories, updateCategory } from "@/data/categories";
 import { createExpenseRecord, deleteExpenseRecord, getAllExpenseRecords, updateExpenseRecord } from "@/data/expenseRecords";
 import { migrateDatabase } from "@/data/init";
@@ -201,10 +201,12 @@ describe("data module", () => {
         expect(expenseRecord3?.accountId).toEqual(account2.id);
         expect(expenseRecord3?.createdAt).toEqual(new Date("December 17, 1995 03:24:00").getTime());
 
-        // account1 = (await getAllAccounts(db)).find((a) => a.name === "Main")!;
-        // expect(account1.balance).toBeCloseTo(2895.89);
-        // account2 = (await getAllAccounts(db)).find((a) => a.name === "Savings")!;
-        // expect(account1.balance).toBeCloseTo(1000);
+        account1 = (await getAllAccounts(db)).find((a) => a.name === "Main")!;
+        const account1Balance = await getAccountBalance(db, account1.id);
+        expect(account1Balance).toBeCloseTo(5255.18);
+        account2 = (await getAllAccounts(db)).find((a) => a.name === "Savings")!;
+        const account2Balance = await getAccountBalance(db, account2.id);
+        expect(account2Balance).toBeCloseTo(2534.99);
     });
 
     test("expenseRecord should be updated", async () => {
@@ -216,23 +218,23 @@ describe("data module", () => {
         const edited = expenseRecords.find((expenseRecord) => expenseRecord.description === "Groceries")!;
         expect(edited.amount).toBeCloseTo(-100.45);
 
-        // const account = (await getAllAccounts(db)).find((a) => a.id === expenseRecord.accountId)!;
-        // expect(account.balance).toBeCloseTo(2899.89);
+        const accountBalance = await getAccountBalance(db, expenseRecord.accountId);
+        expect(accountBalance).toBeCloseTo(5259.18);
     });
 
     test("expenseRecord should be deleted", async () => {
         let expenseRecords = await getAllExpenseRecords(db);
         const expenseRecord = expenseRecords.find((expenseRecord) => expenseRecord.description === "Groceries")!;
         await deleteExpenseRecord(db, expenseRecord.id);
-
+        
         expenseRecords = await getAllExpenseRecords(db);
         expect(expenseRecords.length).toBe(2);
-
+        
         const descriptions = expenseRecords.map((expenseRecord) => expenseRecord.description);
         expect(descriptions).toContain("Monthly salary");
         expect(descriptions).toContain("Gift from brother");
-
-        // const account = (await getAllAccounts(db)).find((a) => a.id === expenseRecord.accountId)!;
-        // expect(account.balance).toBeCloseTo(3000.34);
+        
+        const accountBalance = await getAccountBalance(db, expenseRecord.accountId);
+        expect(accountBalance).toBeCloseTo(5359.63);
     });
 })

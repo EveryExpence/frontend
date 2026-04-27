@@ -18,19 +18,24 @@ export const createAccount = async (db: SQLiteDatabase, accountDTO: AccountInput
 
 export const getAccountBalance = async (db: SQLiteDatabase, id: string): Promise<number> => {
     const stmt = await db.prepareAsync(`
-        SELECT SUM(amount)
+        SELECT SUM(er.amount) + a.balance AS 'balance'
         FROM accounts AS a
         JOIN expense_records AS er
         ON a.id = er.accountId
-        WHERE syncState != 'deleted';
+        WHERE a.id = $id AND a.syncState != 'deleted' AND er.syncState != 'deleted';
     `);
 
     let ans = 0;
     await db.withExclusiveTransactionAsync(async () => {
-        const res = await stmt.executeAsync<number>({
+        const res = await stmt.executeAsync({
             $id: id,
         });
-        ans = await res.getFirstAsync() ?? 0;
+
+        const data = await res.getFirstAsync();
+        if (data !== null && data !== undefined && typeof data === "object") {
+            const { balance } = data as any;
+            ans = balance;
+        }
     });
     return ans;
 };
