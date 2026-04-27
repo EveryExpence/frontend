@@ -4,12 +4,13 @@ import { nanoid } from 'nanoid'
 
 export const createCategory = async (db: SQLiteDatabase, categoryDTO: CategoryInputDTO) => {
     const stmt = await db.prepareAsync(`
-        INSERT INTO categories (id, name, syncState) VALUES ($id, $name, 'created');
+        INSERT INTO categories (id, name, type) VALUES ($id, $name, $type);
     `);
     await db.withExclusiveTransactionAsync(async () => {
         await stmt.executeAsync({
             $id: nanoid(),
             $name: categoryDTO.name,
+            $type: categoryDTO.type,
         });
     });
 };
@@ -22,6 +23,7 @@ export const updateCategory = async (db: SQLiteDatabase, id: string, categoryDTO
     const stmt = await db.prepareAsync(`
         UPDATE categories SET
             name = $name,
+            type = $type,
             syncState = CASE
                 WHEN syncState = 'created' THEN 'created'
                 ELSE 'updated'
@@ -32,6 +34,7 @@ export const updateCategory = async (db: SQLiteDatabase, id: string, categoryDTO
         await stmt.executeAsync({
             $id: id,
             $name: categoryDTO.name,
+            $type: categoryDTO.type,
         });
     });
 };
