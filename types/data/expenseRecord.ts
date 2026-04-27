@@ -2,22 +2,22 @@ import { SyncState } from "./syncState";
 
 export interface ExpenseRecord {
     id: string;
-    ammount: number;
-    location: string | null;
+    amount: number;
+    location?: string;
     description: string;
     paymentMethodId: string;
     categoryId: string;
     accountId: string;
-    createdAt: Date;
+    createdAt?: number;
     syncState: SyncState;
 }
 
 export interface ExpenseRecordInputDTO {
-    ammount: number;
-    location: string | null;
+    amount: number;
+    location?: string;
     description: string;
-    createdAt: Date | null;
     paymentMethodId: string;
     categoryId: string;
     accountId: string;
+    createdAt?: number;
 }
