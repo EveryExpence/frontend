@@ -18,19 +18,26 @@ const accounts: AccountItem[] = [
   { id: '4', name: 'Account #4', balance: '1057 zl', currency: 'PLN' },
 ];
 
+const BOTTOM_NAV_HEIGHT = 84;
+const FLOATING_BUTTON_HEIGHT = 56;
+const FLOATING_BUTTON_GAP = 12;
+const LIST_BOTTOM_GAP = 16;
+const CORNER_RADIUS = 6;
+
 export default function Balances() {
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
   const insets = useSafeAreaInsets();
 
-  const fixedButtonBottom = insets.bottom + 96;
-  const listBottomPadding = fixedButtonBottom + 84;
+const fixedButtonBottom = insets.bottom + BOTTOM_NAV_HEIGHT + FLOATING_BUTTON_GAP;
+const listBottomPadding = fixedButtonBottom + FLOATING_BUTTON_HEIGHT + LIST_BOTTOM_GAP;
+
 
   const renderItem = ({ item }: { item: AccountItem }) => {
     return (
       <View
         className="mb-6 flex-row items-center justify-between px-4 py-4"
-        style={{ backgroundColor: colors.surface, borderRadius: 6 }}
+        style={{ backgroundColor: colors.surface, borderRadius: CORNER_RADIUS }}
       >
         <View className="flex-row items-center">
           <MaterialCommunityIcons
@@ -89,7 +96,7 @@ export default function Balances() {
         <TouchableOpacity
           activeOpacity={0.85}
           className="w-full flex-row items-center justify-center bg-theme-tint py-4"
-          style={{ borderRadius: 6 }}
+          style={{ borderRadius: CORNER_RADIUS }}
         >
           <MaterialCommunityIcons
             name="plus"
