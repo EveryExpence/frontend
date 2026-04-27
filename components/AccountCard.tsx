@@ -31,30 +31,30 @@ export default function AccountCard({
       className="mb-6 flex-row items-center justify-between px-4 py-4"
       style={{ backgroundColor: surfaceColor, borderRadius: cornerRadius }}
     >
-      <View className="flex-row items-center">
+      <View className="flex-row items-center self-stretch">
         <MaterialCommunityIcons
           name="cash-multiple"
-          size={34}
+          size={48}
           color={textColor}
           style={{ marginRight: 12 }}
         />
 
-        <View>
+        <View className="self-stretch justify-between py-1">
           <Text className="text-2xl text-theme-text">{item.name}</Text>
-          <Text className="mt-1 text-2xl text-theme-text">{item.balance}</Text>
+          <Text className="text-2xl text-theme-text">{item.balance}</Text>
         </View>
       </View>
 
-      <View className="items-end justify-between self-stretch py-1">
+      <View className="items-end justify-between self-stretch">
         <Text className="text-2xl text-theme-text">{item.currency}</Text>
 
-        <View className="mt-4 flex-row items-center">
+        <View className="flex-row items-center">
           <TouchableOpacity
             activeOpacity={0.8}
             style={{ padding: 4, marginRight: 8 }}
             onPress={() => onEdit?.(item.id)}
           >
-            <MaterialCommunityIcons name="pencil-outline" size={28} color={textColor} />
+            <MaterialCommunityIcons name="pencil-outline" size={32} color={textColor} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -62,7 +62,7 @@ export default function AccountCard({
             style={{ padding: 4 }}
             onPress={() => onDelete?.(item.id)}
           >
-            <MaterialCommunityIcons name="delete-outline" size={28} color={textColor} />
+            <MaterialCommunityIcons name="delete-outline" size={32} color={textColor} />
           </TouchableOpacity>
         </View>
       </View>

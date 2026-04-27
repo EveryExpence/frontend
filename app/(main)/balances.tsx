@@ -30,8 +30,8 @@ export default function Balances() {
     <SafeAreaView className="flex-1 bg-theme-background">
       <View className="flex-1 px-4 pt-4">
         <View className="mb-5 flex-row items-center justify-between">
-          <Text className="text-xl font-semibold text-theme-text">Your accounts</Text>
-          <Text className="text-lg font-semibold text-theme-tint">
+          <Text className="text-2xl font-semibold text-theme-text">Your accounts</Text>
+          <Text className="text-xl font-semibold text-theme-tint">
             {accounts.length} Total accounts
           </Text>
         </View>
