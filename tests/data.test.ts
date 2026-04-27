@@ -1,3 +1,4 @@
+import { createAccount, deleteAccount, getAllAccounts, updateAccount } from "@/data/accounts";
 import { createCategory, deleteCategory, getAllCategories, updateCategory } from "@/data/categories";
 import { migrateDatabase } from "@/data/init";
 import { createPaymentMethod, deletePaymentMethod, getAllPaymentMethods, updatePaymentMethod } from "@/data/paymentMethods";
@@ -125,7 +126,7 @@ describe("data module", () => {
         let accounts = await getAllAccounts(db);
         const account = accounts.find((account) => account.name === "Dollar Account");
         expect(account).not.toBeUndefined();
-        await updateAccount(db, account!.id, { name: "Crypto" });
+        await updateAccount(db, account!.id, { ...account!, name: "Crypto" });
         
         accounts = await getAllAccounts(db);
         const edited = accounts.find((account) => account.name === "Crypto");
@@ -135,7 +136,7 @@ describe("data module", () => {
     test("account should be deleted", async () => {
         let accounts = await getAllAccounts(db);
         const id = accounts.find((account) => account.name === "Crypto")!.id;
-        await deletePaymentMethod(db, id);
+        await deleteAccount(db, id);
 
         accounts = await getAllAccounts(db);
         expect(accounts.length).toBe(2);
