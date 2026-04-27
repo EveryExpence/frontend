@@ -1,7 +1,6 @@
 import { createCategory, deleteCategory, getAllCategories, updateCategory } from "@/data/categories";
 import { migrateDatabase } from "@/data/init";
 import { createPaymentMethod, deletePaymentMethod, getAllPaymentMethods, updatePaymentMethod } from "@/data/paymentMethods";
-import { Category } from "@/types/data/category";
 import { openDatabaseAsync, SQLiteDatabase } from "expo-sqlite";
 
 describe("data module", () => {
@@ -26,15 +25,15 @@ describe("data module", () => {
         const categories = await getAllCategories(db);
         expect(categories.length).toBe(3);
 
-        const transport = categories.find((category) => category.name === "Transport");
-        expect(transport).not.toBeUndefined();
-        expect(transport?.type).toEqual("expense");
-        const job = categories.find((category) => category.name === "Job");
-        expect(job).not.toBeUndefined();
-        expect(job?.type).toEqual("income");
-        const food = categories.find((category) => category.name === "Food");
-        expect(food).not.toBeUndefined();
-        expect(food?.type).toEqual("expense");
+        const category1 = categories.find((category) => category.name === "Transport");
+        expect(category1).not.toBeUndefined();
+        expect(category1?.type).toEqual("expense");
+        const category2 = categories.find((category) => category.name === "Job");
+        expect(category2).not.toBeUndefined();
+        expect(category2?.type).toEqual("income");
+        const category3 = categories.find((category) => category.name === "Food");
+        expect(category3).not.toBeUndefined();
+        expect(category3?.type).toEqual("expense");
     });
 
     test("category should be updated", async () => {
@@ -98,5 +97,51 @@ describe("data module", () => {
         const names = paymentMethods.map((paymentMethod) => paymentMethod.name);
         expect(names).toContain("Cash");
         expect(names).toContain("BLIK");
+    });
+
+    test("accounts should be added", async () => {
+        await createAccount(db, { name: "Main", currency: "PLN", balance: 2359.29 });
+        await createAccount(db, { name: "Dollar Account", currency: "USD", balance: 343.99 });
+        await createAccount(db, { name: "Savings", currency: "EUR", balance: 1534.99 });
+
+        const accounts = await getAllAccounts(db);
+        expect(accounts.length).toBe(3);
+
+        const account1 = accounts.find((account) => account.name === "Main");
+        expect(account1).not.toBeUndefined();
+        expect(account1?.currency).toEqual("PLN");
+        expect(account1?.balance).toEqual(2359.29);
+        const account2 = accounts.find((account) => account.name === "Dollar Account");
+        expect(account2).not.toBeUndefined();
+        expect(account2?.currency).toEqual("USD");
+        expect(account2?.balance).toEqual(343.99);
+        const account3 = accounts.find((account) => account.name === "Savings");
+        expect(account3).not.toBeUndefined();
+        expect(account3?.currency).toEqual("EUR");
+        expect(account3?.balance).toEqual(1534.99);
+    });
+
+    test("account should be updated", async () => {
+        let accounts = await getAllAccounts(db);
+        const account = accounts.find((account) => account.name === "Dollar Account");
+        expect(account).not.toBeUndefined();
+        await updateAccount(db, account!.id, { name: "Crypto" });
+        
+        accounts = await getAllAccounts(db);
+        const edited = accounts.find((account) => account.name === "Crypto");
+        expect(edited).not.toBeUndefined();
+    });
+
+    test("account should be deleted", async () => {
+        let accounts = await getAllAccounts(db);
+        const id = accounts.find((account) => account.name === "Crypto")!.id;
+        await deletePaymentMethod(db, id);
+
+        accounts = await getAllAccounts(db);
+        expect(accounts.length).toBe(2);
+
+        const names = accounts.map((account) => account.name);
+        expect(names).toContain("Main");
+        expect(names).toContain("Savings");
     });
 })
