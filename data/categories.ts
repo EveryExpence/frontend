@@ -25,6 +25,7 @@ export const updateCategory = async (db: SQLiteDatabase, id: string, categoryDTO
             syncState = CASE
                 WHEN syncState = 'created' THEN 'created'
                 ELSE 'updated'
+            END
         WHERE id = $id AND syncState != 'deleted';
     `);
     await db.withExclusiveTransactionAsync(async () => {
@@ -41,7 +42,7 @@ export const deleteCategory = async (db: SQLiteDatabase, id: string) => {
     `);
     await db.withExclusiveTransactionAsync(async () => {
         await stmt.executeAsync({
-            $id: nanoid(),
+            $id: id,
         });
     });
 };
