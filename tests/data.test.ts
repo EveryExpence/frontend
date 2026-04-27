@@ -145,7 +145,7 @@ describe("data module", () => {
         expect(names).toContain("Savings");
     });
 
-    test("expenseRecords should be added", async () => {
+    test("expense records should be added", async () => {
         const category = (await getAllCategories(db)).find((c) => c.name === "Job")!;
         const paymentMethod = (await getAllPaymentMethods(db)).find((p) => p.name === "Cash")!;
         let account1 = (await getAllAccounts(db)).find((a) => a.name === "Main")!;
@@ -209,7 +209,7 @@ describe("data module", () => {
         expect(account2Balance).toBeCloseTo(2534.99);
     });
 
-    test("expenseRecord should be updated", async () => {
+    test("expense record should be updated", async () => {
         let expenseRecords = await getAllExpenseRecords(db);
         const expenseRecord = expenseRecords.find((expenseRecord) => expenseRecord.description === "Groceries")!;
         await updateExpenseRecord(db, expenseRecord.id, { ...expenseRecord, amount: -100.45 });
@@ -222,7 +222,7 @@ describe("data module", () => {
         expect(accountBalance).toBeCloseTo(5259.18);
     });
 
-    test("expenseRecord should be deleted", async () => {
+    test("expense record should be deleted", async () => {
         let expenseRecords = await getAllExpenseRecords(db);
         const expenseRecord = expenseRecords.find((expenseRecord) => expenseRecord.description === "Groceries")!;
         await deleteExpenseRecord(db, expenseRecord.id);
@@ -236,5 +236,26 @@ describe("data module", () => {
         
         const accountBalance = await getAccountBalance(db, expenseRecord.accountId);
         expect(accountBalance).toBeCloseTo(5359.63);
+    });
+
+    test("should add 10_000 expense records", async () => {
+        const category = (await getAllCategories(db)).find((c) => c.name === "Job")!;
+        const paymentMethod = (await getAllPaymentMethods(db)).find((p) => p.name === "Cash")!;
+        const account = (await getAllAccounts(db)).find((a) => a.name === "Savings")!;
+        for (let i = 0; i < 10_000; ++i) {
+            await createExpenseRecord(db, {
+                amount: 1,
+                description: "Monthly salary",
+                paymentMethodId: paymentMethod.id,
+                categoryId: category.id,
+                accountId: account.id,
+            });
+        }
+    });
+
+    test ("should calculate account balance", async () => {
+        const account = (await getAllAccounts(db)).find((a) => a.name === "Savings")!;
+        const accountBalance = await getAccountBalance(db, account.id);
+        expect(accountBalance).toBeCloseTo(12534.99);
     });
 })
