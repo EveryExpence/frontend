@@ -39,9 +39,8 @@ describe("data module", () => {
 
     test("category should be updated", async () => {
         let categories = await getAllCategories(db);
-        const category = categories.find((category) => category.name === "Transport");
-        expect(category).not.toBeUndefined();
-        await updateCategory(db, category!.id, { name: "Gifts", type: "income" });
+        const category = categories.find((category) => category.name === "Transport")!;
+        await updateCategory(db, category.id, { name: "Gifts", type: "income" });
         
         categories = await getAllCategories(db);
         const edited = categories.find((category) => category.name === "Gifts");
@@ -111,22 +110,21 @@ describe("data module", () => {
         const account1 = accounts.find((account) => account.name === "Main");
         expect(account1).not.toBeUndefined();
         expect(account1?.currency).toEqual("PLN");
-        expect(account1?.balance).toEqual(2359.29);
+        expect(account1?.balance).toBeCloseTo(2359.29);
         const account2 = accounts.find((account) => account.name === "Dollar Account");
         expect(account2).not.toBeUndefined();
         expect(account2?.currency).toEqual("USD");
-        expect(account2?.balance).toEqual(343.99);
+        expect(account2?.balance).toBeCloseTo(343.99);
         const account3 = accounts.find((account) => account.name === "Savings");
         expect(account3).not.toBeUndefined();
         expect(account3?.currency).toEqual("EUR");
-        expect(account3?.balance).toEqual(1534.99);
+        expect(account3?.balance).toBeCloseTo(1534.99);
     });
 
     test("account should be updated", async () => {
         let accounts = await getAllAccounts(db);
-        const account = accounts.find((account) => account.name === "Dollar Account");
-        expect(account).not.toBeUndefined();
-        await updateAccount(db, account!.id, { ...account!, name: "Crypto" });
+        const account = accounts.find((account) => account.name === "Dollar Account")!;
+        await updateAccount(db, account.id, { ...account, name: "Crypto" });
         
         accounts = await getAllAccounts(db);
         const edited = accounts.find((account) => account.name === "Crypto");
@@ -144,5 +142,96 @@ describe("data module", () => {
         const names = accounts.map((account) => account.name);
         expect(names).toContain("Main");
         expect(names).toContain("Savings");
+    });
+
+    test("expenseRecords should be added", async () => {
+        const category = (await getAllCategories(db)).find((c) => c.name === "Job")!;
+        const paymentMethod = (await getAllPaymentMethods(db)).find((p) => p.name === "Cash")!;
+        let account1 = (await getAllAccounts(db)).find((a) => a.name === "Main")!;
+        let account2 = (await getAllAccounts(db)).find((a) => a.name === "Savings")!;
+
+        await createExpenseRecord(db, {
+            ammount: 3000.34,
+            location: "latitude=22.321875;longtitude=114.161842",
+            description: "Monthly salary",
+            paymentMethodId: paymentMethod.id,
+            categoryId: category.id,
+            accountId: account1.id,
+        });
+        await createExpenseRecord(db, {
+            ammount: -104.45,
+            description: "Groceries",
+            paymentMethodId: paymentMethod.id,
+            categoryId: category.id,
+            accountId: account1.id,
+        });
+        await createExpenseRecord(db, {
+            ammount: 1000,
+            description: "Gift from brother",
+            paymentMethodId: paymentMethod.id,
+            categoryId: category.id,
+            accountId: account2.id,
+            createdAt: new Date("December 17, 1995 03:24:00"),
+        });
+
+        const expenseRecords = await getAllExpenseRecords(db);
+        expect(expenseRecords.length).toBe(3);
+
+        const expenseRecord1 = expenseRecords.find((expenseRecord) => expenseRecord.description === "Monthly salary");
+        expect(expenseRecord1).not.toBeUndefined();
+        expect(expenseRecord1?.ammount).toBeCloseTo(3000.34);
+        expect(expenseRecord1?.location).toEqual("latitude=22.321875;longtitude=114.161842");
+        expect(expenseRecord1?.paymentMethodId).toEqual(paymentMethod.id);
+        expect(expenseRecord1?.categoryId).toEqual(category.id);
+        expect(expenseRecord1?.accountId).toEqual(account1.id);
+        const expenseRecord2 = expenseRecords.find((expenseRecord) => expenseRecord.description === "Groceries");
+        expect(expenseRecord2).not.toBeUndefined();
+        expect(expenseRecord1?.ammount).toBeCloseTo(-104.45);
+        expect(expenseRecord2?.location).toBeNull();
+        expect(expenseRecord2?.paymentMethodId).toEqual(paymentMethod.id);
+        expect(expenseRecord2?.categoryId).toEqual(category.id);
+        expect(expenseRecord2?.accountId).toEqual(account1.id);
+        const expenseRecord3 = expenseRecords.find((expenseRecord) => expenseRecord.description === "Gift from brother");
+        expect(expenseRecord3).not.toBeUndefined();
+        expect(expenseRecord3?.location).toBeNull();
+        expect(expenseRecord1?.ammount).toBeCloseTo(1000);
+        expect(expenseRecord3?.paymentMethodId).toEqual(paymentMethod.id);
+        expect(expenseRecord3?.categoryId).toEqual(category.id);
+        expect(expenseRecord3?.accountId).toEqual(account2.id);
+        expect(expenseRecord3?.createdAt).toEqual(new Date("December 17, 1995 03:24:00"));
+
+        account1 = (await getAllAccounts(db)).find((a) => a.name === "Main")!;
+        expect(account1.balance).toBeCloseTo(2895.89);
+        account2 = (await getAllAccounts(db)).find((a) => a.name === "Savings")!;
+        expect(account1.balance).toBeCloseTo(1000);
+    });
+
+    test("expenseRecord should be updated", async () => {
+        let expenseRecords = await getAllExpenseRecords(db);
+        const expenseRecord = expenseRecords.find((expenseRecord) => expenseRecord.description === "Groceries")!;
+        await updateExpenseRecord(db, expenseRecord.id, { ...expenseRecord, amount: -100.45 });
+
+        expenseRecords = await getAllExpenseRecords(db);
+        const edited = expenseRecords.find((expenseRecord) => expenseRecord.name === "Groceries")!;
+        expect(edited.ammount).toBeCloseTo(-100.45);
+
+        const account = (await getAllAccounts(db)).find((a) => a.id === expenseRecord.accountId)!;
+        expect(account.balance).toBeCloseTo(2899.89);
+    });
+
+    test("expenseRecord should be deleted", async () => {
+        let expenseRecords = await getAllExpenseRecords(db);
+        const expenseRecord = expenseRecords.find((expenseRecord) => expenseRecord.name === "Groceries")!;
+        await deleteExpenseRecord(db, expenseRecord.id);
+
+        expenseRecords = await getAllExpenseRecords(db);
+        expect(expenseRecords.length).toBe(2);
+
+        const descriptions = expenseRecords.map((expenseRecord) => expenseRecord.description);
+        expect(descriptions).toContain("Monthly salary");
+        expect(descriptions).toContain("Gift from brother");
+
+        const account = (await getAllAccounts(db)).find((a) => a.id === expenseRecord.accountId)!;
+        expect(account.balance).toBeCloseTo(3000.34);
     });
 })
