@@ -1,11 +1,14 @@
-import React, { memo, useMemo, useState } from "react";
-import { View, Text, SectionList, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { memo, useState } from "react";
+import { View, Text, SectionList, TouchableOpacity, useColorScheme } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { Colors } from '@/constants/theme';
 import { SETTINGS_SECTIONS } from "@/constants/settingsSections";
 import { useAuth } from "@/context/authContext";
 import { AppTheme, Language, SettingItem, SettingItemType } from "@/types/settings";
+
+type ThemeColors = (typeof Colors)[keyof typeof Colors];
 
 type SettingsItemProps = {
   item: SettingItem;
@@ -15,6 +18,7 @@ type SettingsItemProps = {
   currentLanguage: Language;
   currentTheme: AppTheme;
   currentNotifications: boolean;
+  colors: ThemeColors;
 };
 
 const SettingsItem = memo(
@@ -26,6 +30,7 @@ const SettingsItem = memo(
     currentLanguage,
     currentTheme,
     currentNotifications,
+    colors,
   }: SettingsItemProps) => {
     const cornerStyle =
       isFirst && isLast
@@ -39,42 +44,27 @@ const SettingsItem = memo(
     return (
       <TouchableOpacity
         activeOpacity={0.8}
-        className={`h-[80px] bg-[#e3e3ed] mx-4 flex-row items-center px-3 justify-between ${cornerStyle}`}
+        className={`h-[80px] mx-4 flex-row items-center px-3 justify-between ${cornerStyle}`}
         onPress={onPress}
+        style={{ backgroundColor: colors.surface }}
       >
         <View className="flex-row items-center">
           {item.type === "profile" ? (
-            <View className="w-14 h-14 rounded-full bg-white mr-3 items-center justify-center overflow-hidden">
-              <Ionicons
-                name={item.icon as any}
-                size={40}
-                color="#000000"
-              />
+            <View className="w-14 h-14 rounded-full mr-3 items-center justify-center overflow-hidden" style={{ backgroundColor: colors.textLight }}>
+              <Ionicons name={item.icon as any} size={40} color={colors.icon} />
             </View>
           ) : (
             <View style={{ marginRight: 12 }}>
-              <Ionicons
-                name={item.icon as any}
-                size={30}
-                color={item.type === "logout" ? "#dc2626" : "#000000"}
-              />
+              <Ionicons name={item.icon as any} size={30} color={item.type === "logout" ? colors.error : colors.icon} />
             </View>
           )}
           <View>
-            <Text
-              className={`text-xl font-bold ${
-                item.type === "logout" ? "text-red-600" : "text-black"
-              }`}
-              selectable={false}
-            >
+            <Text selectable={false} className="text-xl font-bold" style={{ color: item.type === "logout" ? colors.error : colors.text }}>
               {item.title}
             </Text>
 
             {item.type === "profile" && (
-              <Text
-                className="text-base text-gray-500 mt-1 font-semibold"
-                selectable={false}
-              >
+              <Text selectable={false} className="text-base mt-1 font-semibold" style={{ color: colors.icon }}>
                 {item.subtitle}
               </Text>
             )}
@@ -83,52 +73,38 @@ const SettingsItem = memo(
 
         <View className="flex-row items-center">
           {(item.type === "profile" || item.type === "password") && (
-            <Ionicons name="chevron-forward" size={28} color="#000000" />
+            <Ionicons name="chevron-forward" size={28} color={colors.icon} />
           )}
 
           {item.type === "language" && (
             <React.Fragment>
-              <Text
-                className="text-xl font-semibold text-gray-400"
-                selectable={false}
-              >
+              <Text selectable={false} className="text-xl font-semibold" style={{ color: colors.icon }}>
                 {currentLanguage === "eng" ? "English" : "Polish"}
               </Text>
 
-              <Ionicons name="chevron-forward" size={28} color="#000000" />
+              <Ionicons name="chevron-forward" size={28} color={colors.icon} />
             </React.Fragment>
           )}
 
           {item.type === "theme" && (
             <React.Fragment>
-              <Text
-                className="text-xl font-semibold text-gray-400"
-                selectable={false}
-              >
+              <Text selectable={false} className="text-xl font-semibold" style={{ color: colors.icon }}>
                 {currentTheme === "light" ? "Light" : "Dark"}
               </Text>
 
-              <Ionicons name="chevron-forward" size={28} color="#000000" />
+              <Ionicons name="chevron-forward" size={28} color={colors.icon} />
             </React.Fragment>
           )}
 
           {item.type === "switch" && (
-            <View
-              className={`w-12 h-6 rounded-full px-1 justify-center ${
-                currentNotifications ? "bg-blue-500" : "bg-gray-400"
-              }`}
-            >
-              <View
-                className={`w-6 h-5 rounded-full bg-white ${
-                  currentNotifications ? "self-end" : "self-start"
-                }`}
-              />
+            <View style={{ width: 48, height: 24, borderRadius: 12, padding: 2, justifyContent: 'center', backgroundColor: currentNotifications ? colors.tint : colors.icon }}>
+              <View style={{ width: 24, height: 20, borderRadius: 10, backgroundColor: colors.textLight, alignSelf: currentNotifications ? 'flex-end' : 'flex-start' }} />
             </View>
           )}
         </View>
 
         {!isLast && (
-          <View className="absolute bottom-0 left-6 right-6 h-px bg-[#8e8e98]" />
+          <View style={{ position: 'absolute', bottom: 0, left: 24, right: 24, height: 1, backgroundColor: colors.icon, opacity: 0.16 }} />
         )}
       </TouchableOpacity>
     );
@@ -138,6 +114,9 @@ const SettingsItem = memo(
 const SettingsScreen = () => {
   const router = useRouter();
   const { user, logout } = useAuth();
+  const insets = useSafeAreaInsets();
+  const theme = useColorScheme() || 'light';
+  const colors = Colors[theme];
 
   const [currentLanguage, setLanguage] = useState<Language>("eng");
   const [currentTheme, setTheme] = useState<AppTheme>("light");
@@ -159,13 +138,15 @@ const SettingsScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#ffffff" }}>
+    <SafeAreaView 
+    style={{ flex: 1, backgroundColor: colors.background}}
+    >
       <SectionList
         style={{ marginTop: 25 }}
         sections={SETTINGS_SECTIONS}
         keyExtractor={(item) => item.id}
         renderSectionHeader={({ section: { title } }) => (
-          <Text className="text-2xl text-black font-bold pl-4" selectable={false}>
+          <Text className="text-2xl font-bold pl-4" selectable={false} style={{ color: colors.text }}>
             {title}
           </Text>
         )}
@@ -178,9 +159,11 @@ const SettingsScreen = () => {
             currentLanguage={currentLanguage}
             currentTheme={currentTheme}
             currentNotifications={currentNotifications}
+            colors={colors}
           />
         )}
-        SectionSeparatorComponent={() => <View style={{ height: 10, backgroundColor: "#ffffff" }} />}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+        SectionSeparatorComponent={() => <View style={{ height: 10, backgroundColor: colors.background }} />}
       />
     </SafeAreaView>
   );
