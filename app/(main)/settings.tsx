@@ -1,11 +1,12 @@
-import React, { memo, useState } from "react";
-import { View, Text, SectionList, TouchableOpacity, useColorScheme } from "react-native";
+import React, { memo, useState, useMemo } from "react";
+import { View, Text, SectionList, TouchableOpacity } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Colors } from '@/constants/theme';
-import { SETTINGS_SECTIONS } from "@/constants/settingsSections";
+import { getSettingsSections } from "@/constants/settingsSections";
 import { useAuth } from "@/context/authContext";
+import { useColorScheme, useTheme } from "@/context/themeContext";
 import { AppTheme, Language, SettingItem, SettingItemType } from "@/types/settings";
 
 type ThemeColors = (typeof Colors)[keyof typeof Colors];
@@ -113,18 +114,19 @@ const SettingsItem = memo(
 
 const SettingsScreen = () => {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { logout, user } = useAuth();
+  const { toggleTheme } = useTheme();
   const insets = useSafeAreaInsets();
-  const theme = useColorScheme() || 'light';
+  const theme = useColorScheme();
   const colors = Colors[theme];
 
+  const sections = useMemo(() => getSettingsSections(user?.email), [user?.email]);
   const [currentLanguage, setLanguage] = useState<Language>("eng");
-  const [currentTheme, setTheme] = useState<AppTheme>("light");
   const [currentNotifications, setNotifications] = useState(true);
 
   const handlers: Record<SettingItemType, () => void> = {
     language: () => setLanguage((prev) => (prev === "eng" ? "pl" : "eng")),
-    theme: () => setTheme((prev) => (prev === "light" ? "dark" : "light")),
+    theme: () => toggleTheme(),
     switch: () => setNotifications((prev) => !prev),
     logout: async () => {
       try {
@@ -143,7 +145,7 @@ const SettingsScreen = () => {
     >
       <SectionList
         style={{ marginTop: 25 }}
-        sections={SETTINGS_SECTIONS}
+        sections={sections}
         keyExtractor={(item) => item.id}
         renderSectionHeader={({ section: { title } }) => (
           <Text className="text-2xl font-bold pl-4" selectable={false} style={{ color: colors.text }}>
@@ -157,7 +159,7 @@ const SettingsScreen = () => {
             isLast={index === section.data.length - 1}
             onPress={handlers[item.type]}
             currentLanguage={currentLanguage}
-            currentTheme={currentTheme}
+            currentTheme={theme}
             currentNotifications={currentNotifications}
             colors={colors}
           />

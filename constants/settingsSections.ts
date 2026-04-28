@@ -1,13 +1,13 @@
 import { SettingsSection } from "@/types/settings";
 
-export const SETTINGS_SECTIONS: SettingsSection[] = [
+export const getSettingsSections = (email?: string): SettingsSection[] => [
   {
     title: "Account",
     data: [
       {
         id: "profile",
-        title: "Kowalus",
-        subtitle: "ananas@edu.p.lodz.pl",
+        title: "User",
+        subtitle: email ?? "",
         icon: "person-outline",
         type: "profile",
       },
@@ -44,3 +44,5 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     ],
   },
 ];
+
+export const SETTINGS_SECTIONS: SettingsSection[] = getSettingsSections();
