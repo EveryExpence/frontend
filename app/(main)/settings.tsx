@@ -111,6 +111,8 @@ const SettingsItem = memo(
   },
 );
 
+SettingsItem.displayName = "SettingsItem";
+
 const SettingsScreen = () => {
   const router = useRouter();
   const { logout, user } = useAuth();
