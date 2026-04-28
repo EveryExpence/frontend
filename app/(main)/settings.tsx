@@ -1,12 +1,11 @@
 import React, { memo, useState, useMemo } from "react";
-import { View, Text, SectionList, TouchableOpacity } from "react-native";
+import { View, Text, SectionList, TouchableOpacity, useColorScheme } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Colors } from '@/constants/theme';
 import { getSettingsSections } from "@/constants/settingsSections";
 import { useAuth } from "@/context/authContext";
-import { useColorScheme, useTheme } from "@/context/themeContext";
 import { AppTheme, Language, SettingItem, SettingItemType } from "@/types/settings";
 
 type ThemeColors = (typeof Colors)[keyof typeof Colors];
@@ -115,18 +114,18 @@ const SettingsItem = memo(
 const SettingsScreen = () => {
   const router = useRouter();
   const { logout, user } = useAuth();
-  const { toggleTheme } = useTheme();
   const insets = useSafeAreaInsets();
-  const theme = useColorScheme();
+  const theme = useColorScheme() || 'light';
   const colors = Colors[theme];
 
   const sections = useMemo(() => getSettingsSections(user?.email), [user?.email]);
   const [currentLanguage, setLanguage] = useState<Language>("eng");
+  const [currentTheme, setTheme] = useState<AppTheme>("light");
   const [currentNotifications, setNotifications] = useState(true);
 
   const handlers: Record<SettingItemType, () => void> = {
     language: () => setLanguage((prev) => (prev === "eng" ? "pl" : "eng")),
-    theme: () => toggleTheme(),
+    theme: () => setTheme((prev) => (prev === "light" ? "dark" : "light")),
     switch: () => setNotifications((prev) => !prev),
     logout: async () => {
       try {
@@ -159,7 +158,7 @@ const SettingsScreen = () => {
             isLast={index === section.data.length - 1}
             onPress={handlers[item.type]}
             currentLanguage={currentLanguage}
-            currentTheme={theme}
+            currentTheme={currentTheme}
             currentNotifications={currentNotifications}
             colors={colors}
           />
