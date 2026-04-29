@@ -6,7 +6,7 @@ import { useRouter } from "expo-router";
 import { Colors } from '@/constants/theme';
 import { getSettingsSections } from "@/constants/settingsSections";
 import { useAuth } from "@/context/authContext";
-import { AppTheme, Language, SettingItem, SettingItemType } from "@/types/settings";
+import { AppTheme, Language, SettingItem } from "@/types/settings";
 
 type ThemeColors = (typeof Colors)[keyof typeof Colors];
 
@@ -14,10 +14,6 @@ type SettingsItemProps = {
   item: SettingItem;
   isFirst: boolean;
   isLast: boolean;
-  onPress: () => void;
-  currentLanguage: Language;
-  currentTheme: AppTheme;
-  currentNotifications: boolean;
   colors: ThemeColors;
 };
 
@@ -26,10 +22,6 @@ const SettingsItem =
     item,
     isFirst,
     isLast,
-    onPress,
-    currentLanguage,
-    currentTheme,
-    currentNotifications,
     colors,
   }: SettingsItemProps) => {
     const cornerStyle =
@@ -41,29 +33,31 @@ const SettingsItem =
         ? "rounded-b-md"
         : "";
 
+    const titleColor = item.titleTone === "danger" ? colors.error : colors.text;
+    const iconColor = item.iconTone === "danger" ? colors.error : colors.icon;
+    
+    const leftElement = item.leftElement ?? (
+      <View style={{ marginRight: 12 }}>
+        <Ionicons name={item.icon as any} size={30} color={iconColor} />
+      </View>
+    );
+
     return (
       <TouchableOpacity
         activeOpacity={0.8}
         className={`h-[75px] mx-4 flex-row items-center px-3 justify-between ${cornerStyle}`}
-        onPress={onPress}
+        onPress={item.onPress}
+        disabled={!item.onPress}
         style={{ backgroundColor: colors.surface }}
       >
         <View className="flex-row items-center">
-          {item.type === "profile" ? (
-            <View className="w-14 h-14 rounded-full mr-3 items-center justify-center overflow-hidden" style={{ backgroundColor: colors.textLight }}>
-              <Ionicons name={item.icon as any} size={40} color={colors.icon} />
-            </View>
-          ) : (
-            <View style={{ marginRight: 12 }}>
-              <Ionicons name={item.icon as any} size={30} color={item.type === "logout" ? colors.error : colors.icon} />
-            </View>
-          )}
+          {leftElement}
           <View>
-            <Text selectable={false} className="text-xl font-bold" style={{ color: item.type === "logout" ? colors.error : colors.text }}>
+            <Text selectable={false} className="text-xl font-bold" style={{ color: titleColor }}>
               {item.title}
             </Text>
 
-            {item.type === "profile" && (
+            {item.subtitle && (
               <Text selectable={false} className="text-base mt-1 font-semibold" style={{ color: colors.icon }}>
                 {item.subtitle}
               </Text>
@@ -71,37 +65,11 @@ const SettingsItem =
           </View>
         </View>
 
-        <View className="flex-row items-center">
-          {(item.type === "profile" || item.type === "password") && (
-            <Ionicons name="chevron-forward" size={28} color={colors.icon} />
-          )}
-
-          {item.type === "language" && (
-            <React.Fragment>
-              <Text selectable={false} className="text-xl font-semibold" style={{ color: colors.icon }}>
-                {currentLanguage === "eng" ? "English" : "Polish"}
-              </Text>
-
-              <Ionicons name="chevron-forward" size={28} color={colors.icon} />
-            </React.Fragment>
-          )}
-
-          {item.type === "theme" && (
-            <React.Fragment>
-              <Text selectable={false} className="text-xl font-semibold" style={{ color: colors.icon }}>
-                {currentTheme === "light" ? "Light" : "Dark"}
-              </Text>
-
-              <Ionicons name="chevron-forward" size={28} color={colors.icon} />
-            </React.Fragment>
-          )}
-
-          {item.type === "switch" && (
-            <View style={{ width: 48, height: 24, borderRadius: 12, padding: 2, justifyContent: 'center', backgroundColor: currentNotifications ? colors.tint : colors.icon }}>
-              <View style={{ width: 24, height: 20, borderRadius: 10, backgroundColor: colors.textLight, alignSelf: currentNotifications ? 'flex-end' : 'flex-start' }} />
-            </View>
-          )}
-        </View>
+        {item.rightElement && (
+          <View className="flex-row items-center">
+            {item.rightElement}
+          </View>
+        )}
 
         {!isLast && (
           <View style={{ position: 'absolute', bottom: 0, left: 24, right: 24, height: 1, backgroundColor: colors.icon, opacity: 0.16 }} />
@@ -117,25 +85,76 @@ const SettingsScreen = () => {
   const theme = useColorScheme() || 'light';
   const colors = Colors[theme];
 
-  const sections = getSettingsSections(user?.email);
   const [currentLanguage, setLanguage] = useState<Language>("eng");
   const [currentTheme, setTheme] = useState<AppTheme>("light");
   const [currentNotifications, setNotifications] = useState(true);
 
-  const handlers: Record<SettingItemType, () => void> = {
-    language: () => setLanguage((prev) => (prev === "eng" ? "pl" : "eng")),
-    theme: () => setTheme((prev) => (prev === "light" ? "dark" : "light")),
-    switch: () => setNotifications((prev) => !prev),
-    logout: async () => {
-      try {
-        await logout();
-      } finally {
-        router.replace("/(auth)/login");
-      }
+  const chevron = <Ionicons name="chevron-forward" size={28} color={colors.icon} />;
+
+  const itemOverrides: Record<string, Partial<SettingItem>> = {
+    profile: {
+      onPress: () => router.push("/profile"),
+      leftElement: (
+        <View className="w-14 h-14 rounded-full mr-3 items-center justify-center overflow-hidden" style={{ backgroundColor: colors.textLight }}>
+          <Ionicons name="person-outline" size={40} color={colors.icon} />
+        </View>
+      ),
+      rightElement: chevron,
     },
-    password: () => router.push("/change-password"),
-    profile: () => router.push("/profile"),
+    language: {
+      onPress: () => setLanguage((prev) => (prev === "eng" ? "pl" : "eng")),
+      rightElement: (
+        <React.Fragment>
+          <Text selectable={false} className="text-xl font-semibold" style={{ color: colors.icon }}>
+            {currentLanguage === "eng" ? "English" : "Polish"}
+          </Text>
+          {chevron}
+        </React.Fragment>
+      ),
+    },
+    theme: {
+      onPress: () => setTheme((prev) => (prev === "light" ? "dark" : "light")),
+      rightElement: (
+        <React.Fragment>
+          <Text selectable={false} className="text-xl font-semibold" style={{ color: colors.icon }}>
+            {currentTheme === "light" ? "Light" : "Dark"}
+          </Text>
+          {chevron}
+        </React.Fragment>
+      ),
+    },
+    "push-notifications": {
+      onPress: () => setNotifications((prev) => !prev),
+      rightElement: (
+        <View style={{ width: 48, height: 24, borderRadius: 12, padding: 2, justifyContent: 'center', backgroundColor: currentNotifications ? colors.tint : colors.icon }}>
+          <View style={{ width: 24, height: 20, borderRadius: 10, backgroundColor: colors.textLight, alignSelf: currentNotifications ? 'flex-end' : 'flex-start' }} />
+        </View>
+      ),
+    },
+    "change-password": {
+      onPress: () => router.push("/change-password"),
+      rightElement: chevron,
+    },
+    logout: {
+      onPress: async () => {
+        try {
+          await logout();
+        } finally {
+          router.replace("/(auth)/login");
+        }
+      },
+      titleTone: "danger",
+      iconTone: "danger",
+    },
   };
+
+  const sections = getSettingsSections(user?.email).map((section) => ({
+    ...section,
+    data: section.data.map((item) => ({
+      ...item,
+      ...itemOverrides[item.id],
+    })),
+  }));
 
   return (
     <SafeAreaView 
@@ -155,10 +174,6 @@ const SettingsScreen = () => {
             item={item}
             isFirst={index === 0}
             isLast={index === section.data.length - 1}
-            onPress={handlers[item.type]}
-            currentLanguage={currentLanguage}
-            currentTheme={currentTheme}
-            currentNotifications={currentNotifications}
             colors={colors}
           />
         )}

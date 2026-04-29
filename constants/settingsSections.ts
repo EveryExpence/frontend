@@ -9,15 +9,14 @@ export const getSettingsSections = (email?: string): SettingsSection[] => [
         title: "User",
         subtitle: email ?? "",
         icon: "person-outline",
-        type: "profile",
       },
     ],
   },
   {
     title: "Preferences",
     data: [
-      { id: "language", title: "Language", icon: "language-outline", type: "language" },
-      { id: "theme", title: "Theme", icon: "contrast-outline", type: "theme" },
+      { id: "language", title: "Language", icon: "language-outline" },
+      { id: "theme", title: "Theme", icon: "contrast-outline" },
     ],
   },
   {
@@ -27,7 +26,6 @@ export const getSettingsSections = (email?: string): SettingsSection[] => [
         id: "push-notifications",
         title: "Push Notifications",
         icon: "notifications-outline",
-        type: "switch",
       },
     ],
   },
@@ -38,9 +36,8 @@ export const getSettingsSections = (email?: string): SettingsSection[] => [
         id: "change-password",
         title: "Change Password",
         icon: "lock-closed-outline",
-        type: "password",
       },
-      { id: "logout", title: "Log Out", icon: "log-out-outline", type: "logout" },
+      { id: "logout", title: "Log Out", icon: "log-out-outline" },
     ],
   },
 ];
