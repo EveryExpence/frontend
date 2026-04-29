@@ -5,18 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Colors } from '@/constants/theme';
 import { useAuth } from "@/context/authContext";
-import { AppTheme, Language } from "@/types/settings";
-
-type SettingsRowProps = {
-  title: string;
-  subtitle?: string;
-  iconName?: string;
-  leftElement?: React.ReactNode;
-  rightElement?: React.ReactNode;
-  tone?: "danger";
-  onPress?: () => void;
-  colors: (typeof Colors)[keyof typeof Colors];
-};
+import { AppTheme, Language, SettingsRowProps, SettingsSection } from "@/types/settings";
 
 const SettingsRow = ({
   title,
@@ -58,40 +47,27 @@ const SettingsRow = ({
     </View> : null
 
   return (
-    <View 
-    className="mx-4 rounded-md overflow-hidden" 
-    style={{ backgroundColor: colors.surface }}>
+    <TouchableOpacity
+      activeOpacity={0.8}
+      className="h-[75px] flex-row items-center px-3 justify-between"
+      onPress={onPress}
+      disabled={!onPress}
+      style={{ backgroundColor: colors.surface }}
+    >
+      <View className="flex-row items-center">
+        {resolvedLeft}
 
-      <TouchableOpacity
-        activeOpacity={0.8}
-        className="h-[75px] flex-row items-center px-3 justify-between"
-        onPress={onPress}
-        disabled={!onPress}
-        style={{ backgroundColor: colors.surface }}
-      >
-        <View 
-        className="flex-row items-center">
+        <View>
+          <Text selectable={false} className="text-xl font-bold" style={{ color: titleColor }}>
+            {title}
+          </Text>
 
-          {resolvedLeft}
-
-          <View>
-            <Text 
-            selectable={false} 
-            className="text-xl font-bold" 
-            style={{ color: titleColor }}>
-              {title}
-            </Text>
-
-            {subtitleELement}
-            
-          </View>
+          {subtitleELement}
         </View>
+      </View>
 
-        {rightElementValid}
-
-      </TouchableOpacity>
-
-    </View>
+      {rightElementValid}
+    </TouchableOpacity>
   );
 };
 
@@ -116,142 +92,137 @@ const SettingsScreen = () => {
     }
   };
 
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-
-      <View style={{ marginTop: 25 }}>
-
-        <Text 
-        className="text-2xl font-bold pl-4" 
-        selectable={false} 
-        style={{ color: colors.text }}>
-          Account
-        </Text>
-
-        <SettingsRow
-          title="User"
-          subtitle={user?.email ?? ""}
-          leftElement=
-          {
-            <View 
-            className="w-14 h-14 rounded-full mr-3 items-center justify-center overflow-hidden" 
-            style={{ backgroundColor: colors.textLight }}
-            >
-              <Ionicons 
-              name="person-outline" 
-              size={40} 
-              color={colors.icon} 
-              />
+  const sections: SettingsSection[] = [
+    {
+      title: "Account",
+      items: [
+        {
+          id: "profile",
+          title: "User",
+          subtitle: user?.email ?? "",
+          leftElement: (
+            <View className="w-14 h-14 rounded-full mr-3 items-center justify-center overflow-hidden" style={{ backgroundColor: colors.textLight }}>
+              <Ionicons name="person-outline" size={40} color={colors.icon} />
             </View>
-          }
-          rightElement={chevron}
-          onPress={() => router.push("/profile")}
-          colors={colors}
-        />
-
-        <View style={{ height: 10, backgroundColor: colors.background }} />
-
-        <Text 
-        className="text-2xl font-bold pl-4" 
-        selectable={false} 
-        style={{ color: colors.text }}>
-          Preferences
-        </Text>
-
-        <SettingsRow
-            title="Language"
-            iconName="language-outline"
-            rightElement=
-            {
-              <React.Fragment>
-                <Text 
-                selectable={false} 
-                className="text-xl font-semibold" 
-                style={{ color: colors.icon }}>
-                  {currentLanguage === "eng" ? "English" : "Polish"}
-                </Text>
-                
-                {chevron}
-
-              </React.Fragment>
-            }
-            onPress={() => setLanguage((prev) => (prev === "eng" ? "pl" : "eng"))}
-            colors={colors}
-          />
-
-          <View style={{ height: 1, backgroundColor: colors.icon, opacity: 0.16, marginLeft: 24, marginRight: 24 }} />
-
-          <SettingsRow
-            title="Theme"
-            iconName="contrast-outline"
-            rightElement=
-            {
-              <React.Fragment>
-                <Text 
-                selectable={false} 
-                className="text-xl font-semibold" 
-                style={{ color: colors.icon }}
-                >
-                  {currentTheme === "light" ? "Light" : "Dark"}
-                </Text>
-
-                {chevron}
-                
-              </React.Fragment>
-            }
-            onPress={() => setTheme((prev) => (prev === "light" ? "dark" : "light"))}
-            colors={colors}
-          />
-
-        <View style={{ height: 10, backgroundColor: colors.background }} />
-
-        <Text 
-        className="text-2xl font-bold pl-4" 
-        selectable={false} 
-        style={{ color: colors.text }}>
-          Notifications
-        </Text>
-
-        <SettingsRow
-          title="Push Notifications"
-          iconName="notifications-outline"
-          rightElement=
-          {
+          ),
+          rightElement: chevron,
+          onPress: () => router.push("/profile"),
+        },
+      ],
+    },
+    {
+      title: "Preferences",
+      items: [
+        {
+          id: "language",
+          title: "Language",
+          iconName: "language-outline",
+          rightElement: (
+            <React.Fragment>
+              <Text selectable={false} className="text-xl font-semibold" style={{ color: colors.icon }}>
+                {currentLanguage === "eng" ? "English" : "Polish"}
+              </Text>
+              {chevron}
+            </React.Fragment>
+          ),
+          onPress: () => setLanguage((prev) => (prev === "eng" ? "pl" : "eng")),
+        },
+        {
+          id: "theme",
+          title: "Theme",
+          iconName: "contrast-outline",
+          rightElement: (
+            <React.Fragment>
+              <Text selectable={false} className="text-xl font-semibold" style={{ color: colors.icon }}>
+                {currentTheme === "light" ? "Light" : "Dark"}
+              </Text>
+              {chevron}
+            </React.Fragment>
+          ),
+          onPress: () => setTheme((prev) => (prev === "light" ? "dark" : "light")),
+        },
+      ],
+    },
+    {
+      title: "Notifications",
+      items: [
+        {
+          id: "push-notifications",
+          title: "Push Notifications",
+          iconName: "notifications-outline",
+          rightElement: (
             <View style={{ width: 48, height: 24, borderRadius: 12, padding: 2, justifyContent: "center", backgroundColor: currentNotifications ? colors.tint : colors.icon }}>
               <View style={{ width: 24, height: 20, borderRadius: 10, backgroundColor: colors.textLight, alignSelf: currentNotifications ? "flex-end" : "flex-start" }} />
             </View>
-          }
-          onPress={() => setNotifications((prev) => !prev)}
-          colors={colors}
-        />
+          ),
+          onPress: () => setNotifications((prev) => !prev),
+        },
+      ],
+    },
+    {
+      title: "Security",
+      items: [
+        {
+          id: "change-password",
+          title: "Change Password",
+          iconName: "lock-closed-outline",
+          rightElement: chevron,
+          onPress: () => router.push("/change-password"),
+        },
+        {
+          id: "logout",
+          title: "Log Out",
+          iconName: "log-out-outline",
+          tone: "danger",
+          onPress: handleLogout,
+        },
+      ],
+    },
+  ];
 
-        <View style={{ height: 10, backgroundColor: colors.background }} />
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+      <View style={{ marginTop: 25 }}>
 
-        <Text 
-        className="text-2xl font-bold pl-4" 
-        selectable={false} 
-        style={{ color: colors.text }}>
-          Security
-        </Text>
+        {sections.map((section) => (
+          <View key={section.title}>
 
-        <SettingsRow
-          title="Change Password"
-          iconName="lock-closed-outline"
-          rightElement={chevron}
-          onPress={() => router.push("/change-password")}
-          colors={colors}
-        />
+            <Text 
+            className="text-2xl font-bold pl-4" 
+            selectable={false} 
+            style={{ color: colors.text }}
+            >
+              {section.title}
+              
+            </Text>
 
-        <View style={{ height: 1, backgroundColor: colors.icon, opacity: 0.16, marginLeft: 24, marginRight: 24 }} />
 
-        <SettingsRow
-          title="Log Out"
-          iconName="log-out-outline"
-          tone="danger"
-          onPress={handleLogout}
-          colors={colors}
-        />
-        
+            <View 
+            className="mx-4 rounded-md overflow-hidden" 
+            style={{ backgroundColor: colors.surface }}
+            >
+              {section.items.map((item, index) => (
+                <React.Fragment key={item.id}>
+                  <SettingsRow
+                    title={item.title}
+                    subtitle={item.subtitle}
+                    iconName={item.iconName}
+                    leftElement={item.leftElement}
+                    rightElement={item.rightElement}
+                    tone={item.tone}
+                    onPress={item.onPress}
+                    colors={colors}
+                  />
+                  {index < section.items.length - 1 ? (
+                    <View style={{ height: 1, backgroundColor: colors.icon, opacity: 0.16, marginLeft: 24, marginRight: 24 }} />
+                  ) : null}
+                </React.Fragment>
+              ))}
+            </View>
+
+            <View style={{ height: 10, backgroundColor: colors.background }} />
+          </View>
+        ))}
       </View>
     </SafeAreaView>
   );
