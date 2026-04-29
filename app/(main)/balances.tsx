@@ -35,7 +35,8 @@ const formatBalance = (value: number | string): string => {
 };
 
 export default function Balances() {
-  const scheme = useColorScheme() ?? 'light';
+  // const scheme = useColorScheme() ?? 'light';
+  const scheme = 'dark';
   const colors = Colors[scheme];
   const insets = useSafeAreaInsets();
 

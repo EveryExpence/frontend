@@ -31,7 +31,7 @@ export default function AccountCard({
       className="mb-6 flex-row items-center justify-between px-4 py-4"
       style={{ backgroundColor: surfaceColor, borderRadius: cornerRadius }}
     >
-      <View className="flex-row items-center self-stretch">
+      <View className="flex-row items-center self-stretch flex-1 min-w-0">
         <MaterialCommunityIcons
           name="cash-multiple"
           size={48}
@@ -39,8 +39,14 @@ export default function AccountCard({
           style={{ marginRight: 12 }}
         />
 
-        <View className="self-stretch justify-between py-1">
-          <Text className="text-2xl text-theme-text">{item.name}</Text>
+        <View className="self-stretch justify-between py-1 flex-1 min-w-0">
+          <Text
+            className="text-2xl text-theme-text"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {item.name}
+          </Text>
           <Text className="text-2xl text-theme-text">{item.balance}</Text>
         </View>
       </View>
