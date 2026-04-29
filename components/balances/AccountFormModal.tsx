@@ -19,6 +19,12 @@ type Props = {
   onSave: () => void;
 };
 
+const validateBalance = (value: string): boolean => {
+  if (!value.trim()) return false;
+  const num = Number(value.replace(/\s/g, '').replace(',', '.'));
+  return !isNaN(num);
+};
+
 export default function AccountFormModal({
   visible,
   mode,
@@ -37,11 +43,19 @@ export default function AccountFormModal({
   const colors = Colors[scheme];
   const [pickerOpen, setPickerOpen] = React.useState(false);
 
+  const isBalanceValid = validateBalance(balance);
+  const canSave = name.trim() && isBalanceValid && !isSaving;
+
   React.useEffect(() => {
     if (!visible) {
       setPickerOpen(false);
     }
   }, [visible]);
+
+  const handleSave = () => {
+    if (!canSave) return;
+    onSave();
+  };
 
   return (
     <>
@@ -90,11 +104,17 @@ export default function AccountFormModal({
                 placeholderTextColor={colors.icon}
                 style={{
                   backgroundColor: colors.background,
+                  color: isBalanceValid || !balance ? colors.text : colors.error,
                   padding: 10,
                   borderRadius: 8,
-                  marginBottom: 12,
+                  marginBottom: balance && !isBalanceValid ? 4 : 12,
                 }}
               />
+              {balance && !isBalanceValid && (
+                <Text style={{ color: colors.error, fontSize: 12, marginBottom: 8 }}>
+                  Balance must be a valid positive number
+                </Text>
+              )}
 
               <Text className="text-l text-theme-icon" style={{ marginBottom: 6 }}>Currency</Text>
               <TouchableOpacity
@@ -118,13 +138,14 @@ export default function AccountFormModal({
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  onPress={onSave}
-                  disabled={isSaving}
+                  onPress={handleSave}
+                  disabled={!canSave}
                   style={{
                     marginLeft: 8,
                     padding: 10,
-                    backgroundColor: colors.tint,
+                    backgroundColor: canSave ? colors.tint : colors.icon,
                     borderRadius: 8,
+                    opacity: canSave ? 1 : 0.5,
                   }}
                 >
                   <Text style={{ color: colors.textLight }}>
