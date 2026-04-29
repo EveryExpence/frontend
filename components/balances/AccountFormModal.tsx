@@ -63,7 +63,7 @@ export default function AccountFormModal({
         <View
           style={{
             flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.4)',
+            backgroundColor: 'rgba(0,0,0,0.35)',
             justifyContent: 'flex-start',
             paddingTop: 48,
             paddingHorizontal: 16,
