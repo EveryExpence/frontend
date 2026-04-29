@@ -21,7 +21,7 @@ type SettingsItemProps = {
   colors: ThemeColors;
 };
 
-const SettingsItem = memo(
+const SettingsItem =
   ({
     item,
     isFirst,
@@ -108,10 +108,7 @@ const SettingsItem = memo(
         )}
       </TouchableOpacity>
     );
-  },
-);
-
-SettingsItem.displayName = "SettingsItem";
+}
 
 const SettingsScreen = () => {
   const router = useRouter();
@@ -120,7 +117,7 @@ const SettingsScreen = () => {
   const theme = useColorScheme() || 'light';
   const colors = Colors[theme];
 
-  const sections = useMemo(() => getSettingsSections(user?.email), [user?.email]);
+  const sections = getSettingsSections(user?.email);
   const [currentLanguage, setLanguage] = useState<Language>("eng");
   const [currentTheme, setTheme] = useState<AppTheme>("light");
   const [currentNotifications, setNotifications] = useState(true);
