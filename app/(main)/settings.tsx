@@ -1,4 +1,4 @@
-import React, { memo, useState, useMemo } from "react";
+import React, { useState } from "react";
 import { View, Text, SectionList, TouchableOpacity, useColorScheme } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -44,7 +44,7 @@ const SettingsItem =
     return (
       <TouchableOpacity
         activeOpacity={0.8}
-        className={`h-[80px] mx-4 flex-row items-center px-3 justify-between ${cornerStyle}`}
+        className={`h-[75px] mx-4 flex-row items-center px-3 justify-between ${cornerStyle}`}
         onPress={onPress}
         style={{ backgroundColor: colors.surface }}
       >
