@@ -41,18 +41,19 @@ export default function AccountCard({
 
         <View className="self-stretch justify-between py-1 flex-1 min-w-0">
           <Text
-            className="text-2xl text-theme-text"
+            className="text-2xl"
             numberOfLines={1}
             ellipsizeMode="tail"
+            style={{ color: textColor }}
           >
             {item.name}
           </Text>
-          <Text className="text-2xl text-theme-text">{item.balance}</Text>
+          <Text className="text-2xl" style={{ color: textColor }}>{item.balance}</Text>
         </View>
       </View>
 
       <View className="items-end justify-between self-stretch">
-        <Text className="text-2xl text-theme-text">{item.currency}</Text>
+        <Text className="text-2xl" style={{ color: textColor }}>{item.currency}</Text>
 
         <View className="flex-row items-center">
           <TouchableOpacity

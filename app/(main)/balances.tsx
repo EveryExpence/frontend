@@ -35,8 +35,7 @@ const formatBalance = (value: number | string): string => {
 };
 
 export default function Balances() {
-  // const scheme = useColorScheme() ?? 'light';
-  const scheme = 'dark';
+  const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
   const insets = useSafeAreaInsets();
 
@@ -96,11 +95,13 @@ export default function Balances() {
   }, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-theme-background">
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <View className="flex-1 px-4 pt-4">
         <View className="mb-5 flex-row items-center justify-between">
-          <Text className="text-2xl font-semibold text-theme-text">Your accounts</Text>
-          <Text className="text-xl font-semibold text-theme-tint">
+          <Text className="text-2xl font-semibold" style={{ color: colors.text }}>
+            Your accounts
+          </Text>
+          <Text className="text-xl font-semibold" style={{ color: colors.tint }}>
             {accounts.length} Total accounts
           </Text>
         </View>
@@ -116,7 +117,7 @@ export default function Balances() {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: listBottomPadding }}
             ListEmptyComponent={
-              <Text className="pt-4 text-lg text-theme-icon">No accounts yet</Text>
+              <Text className="pt-4 text-lg" style={{ color: colors.icon }}>No accounts yet</Text>
             }
             renderItem={({ item }) => (
               <AccountCard
@@ -136,8 +137,8 @@ export default function Balances() {
       >
         <TouchableOpacity
           activeOpacity={0.85}
-          className="w-full flex-row items-center justify-center bg-theme-tint py-4"
-          style={{ borderRadius: CORNER_RADIUS }}
+          className="w-full flex-row items-center justify-center py-4"
+          style={{ borderRadius: CORNER_RADIUS, backgroundColor: colors.tint }}
         >
           <MaterialCommunityIcons
             name="plus"
@@ -145,7 +146,9 @@ export default function Balances() {
             color={colors.textLight}
             style={{ marginRight: 8 }}
           />
-          <Text className="text-xl font-semibold text-theme-textLight">Add new account</Text>
+          <Text className="text-xl font-semibold" style={{ color: colors.textLight }}>
+            Add new account
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
