@@ -4,6 +4,8 @@ import { Slot, useRootNavigationState, useRouter, useSegments } from 'expo-route
 import './global.css'
 import { AuthProvider, useAuth } from '@/context/authContext'
 import CustomizedToast from '@/components/Toast'
+import { SQLiteProvider } from 'expo-sqlite';
+import { migrateDatabase } from '@/data/init'
 
 const RooLayout = () => {
     return (
@@ -14,7 +16,12 @@ const RooLayout = () => {
             className="bg-theme-background"
         >
             <AuthProvider>
-                <Helper />
+                <SQLiteProvider 
+                    databaseName="app.db"
+                    onInit={migrateDatabase}
+                >
+                    <Helper />
+                </SQLiteProvider>
             </AuthProvider>
             <CustomizedToast />
         </View>
