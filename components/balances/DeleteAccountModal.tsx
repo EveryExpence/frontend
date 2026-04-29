@@ -18,12 +18,12 @@ export default function DeleteAccountModal({ visible, name, isDeleting = false, 
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable onPress={onClose} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', padding: 16 }}>
         <Pressable onPress={() => {}} style={{ backgroundColor: colors.surface, borderRadius: 12, padding: 16 }}>
-          <Text style={{ color: colors.text, fontSize: 18, fontWeight: '600', marginBottom: 8 }}>Delete account</Text>
-          <Text style={{ color: colors.icon, marginBottom: 16 }}>Delete {name ?? ''}?</Text>
+          <Text className="text-l font-semibold text-theme-text" style={{ marginBottom: 8 }}>Delete account</Text>
+          <Text className="text-l text-theme-icon" style={{ marginBottom: 16 }}>Delete {name ?? ''}?</Text>
 
           <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
             <TouchableOpacity onPress={onClose} style={{ padding: 8 }}>
-              <Text style={{ color: colors.icon }}>Cancel</Text>
+              <Text className="text-l text-theme-icon">Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={onConfirm} disabled={isDeleting} style={{ marginLeft: 10, padding: 8, backgroundColor: colors.error, borderRadius: 8 }}>
               <Text style={{ color: colors.textLight }}>{isDeleting ? 'Deleting...' : 'Delete'}</Text>

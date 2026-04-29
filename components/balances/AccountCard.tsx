@@ -1,6 +1,7 @@
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View, useColorScheme } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Colors } from '@/constants/theme';
 
 export type AccountCardItem = {
   id: string;
@@ -11,8 +12,6 @@ export type AccountCardItem = {
 
 type AccountCardProps = {
   item: AccountCardItem;
-  textColor: string;
-  surfaceColor: string;
   cornerRadius: number;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
@@ -20,22 +19,23 @@ type AccountCardProps = {
 
 export default function AccountCard({
   item,
-  textColor,
-  surfaceColor,
   cornerRadius,
   onEdit,
   onDelete,
 }: AccountCardProps) {
+  const scheme = useColorScheme() ?? 'light';
+  const colors = Colors[scheme];
+
   return (
     <View
       className="mb-6 flex-row items-center justify-between px-4 py-4"
-      style={{ backgroundColor: surfaceColor, borderRadius: cornerRadius }}
+      style={{ backgroundColor: colors.surface, borderRadius: cornerRadius }}
     >
       <View className="flex-row items-center self-stretch flex-1 min-w-0">
         <MaterialCommunityIcons
           name="cash-multiple"
           size={48}
-          color={textColor}
+          color={colors.text}
           style={{ marginRight: 12 }}
         />
 
@@ -44,16 +44,16 @@ export default function AccountCard({
             className="text-2xl"
             numberOfLines={1}
             ellipsizeMode="tail"
-            style={{ color: textColor }}
+            style={{ color: colors.text }}
           >
             {item.name}
           </Text>
-          <Text className="text-2xl" style={{ color: textColor }}>{item.balance}</Text>
+          <Text className="text-2xl" style={{ color: colors.text }}>{item.balance}</Text>
         </View>
       </View>
 
       <View className="items-end justify-between self-stretch">
-        <Text className="text-2xl" style={{ color: textColor }}>{item.currency}</Text>
+        <Text className="text-2xl" style={{ color: colors.text }}>{item.currency}</Text>
 
         <View className="flex-row items-center">
           <TouchableOpacity
@@ -61,7 +61,7 @@ export default function AccountCard({
             style={{ padding: 4, marginRight: 8 }}
             onPress={() => onEdit?.(item.id)}
           >
-            <MaterialCommunityIcons name="pencil-outline" size={32} color={textColor} />
+            <MaterialCommunityIcons name="pencil-outline" size={32} color={colors.text} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -69,7 +69,7 @@ export default function AccountCard({
             style={{ padding: 4 }}
             onPress={() => onDelete?.(item.id)}
           >
-            <MaterialCommunityIcons name="delete-outline" size={32} color={textColor} />
+            <MaterialCommunityIcons name="delete-outline" size={32} color={colors.text} />
           </TouchableOpacity>
         </View>
       </View>

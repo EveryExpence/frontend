@@ -12,9 +12,9 @@ import {
   updateAccountEndpoint,
 } from '@/constants/endpoints';
 import { apiFetch } from '@/utils/apiFetch';
-import AccountCard, { AccountCardItem } from '@/components/AccountCard';
-import AccountFormModal from '@/components/AccountFormModal';
-import DeleteAccountModal from '@/components/DeleteAccountModal';
+import AccountCard, { AccountCardItem } from '@/components/balances/AccountCard';
+import AccountFormModal from '@/components/balances/AccountFormModal';
+import DeleteAccountModal from '@/components/balances/DeleteAccountModal';
 
 type AccountResponseDTO = {
   id: string;
@@ -155,27 +155,27 @@ export default function Balances() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+    <SafeAreaView className="flex-1 bg-theme-background">
       <View className="flex-1 px-4 pt-4">
         <View className="mb-5 flex-row items-center justify-between">
-          <Text className="text-2xl font-semibold" style={{ color: colors.text }}>Your accounts</Text>
-          <Text className="text-xl font-semibold" style={{ color: colors.tint }}>{accounts.length} Total accounts</Text>
+          <Text className="text-2xl font-semibold text-theme-text">Your accounts</Text>
+          <Text className="text-xl font-semibold text-theme-tint">{accounts.length} Total accounts</Text>
         </View>
 
         {isLoading ? (
-          <View className="flex-1 items-center justify-center"><ActivityIndicator size={32} color={colors.tint} /></View>
+          <View className="flex-1 items-center justify-center">
+            <ActivityIndicator size={32} color={colors.tint} />
+          </View>
         ) : (
           <FlatList
             data={accounts}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: listBottomPadding }}
-            ListEmptyComponent={<Text className="pt-4 text-lg" style={{ color: colors.icon }}>No accounts yet</Text>}
+            ListEmptyComponent={<Text className="pt-4 text-lg text-theme-icon">No accounts yet</Text>}
             renderItem={({ item }) => (
               <AccountCard
                 item={item}
-                textColor={colors.text}
-                surfaceColor={colors.surface}
                 cornerRadius={CORNER_RADIUS}
                 onEdit={() => openEdit(item)}
                 onDelete={() => openDelete(item)}
@@ -186,11 +186,13 @@ export default function Balances() {
       </View>
 
       <View pointerEvents="box-none" style={{ position: 'absolute', left: 16, right: 16, bottom: fixedButtonBottom }}>
-        <TouchableOpacity activeOpacity={0.85} className="w-full flex-row items-center justify-center py-4"
-          style={{ borderRadius: CORNER_RADIUS, backgroundColor: colors.tint }} onPress={openAdd}
+        <TouchableOpacity
+          activeOpacity={0.85}
+          className="w-full flex-row items-center justify-center py-4 bg-theme-tint rounded-lg"
+          onPress={openAdd}
         >
           <MaterialCommunityIcons name="plus" size={22} color={colors.textLight} style={{ marginRight: 8 }} />
-          <Text className="text-xl font-semibold" style={{ color: colors.textLight }}>Add new account</Text>
+          <Text className="text-xl font-semibold text-theme-textLight">Add new account</Text>
         </TouchableOpacity>
       </View>
 
