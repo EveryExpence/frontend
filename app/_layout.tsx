@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from '@/context/authContext'
 import CustomizedToast from '@/components/Toast'
 import { SQLiteProvider } from 'expo-sqlite';
 import { migrateDatabase } from '@/data/init'
+import 'react-native-get-random-values';
 
 const RooLayout = () => {
     return (

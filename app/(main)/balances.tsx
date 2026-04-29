@@ -1,28 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Text, TouchableOpacity, View, useColorScheme } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
+import { useSQLiteContext } from 'expo-sqlite';
 
 import { Colors } from '@/constants/theme';
 import {
-  createAccountEndpoint,
-  deleteAccountEndpoint,
-  getAccountsEndpoint,
-  updateAccountEndpoint,
-} from '@/constants/endpoints';
-import { apiFetch } from '@/utils/apiFetch';
+  createAccount as createLocalAccount,
+  deleteAccount as deleteLocalAccount,
+  getAllAccounts as getAllLocalAccounts,
+  updateAccount as updateLocalAccount,
+} from '@/data/accounts';
 import AccountCard, { AccountCardItem } from '@/components/balances/AccountCard';
 import AccountFormModal from '@/components/balances/AccountFormModal';
 import DeleteAccountModal from '@/components/balances/DeleteAccountModal';
-
-type AccountResponseDTO = {
-  id: string;
-  name: string;
-  currency: string;
-  balance: number | string;
-  createdAt: string;
-};
 
 const BOTTOM_NAV_HEIGHT = 84;
 const FLOATING_BUTTON_HEIGHT = 56;
@@ -35,12 +27,16 @@ const CURRENCIES = ['USD', 'EUR', 'PLN', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD'];
 const formatBalance = (value: number | string): string => {
   const numericValue = typeof value === 'string' ? Number(value) : value;
   if (Number.isFinite(numericValue)) {
-    return new Intl.NumberFormat('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numericValue);
+    return new Intl.NumberFormat('pl-PL', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(numericValue);
   }
   return String(value);
 };
 
 export default function Balances() {
+  const db = useSQLiteContext();
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
   const insets = useSafeAreaInsets();
@@ -63,25 +59,29 @@ export default function Balances() {
   const fixedButtonBottom = insets.bottom + BOTTOM_NAV_HEIGHT + FLOATING_BUTTON_GAP;
   const listBottomPadding = fixedButtonBottom + FLOATING_BUTTON_HEIGHT + LIST_BOTTOM_GAP;
 
-  const loadAccounts = async () => {
+  const loadAccounts = useCallback(async () => {
     setIsLoading(true);
     try {
-      const resp = await apiFetch(getAccountsEndpoint, { method: 'GET', headers: { Accept: 'application/json' } });
-      if (!resp.ok) {
-        const err = await resp.json().catch(() => ({}));
-        throw new Error(err.message ?? 'Failed to load accounts');
-      }
-      const data: AccountResponseDTO[] = await resp.json();
-      setAccounts(data.map(a => ({ id: a.id, name: a.name, balance: formatBalance(a.balance), currency: a.currency })));
+      const data = await getAllLocalAccounts(db);
+      setAccounts(
+        data.map((a) => ({
+          id: a.id,
+          name: a.name,
+          balance: formatBalance(a.balance),
+          currency: a.currency,
+        }))
+      );
     } catch (e) {
       setAccounts([]);
-      Toast.show({ text1: `Failed to load accounts: ${e}`, type: 'error' });
+      Toast.show({ text1: `Failed to load local accounts: ${e}`, type: 'error' });
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [db]);
 
-  useEffect(() => { loadAccounts(); }, []);
+  useEffect(() => {
+    loadAccounts();
+  }, [loadAccounts]);
 
   const openAdd = () => {
     setFormMode('add');
@@ -107,27 +107,35 @@ export default function Balances() {
   };
 
   const submitForm = async () => {
-    if (!name.trim()) { Toast.show({ text1: 'Name is required', type: 'error' }); return; }
-    const parsed = Number(String(balanceField).replace(/\s/g, '').replace(',', '.')) || 0;
+    if (!name.trim()) {
+      Toast.show({ text1: 'Name is required', type: 'error' });
+      return;
+    }
+
+    const parsed = Number(String(balanceField).replace(/\s/g, '').replace(',', '.'));
+    if (!Number.isFinite(parsed)) {
+      Toast.show({ text1: 'Balance must be a valid number', type: 'error' });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       if (formMode === 'add') {
-        const r = await apiFetch(createAccountEndpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: name.trim(), currency, balance: parsed }),
+        await createLocalAccount(db, {
+          name: name.trim(),
+          currency,
+          balance: parsed,
         });
-        if (!r.ok) throw new Error('Failed to create account');
         Toast.show({ text1: 'Account created', type: 'success' });
       } else if (editingAccount) {
-        const r = await apiFetch(updateAccountEndpoint(editingAccount.id), {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: name.trim(), currency, balance: parsed }),
+        await updateLocalAccount(db, editingAccount.id, {
+          name: name.trim(),
+          currency,
+          balance: parsed,
         });
-        if (!r.ok) throw new Error('Failed to update account');
         Toast.show({ text1: 'Account updated', type: 'success' });
       }
+
       setIsFormOpen(false);
       await loadAccounts();
     } catch (e) {
@@ -139,10 +147,10 @@ export default function Balances() {
 
   const confirmDelete = async () => {
     if (!deletingAccount) return;
+
     setIsDeleting(true);
     try {
-      const r = await apiFetch(deleteAccountEndpoint(deletingAccount.id), { method: 'DELETE' });
-      if (!r.ok) throw new Error('Failed to delete account');
+      await deleteLocalAccount(db, deletingAccount.id);
       Toast.show({ text1: 'Account deleted', type: 'success' });
       setIsDeleteOpen(false);
       setDeletingAccount(null);
@@ -185,7 +193,10 @@ export default function Balances() {
         )}
       </View>
 
-      <View pointerEvents="box-none" style={{ position: 'absolute', left: 16, right: 16, bottom: fixedButtonBottom }}>
+      <View
+        pointerEvents="box-none"
+        style={{ position: 'absolute', left: 16, right: 16, bottom: fixedButtonBottom }}
+      >
         <TouchableOpacity
           activeOpacity={0.85}
           className="w-full flex-row items-center justify-center py-4 bg-theme-tint rounded-lg"
