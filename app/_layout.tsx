@@ -20,6 +20,7 @@ const RooLayout = () => {
         style={{
           flex: 1,
         }}
+        edges={["top", "left", "right"]}
         className="bg-theme-background"
       >
         <AuthProvider>
