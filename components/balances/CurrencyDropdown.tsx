@@ -17,7 +17,7 @@ export default function CurrencyDropdown({ value, options, visible, onClose, onS
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable onPress={onClose} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', padding: 16 }}>
-        <Pressable onPress={() => {}} style={{ backgroundColor: colors.surface, borderRadius: 12, padding: 12, maxHeight: '70%' }}>
+        <Pressable onPress={() => {}} style={{ backgroundColor: colors.surface, borderRadius: 6, padding: 12, maxHeight: '70%' }}>
           <Text className = "text-2xl text-theme-text" style={{ marginBottom: 10 }}>Select currency</Text>
           <FlatList
             data={options}

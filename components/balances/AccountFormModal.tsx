@@ -73,7 +73,7 @@ export default function AccountFormModal({
             <View
               style={{
                 backgroundColor: colors.surface,
-                borderRadius: 12,
+                borderRadius: 6,
                 padding: 16,
               }}
             >
@@ -90,7 +90,7 @@ export default function AccountFormModal({
                 style={{
                   backgroundColor: colors.background,
                   padding: 10,
-                  borderRadius: 8,
+                  borderRadius: 6,
                   marginBottom: 12,
                 }}
               />
@@ -106,7 +106,7 @@ export default function AccountFormModal({
                   backgroundColor: colors.background,
                   color: isBalanceValid || !balance ? colors.text : colors.error,
                   padding: 10,
-                  borderRadius: 8,
+                  borderRadius: 6,
                   marginBottom: balance && !isBalanceValid ? 4 : 12,
                 }}
               />
@@ -122,7 +122,7 @@ export default function AccountFormModal({
                 style={{
                   padding: 12,
                   backgroundColor: colors.background,
-                  borderRadius: 8,
+                  borderRadius: 6,
                   flexDirection: 'row',
                   justifyContent: 'space-between',
                   marginBottom: 12,
