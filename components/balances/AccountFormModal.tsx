@@ -77,12 +77,12 @@ export default function AccountFormModal({
                 padding: 16,
               }}
             >
-              <Text className="text-2xl font-semibold text-theme-text" style={{ marginBottom: 12 }}>
+              <Text className="text-3xl font-semibold text-theme-text" style={{ marginBottom: 12 }}>
                 {mode === 'add' ? 'Add account' : 'Edit account'}
               </Text>
 
-              <Text style={{ color: colors.icon, marginBottom: 6 }}>Name</Text>
-              <TextInput className="text-l text-theme-text"
+              <Text className="text-2xl text-theme-icon" style={{ marginBottom: 6 }}>Name</Text>
+              <TextInput className="text-2xl text-theme-text"
                 value={name}
                 onChangeText={onChangeName}
                 placeholder="My wallet"
@@ -95,8 +95,8 @@ export default function AccountFormModal({
                 }}
               />
 
-              <Text className="text-l text-theme-icon" style={{ marginBottom: 6 }}>Balance</Text>
-              <TextInput className="text-l text-theme-text"
+              <Text className="text-2xl text-theme-icon" style={{ marginBottom: 6 }}>Balance</Text>
+              <TextInput className="text-2xl text-theme-text"
                 value={balance}
                 onChangeText={onChangeBalance}
                 keyboardType="decimal-pad"
@@ -116,7 +116,7 @@ export default function AccountFormModal({
                 </Text>
               )}
 
-              <Text className="text-l text-theme-icon" style={{ marginBottom: 6 }}>Currency</Text>
+              <Text className="text-2xl text-theme-icon" style={{ marginBottom: 6 }}>Currency</Text>
               <TouchableOpacity
                 onPress={() => setPickerOpen(true)}
                 style={{
@@ -128,13 +128,13 @@ export default function AccountFormModal({
                   marginBottom: 12,
                 }}
               >
-                <Text className="text-l text-theme-text">{currency}</Text>
+                <Text className="text-2xl text-theme-text">{currency}</Text>
                 <MaterialCommunityIcons name="chevron-down" size={18} style={{ color: colors.icon }} />
               </TouchableOpacity>
 
               <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
                 <TouchableOpacity onPress={onClose} style={{ padding: 10 }}>
-                  <Text className="text-l text-theme-icon">Cancel</Text>
+                  <Text className="text-2xl text-theme-icon">Cancel</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -148,7 +148,7 @@ export default function AccountFormModal({
                     opacity: canSave ? 1 : 0.5,
                   }}
                 >
-                  <Text style={{ color: colors.textLight }}>
+                  <Text className="text-2xl" style={{ color: colors.textLight }}>
                     {isSaving ? 'Saving...' : 'Save'}
                   </Text>
                 </TouchableOpacity>
