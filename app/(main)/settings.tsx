@@ -1,266 +1,230 @@
 import React, { useState } from "react";
-import { View, Text, SectionList, TouchableOpacity } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { View, Text, TouchableOpacity, useColorScheme } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { Colors } from '@/constants/theme';
+import { useAuth } from "@/context/authContext";
+import { AppTheme, Language, SettingsRowProps, SettingsSection } from "@/types/settings";
 
-type ItemType =
-  | "password"
-  | "switch"
-  | "logout"
-  | "language"
-  | "theme"
-  | "profile";
-type language = "eng" | "pl";
-type theme = "light" | "dark";
+const SettingsRow = ({
+  title,
+  subtitle,
+  iconName,
+  leftElement,
+  rightElement,
+  tone,
+  onPress,
+  colors,
+}: SettingsRowProps) => {
+  const titleColor = tone === "danger" ? colors.error : colors.text;
+  const iconColor = tone === "danger" ? colors.error : colors.icon;
 
-type Item = {
-  title: string;
-  email?: string;
-  icon: string;
-  type: ItemType;
+  const resolvedLeft = leftElement ?? 
+  (
+    <View style={{ marginRight: 12 }}>
+      <Ionicons 
+      name={iconName as undefined} 
+      size={30} 
+      color={iconColor} />
+    </View>
+  );
+
+  const subtitleELement = subtitle ?
+  (
+    <Text 
+    selectable={false} 
+    className="text-base mt-1 font-semibold" 
+    style={{ color: colors.icon }}>
+      {subtitle}
+    </Text>
+  ) : null
+
+  const rightElementValid = rightElement ? 
+    <View 
+    className="flex-row items-center">
+      {rightElement}
+    </View> : null
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.8}
+      className="h-[75px] flex-row items-center px-3 justify-between"
+      onPress={onPress}
+      disabled={!onPress}
+      style={{ backgroundColor: colors.surface }}
+    >
+      <View className="flex-row items-center">
+        {resolvedLeft}
+
+        <View>
+          <Text selectable={false} className="text-xl font-bold" style={{ color: titleColor }}>
+            {title}
+          </Text>
+
+          {subtitleELement}
+        </View>
+      </View>
+
+      {rightElementValid}
+    </TouchableOpacity>
+  );
 };
-
-const DATA: {
-  title: string;
-  data: Item[];
-}[] = [
-  {
-    title: "Account",
-    data: [
-      {
-        title: "Kowalus",
-        email: "ananas@edu.p.lodz.pl",
-        icon: "person-outline",
-        type: "profile",
-      },
-    ],
-  },
-
-  {
-    title: "Preferences",
-    data: [
-      { title: "Language", icon: "language-outline", type: "language" },
-      { title: "Theme", icon: "contrast-outline", type: "theme" },
-    ],
-  },
-
-  {
-    title: "Notifications",
-    data: [
-      {
-        title: "Push Notifications",
-        icon: "notifications-outline",
-        type: "switch",
-      },
-    ],
-  },
-
-  {
-    title: "Security",
-    data: [
-      {
-        title: "Change Password",
-        icon: "lock-closed-outline",
-        type: "password",
-      },
-      { title: "Log Out", icon: "log-out-outline", type: "logout" },
-    ],
-  },
-];
 
 const SettingsScreen = () => {
   const router = useRouter();
-  const [currentLanguage, setLanguage] = useState<language>("eng"); // current language
-  const [currentTheme, setTheme] = useState<theme>("light"); // current theme
-  const [currentNotifications, setNotifications] = useState(true); // notifications state
+  const { logout, user } = useAuth();
+  
+  const theme = useColorScheme() || 'light';
+  const colors = Colors[theme];
 
-  const toggleNotifications = () => {
-    setNotifications((previousState) => !previousState);
+  const [currentLanguage, setLanguage] = useState<Language>("eng");
+  const [currentTheme, setTheme] = useState<AppTheme>("light");
+  const [currentNotifications, setNotifications] = useState(true);
+
+  const chevron = <Ionicons name="chevron-forward" size={28} color={colors.icon} />;
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } finally {
+      router.replace("/(auth)/login");
+    }
   };
 
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
-  };
-
-  const toggleLanguage = () => {
-    setLanguage((prev) => (prev === "eng" ? "pl" : "eng"));
-  };
-
-  const toggleLogOut = () => {
-    router.push("/login");
-  };
-
-  const pushToChangePass = () => {
-    router.push("/change-password");
-  };
-
-  const pushToProfile = () => {
-    router.push("/profile");
-  };
+  const sections: SettingsSection[] = [
+    {
+      title: "Account",
+      items: [
+        {
+          id: "profile",
+          title: "User",
+          subtitle: user?.email ?? "",
+          leftElement: (
+            <View className="w-14 h-14 rounded-full mr-3 items-center justify-center overflow-hidden" style={{ backgroundColor: colors.textLight }}>
+              <Ionicons name="person-outline" size={40} color={colors.icon} />
+            </View>
+          ),
+          rightElement: chevron,
+          onPress: () => router.push("/profile"),
+        },
+      ],
+    },
+    {
+      title: "Preferences",
+      items: [
+        {
+          id: "language",
+          title: "Language",
+          iconName: "language-outline",
+          rightElement: (
+            <React.Fragment>
+              <Text selectable={false} className="text-xl font-semibold" style={{ color: colors.icon }}>
+                {currentLanguage === "eng" ? "English" : "Polish"}
+              </Text>
+              {chevron}
+            </React.Fragment>
+          ),
+          onPress: () => setLanguage((prev) => (prev === "eng" ? "pl" : "eng")),
+        },
+        {
+          id: "theme",
+          title: "Theme",
+          iconName: "contrast-outline",
+          rightElement: (
+            <React.Fragment>
+              <Text selectable={false} className="text-xl font-semibold" style={{ color: colors.icon }}>
+                {currentTheme === "light" ? "Light" : "Dark"}
+              </Text>
+              {chevron}
+            </React.Fragment>
+          ),
+          onPress: () => setTheme((prev) => (prev === "light" ? "dark" : "light")),
+        },
+      ],
+    },
+    {
+      title: "Notifications",
+      items: [
+        {
+          id: "push-notifications",
+          title: "Push Notifications",
+          iconName: "notifications-outline",
+          rightElement: (
+            <View style={{ width: 48, height: 24, borderRadius: 12, padding: 2, justifyContent: "center", backgroundColor: currentNotifications ? colors.tint : colors.icon }}>
+              <View style={{ width: 24, height: 20, borderRadius: 10, backgroundColor: colors.textLight, alignSelf: currentNotifications ? "flex-end" : "flex-start" }} />
+            </View>
+          ),
+          onPress: () => setNotifications((prev) => !prev),
+        },
+      ],
+    },
+    {
+      title: "Security",
+      items: [
+        {
+          id: "change-password",
+          title: "Change Password",
+          iconName: "lock-closed-outline",
+          rightElement: chevron,
+          onPress: () => router.push("/change-password"),
+        },
+        {
+          id: "logout",
+          title: "Log Out",
+          iconName: "log-out-outline",
+          tone: "danger",
+          onPress: handleLogout,
+        },
+      ],
+    },
+  ];
 
   return (
-    <SafeAreaProvider>
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#ffffff" }}>
-        <SectionList
-          style={{ marginTop: 25 }}
-          sections={DATA}
-          keyExtractor={(item, index) => item.title + index}
-          renderSectionHeader={({ section: { title } }) => (
-            <Text
-              className="text-2xl text-black font-bold pl-4"
-              selectable={false}
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+      <View style={{ marginTop: 25 }}>
+
+        {sections.map((section) => (
+          <View key={section.title}>
+
+            <Text 
+            className="text-2xl font-bold pl-4" 
+            selectable={false} 
+            style={{ color: colors.text }}
             >
-              {title}
+              {section.title}
+              
             </Text>
-          )}
-          renderItem={({ item, index, section }) => {
-            const isFirst = index === 0;
-            const isLast = index === section.data.length - 1;
 
-            const cornerStyle =
-              section.data.length === 1
-                ? "rounded-md"
-                : isFirst
-                  ? "rounded-t-md"
-                  : isLast
-                    ? "rounded-b-md"
-                    : "rounded-none";
 
-            return (
-              <TouchableOpacity
-                activeOpacity={0.8}
-                className={`h-[80px] bg-[#e3e3ed] mx-4 flex-row items-center px-3 justify-between ${cornerStyle}`}
-                onPress={() => {
-                  if (item.type === "language") {
-                    toggleLanguage();
-                  }
-                  if (item.type === "logout") {
-                    toggleLogOut();
-                  }
-                  if (item.type === "switch") {
-                    toggleNotifications();
-                  }
-                  if (item.type === "theme") {
-                    toggleTheme();
-                  }
-                  if (item.type === "profile") {
-                    pushToProfile();
-                  }
-                  if (item.type === "password") {
-                    pushToChangePass();
-                  }
-                }}
-              >
-                <View className="flex-row items-center">
-                  {item.type === "profile" ? (
-                    <View className="w-14 h-14 rounded-full bg-white mr-3 items-center justify-center overflow-hidden">
-                      <Ionicons
-                        name={item.icon as any}
-                        size={40}
-                        color="#000000"
-                      />
-                    </View>
-                  ) : (
-                    <View style={{ marginRight: 12 }}>
-                      <Ionicons
-                        name={item.icon as any}
-                        size={30}
-                        color={item.type === "logout" ? "#dc2626" : "#000000"}
-                      />
-                    </View>
-                  )}
-                  <View>
-                    <Text
-                      className={`text-xl font-bold ${
-                        item.type === "logout" ? "text-red-600" : "text-black"
-                      }`}
-                      selectable={false}
-                    >
-                      {item.title}
-                    </Text>
+            <View 
+            className="mx-4 rounded-md overflow-hidden" 
+            style={{ backgroundColor: colors.surface }}
+            >
+              {section.items.map((item, index) => (
+                <React.Fragment key={item.id}>
+                  <SettingsRow
+                    title={item.title}
+                    subtitle={item.subtitle}
+                    iconName={item.iconName}
+                    leftElement={item.leftElement}
+                    rightElement={item.rightElement}
+                    tone={item.tone}
+                    onPress={item.onPress}
+                    colors={colors}
+                  />
+                  {index < section.items.length - 1 ? (
+                    <View style={{ height: 1, backgroundColor: colors.icon, opacity: 0.16, marginLeft: 24, marginRight: 24 }} />
+                  ) : null}
+                </React.Fragment>
+              ))}
+            </View>
 
-                    {item.type === "profile" && (
-                      <Text
-                        className="text-base text-gray-500 mt-1 font-semibold"
-                        selectable={false}
-                      >
-                        {item.email}
-                      </Text>
-                    )}
-                  </View>
-                </View>
-
-                <View className="flex-row items-center">
-                  {(item.type === "profile" || item.type === "password") && ( // wraper for multiple components
-                    <Ionicons
-                      name="chevron-forward"
-                      size={28}
-                      color="#000000"
-                    />
-                  )}
-
-                  {item.type === "language" && (
-                    <React.Fragment>
-                      <Text
-                        className="text-xl font-semibold text-gray-400"
-                        selectable={false}
-                      >
-                        {currentLanguage === "eng" ? "English" : "Polish"}
-                      </Text>
-
-                      <Ionicons
-                        name="chevron-forward"
-                        size={28}
-                        color="#000000"
-                      />
-                    </React.Fragment>
-                  )}
-
-                  {item.type === "theme" && (
-                    <React.Fragment>
-                      <Text
-                        className="text-xl font-semibold text-gray-400"
-                        selectable={false}
-                      >
-                        {currentTheme === "light" ? "Light" : "Dark"}
-                      </Text>
-
-                      <Ionicons
-                        name="chevron-forward"
-                        size={28}
-                        color="#000000"
-                      />
-                    </React.Fragment>
-                  )}
-
-                  {item.type === "switch" && (
-                    <View
-                      className={`w-12 h-6 rounded-full px-1 justify-center ${
-                        currentNotifications ? "bg-blue-500" : "bg-gray-400"
-                      }`}
-                    >
-                      <View
-                        className={`w-6 h-5 rounded-full bg-white ${
-                          currentNotifications ? "self-end" : "self-start"
-                        }`}
-                      />
-                    </View>
-                  )}
-                </View>
-
-                {!isLast && (
-                  <View className="absolute bottom-0 left-6 right-6 h-px bg-[#8e8e98]" />
-                )}
-              </TouchableOpacity>
-            );
-          }}
-          SectionSeparatorComponent={() => (
-            <View style={{ height: 10, backgroundColor: "#ffffff" }} />
-          )}
-        />
-      </SafeAreaView>
-    </SafeAreaProvider>
+            <View style={{ height: 10, backgroundColor: colors.background }} />
+          </View>
+        ))}
+      </View>
+    </SafeAreaView>
   );
 };
 
