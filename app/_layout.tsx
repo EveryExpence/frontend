@@ -1,6 +1,6 @@
-import { ActivityIndicator, View } from 'react-native'
-import React, { useEffect } from 'react'
-import { Slot, useRootNavigationState, useRouter, useSegments } from 'expo-router'
+import { View } from 'react-native'
+import React from 'react'
+import { Slot } from 'expo-router'
 import './global.css'
 import { AuthProvider, useAuth } from '@/context/authContext'
 import CustomizedToast from '@/components/Toast'
@@ -21,7 +21,7 @@ const RootLayout = () => {
                     databaseName="app.db"
                     onInit={migrateDatabase}
                 >
-                    <Helper />
+                    <Slot />
                 </SQLiteProvider>
             </AuthProvider>
             <CustomizedToast />
@@ -29,6 +29,7 @@ const RootLayout = () => {
     )
 }
 
+<<<<<<< feature/accounts-page-UI
 const Helper = () => {
     const { user, isInitializing } = useAuth();
     const segments = useSegments();
@@ -70,3 +71,6 @@ const Helper = () => {
 }
 
 export default RootLayout
+=======
+export default RooLayout
+>>>>>>> dev

@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     
             await EncryptedStorage.setItem(refreshTokenKey, refreshToken);
             await EncryptedStorage.setItem(accessTokenKey, accessToken);
-    
+
             const userData = await getUserData(accessToken);
             setUser({ ...userData });
         } finally {
@@ -118,6 +118,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setUser(null);
             throw error;
         } finally {
+            await EncryptedStorage.removeItem("loggedIn")
             setIsLoading(false);
         }
     };

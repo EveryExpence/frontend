@@ -14,7 +14,7 @@ export default function TabLayout() {
       iconColor={{ default: colors.tabIconDefault, selected: colors.tabIconSelected }}
       labelStyle={{ color: colors.tabIconDefault }}
     >
-      <NativeTabs.Trigger name="index">
+      <NativeTabs.Trigger name="dashboard">
         <Label>Dashboard</Label>
         <Icon src={<VectorIcon family={MaterialCommunityIcons} name="view-dashboard-outline" />} />
       </NativeTabs.Trigger>
