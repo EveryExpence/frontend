@@ -8,6 +8,7 @@ import * as z from 'zod'
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Toast from 'react-native-toast-message';
+import EncryptedStorage from 'react-native-encrypted-storage';
 
 const formSchema = z.object({
     email: z.email("Must be a valid email"),
@@ -38,9 +39,15 @@ const LoginScreen = () => {
             setTimeout(() => {
                 Toast.show({ text1: 'Logged in successfully' });
             }, 100);
+            await EncryptedStorage.setItem("loggedIn", "true");
         } catch (error) {
             Toast.show({ text1: `Login failed: ${error}`, type: "error" });
         }
+    }
+
+    const handleSkip = async () => {
+        await EncryptedStorage.setItem("loggedIn", "true");
+        router.replace("/dashboard")
     }
 
     if (isLoading) {
@@ -128,6 +135,18 @@ const LoginScreen = () => {
                 >
                     <Text className="text-xl text-center text-theme-textLight">
                         Login
+                    </Text>
+                </TouchableOpacity>
+            </View>
+
+            <View className="w-full px-8 mt-4">
+                <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={handleSkip}
+                    className="w-full justify-start p-4 rounded-md bg-theme-surface"
+                >
+                    <Text className="text-xl text-center text-theme-textLight">
+                        Continue without login
                     </Text>
                 </TouchableOpacity>
             </View>

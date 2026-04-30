@@ -1,6 +1,6 @@
-import { ActivityIndicator, View } from 'react-native'
-import React, { useEffect } from 'react'
-import { Slot, useRootNavigationState, useRouter, useSegments } from 'expo-router'
+import { View } from 'react-native'
+import React from 'react'
+import { Slot } from 'expo-router'
 import './global.css'
 import { AuthProvider, useAuth } from '@/context/authContext'
 import CustomizedToast from '@/components/Toast'
@@ -20,52 +20,12 @@ const RooLayout = () => {
                     databaseName="app.db"
                     onInit={migrateDatabase}
                 >
-                    <Helper />
+                    <Slot />
                 </SQLiteProvider>
             </AuthProvider>
             <CustomizedToast />
         </View>
     )
-}
-
-const Helper = () => {
-    const { user, isInitializing } = useAuth();
-    const segments = useSegments();
-    const router = useRouter();
-    const navigationState = useRootNavigationState();
-    const inAuthGroup = segments[0] === '(auth)';
-
-    useEffect(() => {
-        if (isInitializing) {
-            return;
-        }
-
-        if (!navigationState?.key) {
-            return;
-        }
-
-        if (user === null && !inAuthGroup) {
-            setTimeout(() => {
-                router.replace("/login");
-            }, 0);
-        }
-    
-        if (user !== null && inAuthGroup) {
-            setTimeout(() => {
-                router.replace("/");
-            }, 0);
-        }
-    }, [user, inAuthGroup, navigationState,, isInitializing, router])
-
-    if (isInitializing) {
-        return (
-            <View className="flex flex-1 justify-center items-center">
-                <ActivityIndicator size={32} />
-            </View>
-        )
-    }
-
-    return <Slot />;
 }
 
 export default RooLayout
