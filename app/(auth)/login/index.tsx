@@ -145,7 +145,7 @@ const LoginScreen = () => {
                     onPress={handleSkip}
                     className="w-full justify-start p-4 rounded-md bg-theme-surface"
                 >
-                    <Text className="text-xl text-center text-theme-textLight">
+                    <Text className="text-xl text-center text-theme-text">
                         Continue without login
                     </Text>
                 </TouchableOpacity>
