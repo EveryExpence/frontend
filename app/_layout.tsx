@@ -8,7 +8,7 @@ import { SQLiteProvider } from 'expo-sqlite';
 import { migrateDatabase } from '@/data/init'
 import 'react-native-get-random-values';
 
-const RooLayout = () => {
+const RootLayout = () => {
     return (
         <View
             style={{
@@ -56,7 +56,7 @@ const Helper = () => {
                 router.replace("/");
             }, 0);
         }
-    }, [user, inAuthGroup, navigationState,, isInitializing, router])
+    }, [user, inAuthGroup, navigationState, isInitializing, router])
 
     if (isInitializing) {
         return (
@@ -69,4 +69,4 @@ const Helper = () => {
     return <Slot />;
 }
 
-export default RooLayout
+export default RootLayout
