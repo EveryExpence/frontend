@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, useColorScheme } from "react-native";
+import { View, Text, TouchableOpacity, useColorScheme, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -182,7 +182,7 @@ const SettingsScreen = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <View style={{ marginTop: 25 }}>
+      <ScrollView style={{ marginTop: 25 }}>
 
         {sections.map((section) => (
           <View key={section.title}>
@@ -223,7 +223,7 @@ const SettingsScreen = () => {
             <View style={{ height: 10, backgroundColor: colors.background }} />
           </View>
         ))}
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
