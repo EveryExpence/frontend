@@ -14,8 +14,8 @@ export default function MainLayout() {
       }}
     >
       <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="settings/change-password" />
-      <Stack.Screen name="settings/profile" />
+      <Stack.Screen name="(settings)/change-password" />
+      <Stack.Screen name="(settings)/profile" />
     </Stack>
   );
 }
