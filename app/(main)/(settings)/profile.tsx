@@ -56,6 +56,7 @@ const ProfileScreen = () => {
             value="John"
             className="p-4 text-xl border rounded-md text-theme-text"
             style={{
+              borderColor: colors.surface,
               backgroundColor: colors.background,
               color: colors.text,
             }}
