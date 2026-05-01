@@ -92,13 +92,13 @@ const SettingsScreen = () => {
           leftElement: (
             <View
               className="w-14 h-14 rounded-full mr-3 items-center justify-center overflow-hidden"
-              style={{ backgroundColor: colors.textLight }}
+              style={{ backgroundColor: colors.surface }}
             >
               <Ionicons name="person-outline" size={40} color={colors.icon} />
             </View>
           ),
           rightElement: chevron,
-          onPress: () => router.push("/settings/profile"),
+          onPress: () => router.push("/profile"),
         },
       ],
     },
@@ -176,7 +176,7 @@ const SettingsScreen = () => {
           title: "Change Password",
           iconName: "lock-closed-outline",
           rightElement: chevron,
-          onPress: () => router.push("/settings/change-password"),
+          onPress: () => router.push("/change-password"),
         },
         {
           id: "logout",
