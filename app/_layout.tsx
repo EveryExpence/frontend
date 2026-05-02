@@ -7,26 +7,29 @@ import CustomizedToast from '@/components/Toast'
 import { SQLiteProvider } from 'expo-sqlite';
 import { migrateDatabase } from '@/data/init'
 import 'react-native-get-random-values';
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 const RootLayout = () => {
-    return (
-        <View
-            style={{
-                flex: 1,
-            }}
-            className="bg-theme-background"
-        >
-            <AuthProvider>
-                <SQLiteProvider 
-                    databaseName="app.db"
-                    onInit={migrateDatabase}
-                >
-                    <Slot />
-                </SQLiteProvider>
-            </AuthProvider>
-            <CustomizedToast />
-        </View>
-    )
+  return (
+    <SafeAreaProvider>
+      <View
+        style={{
+          flex: 1,
+        }}
+        className="bg-theme-background"
+      >
+        <AuthProvider>
+          <SQLiteProvider 
+            databaseName="app.db"
+            onInit={migrateDatabase}
+          >
+              <Slot />
+          </SQLiteProvider>
+        </AuthProvider>
+        <CustomizedToast />
+      </View>
+    </SafeAreaProvider>
+  )
 }
 
 export default RootLayout
