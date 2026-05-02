@@ -3,7 +3,7 @@ import React, { useEffect } from 'react'
 import { useRouter } from 'expo-router';
 import EncryptedStorage from 'react-native-encrypted-storage';
 
-const index = () => {
+const Index = () => {
   const router = useRouter();
 
   useEffect(() => {
@@ -17,11 +17,11 @@ const index = () => {
     }
 
     checkFlag();
-  }, [])
+  }, [router])
   
   return (
     <ActivityIndicator />
   )
 }
 
-export default index
+export default Index
