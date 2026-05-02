@@ -1,4 +1,4 @@
-import { Text, TextInput, useColorScheme, View } from 'react-native'
+import { Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Dropdown } from 'react-native-element-dropdown';
@@ -7,6 +7,8 @@ import { Account } from '@/types/data/account';
 import { getAllAccounts } from '@/data/accounts';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
+import { Category } from '@/types/data/category';
+import { getAllCategories } from '@/data/categories';
 
 export default function NewExpense() {
   const scheme = useColorScheme() ?? 'light';
@@ -14,11 +16,14 @@ export default function NewExpense() {
   const db = useSQLiteContext();
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [amount, setAmount] = useState("");
 
   useEffect(() => {
     (async () => {
       setAccounts(await getAllAccounts(db));
+      setCategories(await getAllCategories(db));
     })();
   }, [db]);
 
@@ -48,7 +53,7 @@ export default function NewExpense() {
           labelField="name"
           valueField="id"
           placeholder="Select account"
-          searchPlaceholder="Search..."
+          searchPlaceholder="Search account..."
           value={selectedAccount ?? undefined}
           onChange={item => setSelectedAccount(item)}
           renderLeftIcon={() => (
@@ -89,6 +94,56 @@ export default function NewExpense() {
             amount != "" && selectedAccount !== null ?
               <Text className="absolute text-xl right-4">{selectedAccount.currency}</Text> : <></>
           }
+        </View>
+      </View>
+
+      <View>
+        <Text className="text-2xl font-bold">Category</Text>
+
+        <View className="flex-row justify-between items-center gap-2">
+          <Dropdown
+            style={{
+              backgroundColor: colors.surface,
+              padding: 12,
+              borderRadius: 6,
+              flex: 1,
+            }}
+            selectedTextStyle={{
+              fontSize: 18,
+            }}
+            placeholderStyle={{
+              fontSize: 18,
+            }}
+            inputSearchStyle={{
+              fontSize: 18,
+            }}
+            data={categories}
+            search
+            maxHeight={300}
+            labelField="name"
+            valueField="id"
+            placeholder="Select category"
+            searchPlaceholder="Search category..."
+            value={selectedCategory ?? undefined}
+            onChange={item => setSelectedCategory(item)}
+            renderLeftIcon={() => (
+              <MaterialCommunityIcons
+                className="mr-6"
+                name="chart-waterfall"
+                size={24}
+              />
+            )}
+            renderRightIcon={() => (
+              <MaterialCommunityIcons
+                name="chevron-down"
+                size={24}
+              />
+            )}
+          />
+
+          <TouchableOpacity>
+            <MaterialCommunityIcons name="plus" size={32} />
+          </TouchableOpacity>
         </View>
       </View>
 
