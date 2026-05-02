@@ -11,6 +11,7 @@ import { Category } from '@/types/data/category';
 import { getAllCategories } from '@/data/categories';
 import { PaymentMethod } from '@/types/data/paymentMethod';
 import { getAllPaymentMethods } from '@/data/paymentMethods';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function NewExpense() {
   const scheme = useColorScheme() ?? 'light';
@@ -23,6 +24,10 @@ export default function NewExpense() {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [amount, setAmount] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedTime, setSelectedTime] = useState<Date>(new Date());
+  const [showDateSelection, setShowDateSelection] = useState(false);
+  const [showTimeSelection, setShowTimeSelection] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -172,7 +177,7 @@ export default function NewExpense() {
             inputSearchStyle={{
               fontSize: 18,
             }}
-            data={categories}
+            data={paymentMethods}
             search
             maxHeight={300}
             labelField="name"
@@ -199,6 +204,55 @@ export default function NewExpense() {
           <TouchableOpacity>
             <MaterialCommunityIcons name="plus" size={32} />
           </TouchableOpacity>
+        </View>
+      </View>
+
+      <View className="flex-row">
+        <View className="flex-1 mr-4">
+          <Text className="text-2xl font-bold">Expense date</Text>
+
+            <TouchableOpacity
+              onPress={() => setShowDateSelection(true)}
+              className="bg-theme-surface py-4 px-4 rounded-md flex-row items-center gap-2"
+            >
+              <MaterialCommunityIcons name="calendar" size={20} />
+              <Text className="text-xl">{ selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) } </Text>
+            </TouchableOpacity>
+          { showDateSelection ?
+            <DateTimePicker
+              display="calendar"
+              mode="date"
+              value={selectedDate}
+              onValueChange={(_, value) => {
+                setSelectedDate(value);
+                setShowDateSelection(false);
+              }}
+              onDismiss={() => setShowDateSelection(false)}
+              maximumDate={new Date()}
+            /> : <></> }
+        </View>
+
+        <View className="flex-1 ml-4">
+          <Text className="text-2xl font-bold">Expense time</Text>
+
+            <TouchableOpacity
+              onPress={() => setShowTimeSelection(true)}
+              className="bg-theme-surface py-4 px-4 rounded-md flex-row items-center gap-2"
+            >
+              <MaterialCommunityIcons name="clock" size={20} />
+              <Text className="text-xl">{ selectedTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) } </Text>
+            </TouchableOpacity>
+          { showTimeSelection ?
+            <DateTimePicker
+              display="clock"
+              mode="time"
+              value={selectedTime}
+              onValueChange={(_, value) => {
+                setSelectedTime(value);
+                setShowTimeSelection(false);
+              }}
+              onDismiss={() => setShowTimeSelection(false)}
+            /> : <></> }
         </View>
       </View>
 
