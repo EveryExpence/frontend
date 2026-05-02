@@ -1,7 +1,8 @@
 import React from 'react'
 import { useAuth } from '@/context/authContext';
-import { TouchableOpacity, Text, View } from 'react-native';
+import { TouchableOpacity, Text } from 'react-native';
 import Toast from 'react-native-toast-message';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Main = () => {
   const { user, logout } = useAuth();
@@ -15,7 +16,7 @@ const Main = () => {
   };
 
   return (
-    <View className="flex flex-1 justify-center items-center">
+    <SafeAreaView className="flex flex-1 justify-center items-center">
       <Text className="2xl">
         { user?.email } { user?.publicUsername }
       </Text>
@@ -25,7 +26,7 @@ const Main = () => {
           Logout
         </Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   )
 }
 
