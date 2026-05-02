@@ -6,7 +6,6 @@ import {
   useColorScheme,
   ScrollView,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Colors } from "@/constants/theme";
@@ -223,54 +222,52 @@ const SettingsScreen = () => {
   ];
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView style={{ marginTop: 25 }}>
-        {sections.map((section) => (
-          <View key={section.title}>
-            <Text
-              className="text-2xl font-bold pl-4"
-              selectable={false}
-              style={{ color: colors.text }}
-            >
-              {section.title}
-            </Text>
+    <ScrollView style={{ marginTop: 25 }}>
+      {sections.map((section) => (
+        <View key={section.title}>
+          <Text
+            className="text-2xl font-bold pl-4"
+            selectable={false}
+            style={{ color: colors.text }}
+          >
+            {section.title}
+          </Text>
 
-            <View
-              className="mx-4 rounded-md overflow-hidden"
-              style={{ backgroundColor: colors.surface }}
-            >
-              {section.items.map((item, index) => (
-                <React.Fragment key={item.id}>
-                  <SettingsRow
-                    title={item.title}
-                    subtitle={item.subtitle}
-                    iconName={item.iconName}
-                    leftElement={item.leftElement}
-                    rightElement={item.rightElement}
-                    tone={item.tone}
-                    onPress={item.onPress}
-                    colors={colors}
+          <View
+            className="mx-4 rounded-md overflow-hidden"
+            style={{ backgroundColor: colors.surface }}
+          >
+            {section.items.map((item, index) => (
+              <React.Fragment key={item.id}>
+                <SettingsRow
+                  title={item.title}
+                  subtitle={item.subtitle}
+                  iconName={item.iconName}
+                  leftElement={item.leftElement}
+                  rightElement={item.rightElement}
+                  tone={item.tone}
+                  onPress={item.onPress}
+                  colors={colors}
+                />
+                {index < section.items.length - 1 ? (
+                  <View
+                    style={{
+                      height: 1,
+                      backgroundColor: colors.icon,
+                      opacity: 0.16,
+                      marginLeft: 24,
+                      marginRight: 24,
+                    }}
                   />
-                  {index < section.items.length - 1 ? (
-                    <View
-                      style={{
-                        height: 1,
-                        backgroundColor: colors.icon,
-                        opacity: 0.16,
-                        marginLeft: 24,
-                        marginRight: 24,
-                      }}
-                    />
-                  ) : null}
-                </React.Fragment>
-              ))}
-            </View>
-
-            <View style={{ height: 10, backgroundColor: colors.background }} />
+                ) : null}
+              </React.Fragment>
+            ))}
           </View>
-        ))}
-      </ScrollView>
-    </SafeAreaView>
+
+          <View style={{ height: 10, backgroundColor: colors.background }} />
+        </View>
+      ))}
+    </ScrollView>
   );
 };
 
