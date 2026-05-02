@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Text, TouchableOpacity, View, useColorScheme } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -163,7 +163,7 @@ export default function Balances() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-theme-background">
+    <View className="flex-1 bg-theme-background">
       <View className="flex-1 px-4 pt-4">
         <View className="mb-5 flex-row items-center justify-between">
           <Text className="text-2xl font-semibold text-theme-text">Your accounts</Text>
@@ -229,6 +229,6 @@ export default function Balances() {
         onClose={() => setIsDeleteOpen(false)}
         onConfirm={confirmDelete}
       />
-    </SafeAreaView>
+    </View>
   );
 }
