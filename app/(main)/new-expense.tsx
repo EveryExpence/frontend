@@ -67,54 +67,31 @@ export default function NewExpense() {
         />
       </View>
 
-      <View className="w-full flex-row justify-between">
-        <View className="w-7/12">
-          <Text className="text-2xl font-bold">Amount</Text>
+      <View className="w-full">
+        <Text className="text-2xl font-bold">Amount</Text>
 
-          <View className="w-full flex flex-row items-center">
-            <MaterialCommunityIcons
-              name="currency-eur"
-              size={24}
-              color={colors.text}
-              className="absolute left-4 text-theme-icon z-50"
-            />
-            <TextInput
-              placeholder='Enter amount'
-              placeholderTextColor={colors.text}
-              value={amount}
-              onChangeText={setAmount}
-              className={`w-full py-4 pl-12 text-right text-xl border rounded-md bg-theme-surface text-theme-text
-                ${amount != "" && selectedAccount !== null ? 'pr-12' : 'pr-4'}`}
-            />
-            {
-              amount != "" && selectedAccount !== null ?
-                <Text className="absolute right-4">{selectedAccount.currency}</Text> : <></>
-            }
-          </View>
-        </View>
-
-        <View className="w-4/12">
-          <Text className="text-2xl font-bold">Amount</Text>
-
-          <View className="w-full flex flex-row items-center">
-            <MaterialCommunityIcons
-              name="currency-eur"
-              size={24}
-              color={colors.text}
-              className="absolute left-4 text-theme-icon z-50"
-            />
-            <TextInput
-              placeholder='Enter amount'
-              placeholderTextColor={colors.text}
-              value={amount}
-              onChangeText={setAmount}
-              className={`w-full p-4 pl-12 text-xl border rounded-md text-theme-text bg-theme-surface ${
-                (amount != "" && isNaN(parseFloat(amount))) ? 'border-red-500' : 'border-theme-text'
-              }`}
-            />
-          </View>
+        <View className="w-full flex flex-row items-center">
+          <MaterialCommunityIcons
+            name="cash"
+            size={24}
+            color={colors.text}
+            className="absolute left-4 text-theme-icon z-50"
+          />
+          <TextInput
+            placeholder='Enter amount'
+            placeholderTextColor={colors.text}
+            value={amount}
+            onChangeText={setAmount}
+            className={`w-full py-4 pl-12 text-xl rounded-md bg-theme-surface text-theme-text
+              ${amount != "" && selectedAccount !== null ? 'pr-12' : 'pr-4'}`}
+          />
+          {
+            amount != "" && selectedAccount !== null ?
+              <Text className="absolute text-xl right-4">{selectedAccount.currency}</Text> : <></>
+          }
         </View>
       </View>
+
     </SafeAreaView>
   )
 }
