@@ -224,7 +224,7 @@ const SettingsScreen = () => {
 
   return (
     <SafeAreaView>
-      <ScrollView style={{ marginTop: 25 }}>
+      <ScrollView>
         {sections.map((section) => (
           <View key={section.title}>
             <Text
