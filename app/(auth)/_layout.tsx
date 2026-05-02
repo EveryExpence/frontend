@@ -1,10 +1,11 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 import { Slot } from 'expo-router'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 const _layout = () => {
     return (
-        <View className="flex-1">
+        <SafeAreaView className="flex-1">
             <View
                 className="absolute rounded-full bg-theme-tint"
                 style={{
@@ -19,7 +20,7 @@ const _layout = () => {
                 className="absolute gap-5"
                 style={{
                     top: 50,
-                    right: 10,
+                    right: 20,
                 }}
             >
                 <Text
@@ -35,7 +36,7 @@ const _layout = () => {
             >
                 <Slot />
             </View>
-        </View>
+        </SafeAreaView>
     )
 }
 
