@@ -1,10 +1,27 @@
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
+import React, { useState } from "react";
 import { useThemeColor } from "@/hooks/use-theme-color";
 
 const ProfileScreen = () => {
   const iconColor = useThemeColor({}, "icon");
+
+  const [isEditing, setIsEditing] = useState(false)
+
+  const [form, setForm] = useState({
+    firstName: "John",
+    lastName: "Doe",
+    email: "john@email.com"
+  })
+
+  const handleChange = (key: any, value: any) => {
+      setForm((prev) => 
+      ({
+        ...prev,
+        [key]: value,
+      })
+    );
+  }
 
   return (
     <View
@@ -19,11 +36,11 @@ const ProfileScreen = () => {
         </View>
 
         <Text className="mt-4 text-3xl font-semibold text-theme-text">
-          John Doe
+          {form.firstName} {form.lastName}
         </Text>
 
         <Text className="text-2xl text-theme-icon">
-          john@email.com
+          {form.email}
         </Text>
       </View>
 
@@ -32,46 +49,53 @@ const ProfileScreen = () => {
       >
         <View>
           <Text className="text-2xl mb-1 text-theme-icon">
-            First Name
+            {form.firstName}
           </Text>
 
           <TextInput
-            editable={false}
-            value="John"
-            className="p-4 text-xl border border-theme-surface rounded-md bg-theme-background text-theme-text"
+            editable={isEditing}
+            value={form.firstName}
+            className="p-4 text-xl border border-theme-text rounded-md bg-theme-background text-theme-text"
+            onChangeText={(text) => handleChange("firstName", text)}
           />
         </View>
 
         <View>
           <Text className="text-2xl mb-1 text-theme-icon">
-            Last Name
+            {form.lastName}
           </Text>
 
           <TextInput
-            editable={false}
-            value="Doe"
-            className="p-4 text-xl border border-theme-surface rounded-md bg-theme-background text-theme-text"
+            editable={isEditing}
+            value={form.lastName}
+            className="p-4 text-xl border border-theme-text rounded-md bg-theme-background text-theme-text"
+            onChangeText={(text) => handleChange("lastName", text)}
           />
         </View>
 
         <View>
           <Text className="text-2xl mb-1 text-theme-icon">
-            Email
+            {form.email}
           </Text>
 
           <TextInput
-            editable={false}
-            value="john@email.com"
-            className="p-4 text-xl border border-theme-surface rounded-md bg-theme-background text-theme-text"
+            editable={isEditing}
+            value={form.email}
+            className="p-4 text-xl border border-theme-text rounded-md bg-theme-background text-theme-text"
+            onChangeText={(text) => handleChange("email", text)}
           />
         </View>
       </View>
 
       <TouchableOpacity
-        className="mt-6 p-4 rounded-md items-center bg-theme-tint"
+        className={`mt-6 p-4 rounded-md items-center ${isEditing ? 'bg-theme-tint' : 'bg-theme-tint' }`}
+        onPress={() => setIsEditing((prev) => !prev)}
       >
-        <Text className="text-xl text-center text-theme-textLight font-semibold">
-          Edit Profile
+        <Text 
+        className="text-xl text-center text-theme-textLight font-semibold"
+        >
+          {isEditing ? "Save Changes" : "Edit Profile"}
+          
         </Text>
       </TouchableOpacity>
 
