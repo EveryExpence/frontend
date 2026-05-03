@@ -72,13 +72,13 @@ export default function NewExpense() {
               <MaterialCommunityIcons
                 className="mr-6"
                 name="bank"
-                size={24}
+                size={20}
               />
             )}
             renderRightIcon={() => (
               <MaterialCommunityIcons
                 name="chevron-down"
-                size={24}
+                size={20}
               />
             )}
           />
@@ -90,7 +90,7 @@ export default function NewExpense() {
           <View className="w-full flex flex-row items-center">
             <MaterialCommunityIcons
               name="cash"
-              size={24}
+              size={20}
               color={colors.text}
               className="absolute left-4 text-theme-icon z-50"
             />
@@ -100,7 +100,7 @@ export default function NewExpense() {
               value={amount}
               onChangeText={setAmount}
               className={`w-full py-4 pl-12 text-xl rounded-md bg-theme-surface text-theme-text
-                ${amount != "" && selectedAccount !== null ? 'pr-12' : 'pr-4'}`}
+                ${amount != "" && selectedAccount !== null ? 'pr-16' : 'pr-4'}`}
             />
             {
               amount != "" && selectedAccount !== null ?
@@ -142,13 +142,13 @@ export default function NewExpense() {
                 <MaterialCommunityIcons
                   className="mr-6"
                   name="chart-waterfall"
-                  size={24}
+                  size={20}
                 />
               )}
               renderRightIcon={() => (
                 <MaterialCommunityIcons
                   name="chevron-down"
-                  size={24}
+                  size={20}
                 />
               )}
             />
@@ -192,13 +192,13 @@ export default function NewExpense() {
                 <MaterialCommunityIcons
                   className="mr-6"
                   name="cash-register"
-                  size={24}
+                  size={20}
                 />
               )}
               renderRightIcon={() => (
                 <MaterialCommunityIcons
                   name="chevron-down"
-                  size={24}
+                  size={20}
                 />
               )}
             />
@@ -209,66 +209,58 @@ export default function NewExpense() {
           </View>
         </View>
 
-        <View className="flex-row mb-8">
-          <View className="flex-1 mr-4">
-            <Text className="text-2xl font-bold">Expense date</Text>
+        <View className="mb-8">
+          <Text className="text-2xl font-bold">Expense timestamp</Text>
 
-              <TouchableOpacity
-                onPress={() => setShowDateSelection(true)}
-                className="bg-theme-surface py-4 px-4 rounded-md flex-row items-center gap-2"
-              >
-                <MaterialCommunityIcons name="calendar" size={20} />
-                <Text className="text-xl">{ selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) } </Text>
-              </TouchableOpacity>
-            { showDateSelection ?
-              <DateTimePicker
-                display="calendar"
-                mode="date"
-                value={selectedDate}
-                onValueChange={(_, value) => {
-                  setSelectedDate(value);
-                  setShowDateSelection(false);
-                }}
-                onDismiss={() => setShowDateSelection(false)}
-                maximumDate={new Date()}
-              /> : <></> }
-          </View>
+          <TouchableOpacity
+            onPress={() => setShowDateSelection(true)}
+            className="bg-theme-surface py-4 px-4 rounded-md flex-row items-center gap-2"
+          >
+            <MaterialCommunityIcons name="clock" size={20} />
+            <Text className="text-xl">{selectedTime.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })} </Text>
+          </TouchableOpacity>
 
-          <View className="flex-1 ml-4">
-            <Text className="text-2xl font-bold">Expense time</Text>
+          {showDateSelection ?
+            <DateTimePicker
+              display="calendar"
+              mode="date"
+              value={selectedDate}
+              onValueChange={(_, value) => {
+                setSelectedDate(value);
+                setShowDateSelection(false);
+                setShowTimeSelection(true);
+              }}
+              onDismiss={() => {
+                setShowDateSelection(false);
+                setShowTimeSelection(true);
+              }}
+              maximumDate={new Date()}
+            /> : <></>}
 
-              <TouchableOpacity
-                onPress={() => setShowTimeSelection(true)}
-                className="bg-theme-surface py-4 px-4 rounded-md flex-row items-center gap-2"
-              >
-                <MaterialCommunityIcons name="clock" size={20} />
-                <Text className="text-xl">{ selectedTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) } </Text>
-              </TouchableOpacity>
-            { showTimeSelection ?
-              <DateTimePicker
-                display="clock"
-                mode="time"
-                value={selectedTime}
-                onValueChange={(_, value) => {
-                  setSelectedTime(value);
-                  setShowTimeSelection(false);
-                }}
-                onDismiss={() => setShowTimeSelection(false)}
-              /> : <></> }
-          </View>
+          {showTimeSelection ?
+            <DateTimePicker
+              display="clock"
+              mode="time"
+              value={selectedTime}
+              onValueChange={(_, value) => {
+                setSelectedTime(value);
+                setShowTimeSelection(false);
+              }}
+              onDismiss={() => setShowTimeSelection(false)}
+            /> : <></>}
         </View>
 
         <View className="mb-8">
           <Text className="text-2xl font-bold">Description</Text>
 
           <TextInput
-              placeholder='Enter description'
-              placeholderTextColor={colors.text}
-              value={description}
-              onChangeText={setDescription}
-              multiline
-              className="w-full min-h-72  text-xl rounded-md bg-theme-surface text-theme-text"
-            />
+            placeholder='Enter description'
+            placeholderTextColor={colors.text}
+            value={description}
+            onChangeText={setDescription}
+            multiline
+            className="w-full min-h-72  text-xl rounded-md bg-theme-surface text-theme-text"
+          />
         </View>
 
         <View className="py-20" />
