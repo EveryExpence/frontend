@@ -12,6 +12,7 @@ import { PaymentMethod } from '@/types/data/paymentMethod';
 import { getAllPaymentMethods } from '@/data/paymentMethods';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AccountSelection from '@/components/new-expense/AccountSelection';
+import AmountInput from '@/components/new-expense/AmountInput';
 
 export default function NewExpense() {
   const scheme = useColorScheme() ?? 'light';
@@ -22,7 +23,6 @@ export default function NewExpense() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
-  const [amount, setAmount] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedTime, setSelectedTime] = useState<Date>(new Date());
   const [showDateSelection, setShowDateSelection] = useState(false);
@@ -41,30 +41,7 @@ export default function NewExpense() {
       <ScrollView className="px-4">
         <AccountSelection selectedAccount={selectedAccount} setSelectedAccount={setSelectedAccount} />
 
-        <View className="w-full mb-8">
-          <Text className="text-2xl font-bold">Amount</Text>
-
-          <View className="w-full flex flex-row items-center">
-            <MaterialCommunityIcons
-              name="cash"
-              size={20}
-              color={colors.text}
-              className="absolute left-4 text-theme-icon z-50"
-            />
-            <TextInput
-              placeholder='Enter amount'
-              placeholderTextColor={colors.text}
-              value={amount}
-              onChangeText={setAmount}
-              className={`w-full py-4 pl-12 text-xl rounded-md bg-theme-surface text-theme-text
-                ${amount != "" && selectedAccount !== null ? 'pr-16' : 'pr-4'}`}
-            />
-            {
-              amount != "" && selectedAccount !== null ?
-                <Text className="absolute text-xl right-4">{selectedAccount.currency}</Text> : <></>
-            }
-          </View>
-        </View>
+        <AmountInput selectedAccount={selectedAccount} />
 
         <View className="mb-8">
           <Text className="text-2xl font-bold">Category</Text>
