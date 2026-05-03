@@ -1,17 +1,19 @@
 import { View, Text, useColorScheme, TextInput } from 'react-native'
-import React, { useState } from 'react'
+import React, { Dispatch, SetStateAction, useState } from 'react'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { Colors } from '@/constants/theme';
 import { Account } from '@/types/data/account';
 
 interface Props {
     selectedAccount: Account | null;
+    amount: string;
+    setAmount: Dispatch<SetStateAction<string>>;
+    isValid: boolean;
 }
 
-const AmountInput = ({ selectedAccount }: Props) => {
+const AmountInput = ({ selectedAccount, amount, setAmount, isValid }: Props) => {
     const scheme = useColorScheme() ?? 'light';
     const colors = Colors[scheme];
-    const [amount, setAmount] = useState("");
 
     return (
         <View className="w-full mb-8">
@@ -29,13 +31,18 @@ const AmountInput = ({ selectedAccount }: Props) => {
                     placeholderTextColor={colors.text}
                     value={amount}
                     onChangeText={setAmount}
-                    className={`w-full py-4 pl-12 text-xl rounded-md bg-theme-surface text-theme-text
-                        ${amount != "" && selectedAccount !== null ? 'pr-16' : 'pr-4'}`}
+                    className={`px-12 w-full py-4 text-xl rounded-md bg-theme-surface text-theme-text
+                        ${amount !== "" && selectedAccount !== null ? 'pr-16' : 'pr-4'}
+                        ${isValid ? '' : "border border-red-500"}`}
                 />
                 {
-                    amount != "" && selectedAccount !== null ?
+                    amount !== "" && selectedAccount !== null ?
                         <Text className="absolute text-xl right-4">{selectedAccount.currency}</Text> : <></>
                 }
+            </View>
+
+            <View className="relative h-0">
+                <Text className="absolute text-red-500">{isValid ? "" : "Must be a valid number"}</Text>
             </View>
         </View>
     )

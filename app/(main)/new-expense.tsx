@@ -16,6 +16,8 @@ export default function NewExpense() {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
   const [selectedDateTime, setSelectedDateTime] = useState(new Date());
+  const [amount, setAmount] = useState("");
+  const isAmountValid = amount.trim().length === 0 || !isNaN(Number(amount));
   const [description, setDescription] = useState("");
 
   return (
@@ -23,7 +25,7 @@ export default function NewExpense() {
       <ScrollView className="px-4">
         <AccountSelection selectedAccount={selectedAccount} setSelectedAccount={setSelectedAccount} />
 
-        <AmountInput selectedAccount={selectedAccount} />
+        <AmountInput selectedAccount={selectedAccount} amount={amount} setAmount={setAmount} isValid={isAmountValid} />
 
         <CategorySelection selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
 
