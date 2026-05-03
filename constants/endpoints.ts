@@ -6,3 +6,4 @@ export const getUserDataEndpoint = `${base}/user`;
 export const logoutEndpoint = `${base}/auth/logout`;
 export const registerEndpoint = `${base}/auth/register`;
 export const refreshEndpoint = `${base}/auth/refresh`
+export const updateUserEmailEndpoint = `${base}/user/changePassword`

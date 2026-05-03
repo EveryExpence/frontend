@@ -4,6 +4,9 @@ import React, { useEffect, useState } from "react";
 import {Controller, useForm} from 'react-hook-form';
 import { useThemeColor } from "@/hooks/use-theme-color";
 import Toast from 'react-native-toast-message';
+import { updateUserEmail } from '@/context/userContext'
+import EncryptedStorage from "react-native-encrypted-storage";
+import { accessTokenKey } from "@/constants/encryptedStorageKeys";
 
 const ProfileScreen = () => {
   const { control, watch, handleSubmit, formState: {errors} } = useForm({
@@ -21,10 +24,10 @@ const ProfileScreen = () => {
   const [displayLastName, setDisplayLastName] = useState("")
   const [displayEmail, setDisplayEmail] = useState("")
 
-  const onSubmit = () => {
-    setDisplayEmail(watch("email"));
-    setDisplayFirstName(watch("firstName"))
-    setDisplayLastName(watch("lastName"))
+  const onSubmit = (data: any) => {
+    setDisplayEmail(data.email);
+    setDisplayFirstName(data.firstName)
+    setDisplayLastName(data.lastName)
   }
 
   useEffect(() =>{
@@ -32,6 +35,18 @@ const ProfileScreen = () => {
     setDisplayFirstName(watch("firstName"))
     setDisplayLastName(watch("lastName"))
   }, []);
+
+  const handleUpdate = async (email: string) => {
+    try{
+      const token = await EncryptedStorage.getItem(accessTokenKey)
+
+      if (!token) throw new Error("No access token");
+
+      await updateUserEmail(token, displayEmail)
+    }catch (err: any){
+      console.error(err.message)
+    }
+  }
 
   return (
     <View
@@ -99,10 +114,10 @@ const ProfileScreen = () => {
             control={control}
             name="lastName"
             rules={{
-              required:"First Name is required",
+              required:"Last Name is required",
               maxLength: {
                 value: 20,
-                message: "First Name is too long",
+                message: "Last Name is too long",
               },
             }}
             render={({ field: {onChange, value}}) => (
@@ -131,10 +146,10 @@ const ProfileScreen = () => {
             control={control}
             name="email"
             rules={{
-              required:"First Name is required",
+              required:"Email is required",
               maxLength: {
                 value: 20,
-                message: "First Name is too long",
+                message: "Email is too long",
               },
               pattern: {
                 value: /^\S+@\S+\.\S+$/,
@@ -163,13 +178,18 @@ const ProfileScreen = () => {
       <TouchableOpacity
         className={`mt-6 p-4 rounded-md items-center ${isEditing ? 'bg-theme-success' : 'bg-theme-tint' }`}
         onPress={() => {
-            handleSubmit(() => {
-                setIsEditing(prev => !prev)
+            handleSubmit((data) => {
                 if(isEditing){
-                  onSubmit()
+                  onSubmit(data)
+                  handleUpdate(data.email)
+                  setIsEditing(false)
+
                   setTimeout(() => {
                       Toast.show({ text1: 'Changed profile successfully' });
                   }, 100);
+
+                }else{
+                  setIsEditing(true)
                 }
               },
               (errors) => {
