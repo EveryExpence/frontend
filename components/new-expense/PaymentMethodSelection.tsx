@@ -1,15 +1,20 @@
-import { View, Text, TouchableOpacity, useColorScheme } from 'react-native'
+import { View, Text, TouchableOpacity, useColorScheme, TextInput } from 'react-native'
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Dropdown } from 'react-native-element-dropdown'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { PaymentMethod } from '@/types/data/paymentMethod'
-import { useSQLiteContext } from 'expo-sqlite'
+import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite'
 import { Colors } from '@/constants/theme'
-import { getAllPaymentMethods } from '@/data/paymentMethods'
+import { createPaymentMethod, getAllPaymentMethods } from '@/data/paymentMethods'
+import CustomModal from '../Modal'
 
 interface Props {
     selectedPaymentMethod: PaymentMethod | null;
     setSelectedPaymentMethod: Dispatch<SetStateAction<PaymentMethod | null>>;
+}
+
+const fetchPaymentMethods = async (db: SQLiteDatabase, callback: Dispatch<SetStateAction<PaymentMethod[]>>) => {
+    callback(await getAllPaymentMethods(db));
 }
 
 const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMethod }: Props) => {
@@ -17,11 +22,18 @@ const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMetho
     const colors = Colors[scheme];
     const db = useSQLiteContext();
     const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [newPaymentMethodName, setNewPaymentMethodName] = useState("");
+
+    const saveNewCategory = async () => {
+        await createPaymentMethod(db, { name: newPaymentMethodName });
+        await fetchPaymentMethods(db, setPaymentMethods);
+        setIsModalVisible(false);
+        setNewPaymentMethodName("");
+    }
 
     useEffect(() => {
-        (async () => {
-            setPaymentMethods(await getAllPaymentMethods(db));
-        })();
+        fetchPaymentMethods(db, setPaymentMethods);
     }, [db]);
 
     return (
@@ -75,10 +87,50 @@ const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMetho
                     )}
                 />
 
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => setIsModalVisible(true)}>
                     <MaterialCommunityIcons name="plus" size={32} color={colors.text} />
                 </TouchableOpacity>
             </View>
+
+            <CustomModal
+                isVisible={isModalVisible}
+                setIsVisible={setIsModalVisible}
+                title="Create a new payment method"
+                cancelAction={
+                    <TouchableOpacity onPress={() => setIsModalVisible(false)}>
+                        <Text className="text-xl text-theme-text">Cancel</Text>
+                    </TouchableOpacity>
+                }
+                confirmAction={
+                    <TouchableOpacity
+                        onPress={saveNewCategory}
+                        className="bg-theme-tint rounded-md px-5 py-3"
+                    >
+                        <Text className="text-xl text-theme-textLight">Save</Text>
+                    </TouchableOpacity>
+                }
+            >
+                <View className="w-full mb-4">
+                    <Text className="text-xl text-theme-text opacity-85">Payment method name</Text>
+
+                    <View className="w-full flex-row items-center">
+                        <MaterialCommunityIcons
+                            className="absolute pl-4 z-30"
+                            name="abugida-thai"
+                            size={20}
+                            color={colors.text}
+                        />
+
+                        <TextInput
+                            placeholder='Enter name'
+                            placeholderClassName="text-theme-text opacity-35"
+                            value={newPaymentMethodName}
+                            onChangeText={setNewPaymentMethodName}
+                            className="px-12 w-full py-4 text-xl rounded-md bg-theme-surface text-theme-text border border-theme-text"
+                        />
+                    </View>
+                </View>
+            </CustomModal>
         </View>
     )
 }
