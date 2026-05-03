@@ -1,38 +1,28 @@
 import { ScrollView, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { Dropdown } from 'react-native-element-dropdown';
-import { useSQLiteContext } from 'expo-sqlite';
 import { Account } from '@/types/data/account';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
 import { Category } from '@/types/data/category';
 import { PaymentMethod } from '@/types/data/paymentMethod';
-import { getAllPaymentMethods } from '@/data/paymentMethods';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AccountSelection from '@/components/new-expense/AccountSelection';
 import AmountInput from '@/components/new-expense/AmountInput';
 import CategorySelection from '@/components/new-expense/CategorySelection';
+import PaymentMethodSelection from '@/components/new-expense/PaymentMethodSelection';
 
 export default function NewExpense() {
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
-  const db = useSQLiteContext();
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedTime, setSelectedTime] = useState<Date>(new Date());
   const [showDateSelection, setShowDateSelection] = useState(false);
   const [showTimeSelection, setShowTimeSelection] = useState(false);
   const [description, setDescription] = useState("");
-
-  useEffect(() => {
-    (async () => {
-      setPaymentMethods(await getAllPaymentMethods(db));
-    })();
-  }, [db]);
 
   return (
     <SafeAreaView>
@@ -43,55 +33,7 @@ export default function NewExpense() {
 
         <CategorySelection selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
 
-        <View className="mb-8">
-          <Text className="text-2xl font-bold">Payment method</Text>
-
-          <View className="flex-row justify-between items-center gap-2">
-            <Dropdown
-              style={{
-                backgroundColor: colors.surface,
-                padding: 12,
-                borderRadius: 6,
-                flex: 1,
-              }}
-              selectedTextStyle={{
-                fontSize: 18,
-              }}
-              placeholderStyle={{
-                fontSize: 18,
-              }}
-              inputSearchStyle={{
-                fontSize: 18,
-              }}
-              data={paymentMethods}
-              search
-              maxHeight={300}
-              labelField="name"
-              valueField="id"
-              placeholder="Select payment method"
-              searchPlaceholder="Search payment method..."
-              value={selectedPaymentMethod ?? undefined}
-              onChange={item => setSelectedPaymentMethod(item)}
-              renderLeftIcon={() => (
-                <MaterialCommunityIcons
-                  className="mr-6"
-                  name="cash-register"
-                  size={20}
-                />
-              )}
-              renderRightIcon={() => (
-                <MaterialCommunityIcons
-                  name="chevron-down"
-                  size={20}
-                />
-              )}
-            />
-
-            <TouchableOpacity>
-              <MaterialCommunityIcons name="plus" size={32} />
-            </TouchableOpacity>
-          </View>
-        </View>
+        <PaymentMethodSelection selectedPaymentMethod={selectedPaymentMethod} setSelectedPaymentMethod={setSelectedPaymentMethod} />
 
         <View className="mb-8">
           <Text className="text-2xl font-bold">Expense timestamp</Text>
