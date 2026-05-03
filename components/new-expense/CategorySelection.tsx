@@ -119,7 +119,7 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory }: Props) => 
                     <View className="w-full flex-row items-center">
                         <MaterialCommunityIcons
                             className="absolute pl-4 z-30"
-                            name="abugida-thai"
+                            name="text-long"
                             size={20}
                             color={colors.text}
                         />
