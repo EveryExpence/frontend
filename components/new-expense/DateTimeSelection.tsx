@@ -1,7 +1,8 @@
-import { View, Text, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity, useColorScheme } from 'react-native'
 import React, { Dispatch, SetStateAction, useState } from 'react'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Colors } from '@/constants/theme';
 
 interface Props {
     selectedDateTime: Date;
@@ -9,6 +10,8 @@ interface Props {
 }
 
 const DateTimeSelection = ({ selectedDateTime, setSelectedDateTime }: Props) => {
+    const scheme = useColorScheme() ?? 'light';
+    const colors = Colors[scheme];
     const [showDateSelection, setShowDateSelection] = useState(false);
     const [showTimeSelection, setShowTimeSelection] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -16,14 +19,14 @@ const DateTimeSelection = ({ selectedDateTime, setSelectedDateTime }: Props) => 
 
     return (
         <View className="mb-8">
-            <Text className="text-2xl font-bold">Expense timestamp</Text>
+            <Text className="text-2xl text-theme-text font-bold">Expense timestamp</Text>
 
             <TouchableOpacity
                 onPress={() => setShowDateSelection(true)}
-                className="bg-theme-surface py-4 px-4 rounded-md flex-row items-center gap-2"
+                className="bg-theme-surface py-4 px-3 rounded-md flex-row items-center gap-2"
             >
-                <MaterialCommunityIcons name="clock" size={20} />
-                <Text className="text-xl">{selectedDateTime.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })} </Text>
+                <MaterialCommunityIcons name="clock" size={20} color={colors.text} />
+                <Text className="text-xl text-theme-text pl-5">{selectedDateTime.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })} </Text>
             </TouchableOpacity>
 
             {showDateSelection ?

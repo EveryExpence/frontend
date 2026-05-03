@@ -26,22 +26,27 @@ const AccountSelection = ({ selectedAccount, setSelectedAccount }: Props) => {
 
     return (
         <View className="mb-8">
-            <Text className="text-2xl font-bold">Account</Text>
+            <Text className="text-2xl text-theme-text font-bold">Account</Text>
 
             <Dropdown
                 style={{
                     backgroundColor: colors.surface,
                     padding: 12,
                     borderRadius: 6,
+                    flex: 1,
                 }}
                 selectedTextStyle={{
-                    fontSize: 18,
+                    fontSize: 17,
+                    color: colors.text,
                 }}
                 placeholderStyle={{
-                    fontSize: 18,
+                    fontSize: 17,
+                    color: colors.text,
+                    opacity: 0.5,
                 }}
                 inputSearchStyle={{
-                    fontSize: 18,
+                    fontSize: 17,
+                    color: colors.text,
                 }}
                 data={accounts}
                 search
@@ -57,12 +62,14 @@ const AccountSelection = ({ selectedAccount, setSelectedAccount }: Props) => {
                         className="mr-6"
                         name="bank"
                         size={20}
+                        color={colors.text}
                     />
                 )}
                 renderRightIcon={() => (
                     <MaterialCommunityIcons
                         name="chevron-down"
                         size={20}
+                        color={colors.text}
                     />
                 )}
             />

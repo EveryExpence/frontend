@@ -1,6 +1,5 @@
-import { View, Text, TextInput, useColorScheme } from 'react-native'
+import { View, Text, TextInput } from 'react-native'
 import React, { Dispatch, SetStateAction } from 'react'
-import { Colors } from '@/constants/theme';
 
 interface Props {
     description: string;
@@ -8,16 +7,13 @@ interface Props {
 }
 
 const DescriptionInput = ({ description, setDescription }: Props) => {
-    const scheme = useColorScheme() ?? 'light';
-    const colors = Colors[scheme];
-
     return (
         <View className="mb-8">
-            <Text className="text-2xl font-bold">Description</Text>
+            <Text className="text-2xl text-theme-text font-bold">Description</Text>
 
             <TextInput
                 placeholder='Enter description'
-                placeholderTextColor={colors.text}
+                placeholderClassName="text-theme-text opacity-35"
                 value={description}
                 onChangeText={setDescription}
                 multiline

@@ -52,15 +52,16 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory }: Props) => 
                         flex: 1,
                     }}
                     selectedTextStyle={{
-                        fontSize: 18,
+                        fontSize: 17,
                         color: colors.text,
                     }}
                     placeholderStyle={{
-                        fontSize: 18,
+                        fontSize: 17,
                         color: colors.text,
+                        opacity: 0.5,
                     }}
                     inputSearchStyle={{
-                        fontSize: 18,
+                        fontSize: 17,
                         color: colors.text,
                     }}
                     data={categories}

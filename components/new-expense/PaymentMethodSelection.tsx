@@ -26,7 +26,7 @@ const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMetho
 
     return (
         <View className="mb-8">
-            <Text className="text-2xl font-bold">Payment method</Text>
+            <Text className="text-2xl text-theme-text font-bold">Payment method</Text>
 
             <View className="flex-row justify-between items-center gap-2">
                 <Dropdown
@@ -37,13 +37,17 @@ const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMetho
                         flex: 1,
                     }}
                     selectedTextStyle={{
-                        fontSize: 18,
+                        fontSize: 17,
+                        color: colors.text,
                     }}
                     placeholderStyle={{
-                        fontSize: 18,
+                        fontSize: 17,
+                        color: colors.text,
+                        opacity: 0.5,
                     }}
                     inputSearchStyle={{
-                        fontSize: 18,
+                        fontSize: 17,
+                        color: colors.text,
                     }}
                     data={paymentMethods}
                     search
@@ -59,18 +63,20 @@ const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMetho
                             className="mr-6"
                             name="cash-register"
                             size={20}
+                            color={colors.text}
                         />
                     )}
                     renderRightIcon={() => (
                         <MaterialCommunityIcons
                             name="chevron-down"
                             size={20}
+                            color={colors.text}
                         />
                     )}
                 />
 
                 <TouchableOpacity>
-                    <MaterialCommunityIcons name="plus" size={32} />
+                    <MaterialCommunityIcons name="plus" size={32} color={colors.text} />
                 </TouchableOpacity>
             </View>
         </View>

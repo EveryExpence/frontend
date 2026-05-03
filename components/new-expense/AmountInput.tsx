@@ -17,27 +17,27 @@ const AmountInput = ({ selectedAccount, amount, setAmount, isValid }: Props) => 
 
     return (
         <View className="w-full mb-8">
-            <Text className="text-2xl font-bold">Amount</Text>
+            <Text className="text-2xl text-theme-text font-bold">Amount</Text>
 
             <View className="w-full flex flex-row items-center">
                 <MaterialCommunityIcons
                     name="cash"
                     size={20}
                     color={colors.text}
-                    className="absolute left-4 text-theme-icon z-50"
+                    className="absolute left-3 text-theme-icon z-50"
                 />
                 <TextInput
                     placeholder='Enter amount'
-                    placeholderTextColor={colors.text}
+                    placeholderClassName="text-theme-text opacity-35"
                     value={amount}
                     onChangeText={setAmount}
-                    className={`px-12 w-full py-4 text-xl rounded-md bg-theme-surface text-theme-text
+                    className={`px-16 w-full py-4 text-xl rounded-md bg-theme-surface text-theme-text
                         ${amount !== "" && selectedAccount !== null ? 'pr-16' : 'pr-4'}
                         ${isValid ? '' : "border border-red-500"}`}
                 />
                 {
                     amount !== "" && selectedAccount !== null ?
-                        <Text className="absolute text-xl right-4">{selectedAccount.currency}</Text> : <></>
+                        <Text className="absolute text-xl text-theme-text right-4">{selectedAccount.currency}</Text> : <></>
                 }
             </View>
 
