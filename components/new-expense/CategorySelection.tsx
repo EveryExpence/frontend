@@ -1,12 +1,13 @@
-import { View, Text, useColorScheme, TouchableOpacity, TextInput } from 'react-native'
+import { View, Text, useColorScheme, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native'
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Dropdown } from 'react-native-element-dropdown'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import { Category } from '@/types/data/category'
+import { Category, categoryTypes } from '@/types/data/category'
 import { Colors } from '@/constants/theme'
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite'
-import { getAllCategories } from '@/data/categories'
+import { createCategory, getAllCategories } from '@/data/categories'
 import CustomModal from '../Modal'
+import SegmentedControl from '@react-native-segmented-control/segmented-control';
 
 interface Props {
     selectedCategory: Category | null;
@@ -24,6 +25,15 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory }: Props) => 
     const [categories, setCategories] = useState<Category[]>([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState("");
+    const [newCategoryTypeIndex, setNewCategoryTypeIndex] = useState(2);
+
+    const saveNewCategory = async () => {
+        await createCategory(db, { name: newCategoryName, type: categoryTypes[newCategoryTypeIndex] });
+        await fetchCategories(db, setCategories);
+        setIsModalVisible(false);
+        setNewCategoryName("");
+        setNewCategoryTypeIndex(2);
+    }
 
     useEffect(() => {
         fetchCategories(db, setCategories);
@@ -95,7 +105,7 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory }: Props) => 
                 }
                 confirmAction={
                     <TouchableOpacity
-                        onPress={() => { }}
+                        onPress={saveNewCategory}
                         className="bg-theme-tint rounded-md px-5 py-3"
                     >
                         <Text className="text-xl text-theme-textLight">Save</Text>
@@ -121,6 +131,29 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory }: Props) => 
                             className="px-12 w-full py-4 text-xl rounded-md bg-theme-surface text-theme-text border border-theme-text"
                         />
                     </View>
+                </View>
+
+                <View className="w-full mb-4">
+                    <Text className="text-xl text-theme-text opacity-85">Category name</Text>
+
+                    <SegmentedControl
+                        tintColor={colors.tint}
+                        fontStyle={{
+                            color: colors.text,
+                        }}
+                        activeFontStyle={{
+                            color: colors.textLight,
+                        }}
+                        backgroundColor={colors.background}
+                        style={{
+                            height: 36
+                        }}
+                        values={categoryTypes}
+                        selectedIndex={newCategoryTypeIndex}
+                        onChange={(event) => {
+                            setNewCategoryTypeIndex(event.nativeEvent.selectedSegmentIndex);
+                        }}
+                    />
                 </View>
             </CustomModal>
         </View>

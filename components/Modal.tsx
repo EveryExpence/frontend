@@ -23,7 +23,7 @@ const CustomModal = (props: Props) => {
 
                     {props.children}
 
-                    <View className="flex-row justify-between items-center">
+                    <View className="flex-row justify-between items-center mt-2">
                         {props.cancelAction ?? <></>}
 
                         {props.confirmAction ?? <></>}
