@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {Controller, useForm} from 'react-hook-form';
 import { useThemeColor } from "@/hooks/use-theme-color";
+import Toast from 'react-native-toast-message';
 
 const ProfileScreen = () => {
   const { control, watch, handleSubmit, formState: {errors} } = useForm({
@@ -164,10 +165,15 @@ const ProfileScreen = () => {
         onPress={() => {
             handleSubmit(() => {
                 setIsEditing(prev => !prev)
-                onSubmit()
+                if(isEditing){
+                  onSubmit()
+                  setTimeout(() => {
+                      Toast.show({ text1: 'Changed profile successfully' });
+                  }, 100);
+                }
               },
               (errors) => {
-                console.log("Validation failed", errors)
+                Toast.show({ text1: `Changing profile failed ${errors}`, type: "error" });
               }
             )();
           }}
