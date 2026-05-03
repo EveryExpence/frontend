@@ -1,4 +1,4 @@
-import { View, Text, useColorScheme, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native'
+import { View, Text, useColorScheme, TouchableOpacity, TextInput } from 'react-native'
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Dropdown } from 'react-native-element-dropdown'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
