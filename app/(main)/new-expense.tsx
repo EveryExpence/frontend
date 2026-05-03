@@ -259,7 +259,8 @@ export default function NewExpense() {
             value={description}
             onChangeText={setDescription}
             multiline
-            className="w-full min-h-72  text-xl rounded-md bg-theme-surface text-theme-text"
+            textAlignVertical="top"
+            className="w-full min-h-36 text-xl rounded-md bg-theme-surface text-theme-text px-4 py-6"
           />
         </View>
 
