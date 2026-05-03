@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Dropdown } from 'react-native-element-dropdown';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Account } from '@/types/data/account';
-import { getAllAccounts } from '@/data/accounts';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
 import { Category } from '@/types/data/category';
@@ -12,13 +11,13 @@ import { getAllCategories } from '@/data/categories';
 import { PaymentMethod } from '@/types/data/paymentMethod';
 import { getAllPaymentMethods } from '@/data/paymentMethods';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import AccountSelection from '@/components/new-expense/AccountSelection';
 
 export default function NewExpense() {
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
   const db = useSQLiteContext();
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
-  const [accounts, setAccounts] = useState<Account[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
@@ -32,7 +31,6 @@ export default function NewExpense() {
 
   useEffect(() => {
     (async () => {
-      setAccounts(await getAllAccounts(db));
       setCategories(await getAllCategories(db));
       setPaymentMethods(await getAllPaymentMethods(db));
     })();
@@ -41,48 +39,7 @@ export default function NewExpense() {
   return (
     <SafeAreaView>
       <ScrollView className="px-4">
-        <View className="mb-8">
-          <Text className="text-2xl font-bold">Account</Text>
-
-          <Dropdown
-            style={{
-              backgroundColor: colors.surface,
-              padding: 12,
-              borderRadius: 6,
-            }}
-            selectedTextStyle={{
-              fontSize: 18,
-            }}
-            placeholderStyle={{
-              fontSize: 18,
-            }}
-            inputSearchStyle={{
-              fontSize: 18,
-            }}
-            data={accounts}
-            search
-            maxHeight={300}
-            labelField="name"
-            valueField="id"
-            placeholder="Select account"
-            searchPlaceholder="Search account..."
-            value={selectedAccount ?? undefined}
-            onChange={item => setSelectedAccount(item)}
-            renderLeftIcon={() => (
-              <MaterialCommunityIcons
-                className="mr-6"
-                name="bank"
-                size={20}
-              />
-            )}
-            renderRightIcon={() => (
-              <MaterialCommunityIcons
-                name="chevron-down"
-                size={20}
-              />
-            )}
-          />
-        </View>
+        <AccountSelection selectedAccount={selectedAccount} setSelectedAccount={setSelectedAccount} />
 
         <View className="w-full mb-8">
           <Text className="text-2xl font-bold">Amount</Text>
