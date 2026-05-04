@@ -4,47 +4,72 @@ import React, { useEffect, useState } from "react";
 import {Controller, useForm} from 'react-hook-form';
 import { useThemeColor } from "@/hooks/use-theme-color";
 import Toast from 'react-native-toast-message';
-import { updateUserEmail } from '@/context/userContext'
+import { updateUserEmail, updateUserName } from '@/context/userContext'
 import EncryptedStorage from "react-native-encrypted-storage";
 import { accessTokenKey } from "@/constants/encryptedStorageKeys";
+import { getUserData } from '@/context/authContext'
 
 const ProfileScreen = () => {
-  const { control, watch, handleSubmit, formState: {errors} } = useForm({
+  const { control, handleSubmit, reset, formState: {errors} } = useForm({
     defaultValues:{
-      firstName: "John",
-      lastName: "Doe",
-      email: "john@email.com",
+      userName: "",
+      email: "",
     }
   });
 
   const iconColor = useThemeColor({}, "icon");
   const [isEditing, setIsEditing] = useState(false)
-
-  const [displayFirstName, setDisplayFirstName] = useState("")
-  const [displayLastName, setDisplayLastName] = useState("")
+  const [displayUserName, setDisplayUserName] = useState("")
   const [displayEmail, setDisplayEmail] = useState("")
 
-  const onSubmit = (data: any) => {
-    setDisplayEmail(data.email);
-    setDisplayFirstName(data.firstName)
-    setDisplayLastName(data.lastName)
-  }
-
-  useEffect(() =>{
-    setDisplayEmail(watch("email"));
-    setDisplayFirstName(watch("firstName"))
-    setDisplayLastName(watch("lastName"))
-  }, []);
-
-  const handleUpdate = async (email: string) => {
+  const loadUser = async () => {
     try{
       const token = await EncryptedStorage.getItem(accessTokenKey)
 
       if (!token) throw new Error("No access token");
 
-      await updateUserEmail(token, displayEmail)
+      const data = await getUserData(token)
+
+      const nextUserName = data.publicUsername || "";
+      const nextEmail = data.email || "";
+
+      reset({
+        userName: nextUserName,
+        email: nextEmail,
+      });
+
+      setDisplayUserName(nextUserName);
+      setDisplayEmail(nextEmail);
+
+    }catch(err){
+      console.error(err)
+    }
+  }
+
+  useEffect(() =>{
+    loadUser()
+  }, []);
+
+  const handleUpdate = async (email: string, userName: string) => {
+    try{
+      const token = await EncryptedStorage.getItem(accessTokenKey)
+
+      if (!token) throw new Error("No access token");
+
+      await Promise.all([
+        updateUserEmail(token, email),
+        updateUserName(token, userName)
+      ]);
+
+      await loadUser();
+      setDisplayUserName(userName);
+      setDisplayEmail(email);
     }catch (err: any){
-      console.error(err.message)
+      console.error(err);
+      Toast.show({ 
+        text1: err?.message || "Something went wrong", 
+        type: "error" 
+      });
     }
   }
 
@@ -61,7 +86,7 @@ const ProfileScreen = () => {
         </View>
 
         <Text className="mt-4 text-3xl font-semibold text-theme-text">
-          {displayFirstName} {displayLastName}
+          {displayUserName}
         </Text>
 
         <Text className="text-2xl text-theme-icon">
@@ -74,17 +99,21 @@ const ProfileScreen = () => {
       >
         <View>
           <Text className="text-2xl mb-1 text-theme-icon">
-            First Name 
+            Username
           </Text>
 
           <Controller
             control={control}
-            name="firstName"
+            name="userName"
             rules={{
-              required:"First Name is required",
+              required:"Username is required",
               maxLength: {
                 value: 20,
-                message: "First Name is too long",
+                message: "Username is too long",
+              },
+              minLength: {
+                value: 3,
+                message: "Username is too short",
               },
             }}
             render={({ field: {onChange, value}}) => (
@@ -97,44 +126,12 @@ const ProfileScreen = () => {
             )}
           />
 
-          {errors.firstName && (
+          {errors.userName && (
             <Text className="text-red-500 text-sm pl-2 mt-1">
-                {errors.firstName.message}
+                {errors.userName.message}
             </Text>
           )}
 
-        </View>
-
-        <View>
-          <Text className="text-2xl mb-1 text-theme-icon">
-            Last Name
-          </Text>
-
-          <Controller
-            control={control}
-            name="lastName"
-            rules={{
-              required:"Last Name is required",
-              maxLength: {
-                value: 20,
-                message: "Last Name is too long",
-              },
-            }}
-            render={({ field: {onChange, value}}) => (
-              <TextInput
-                editable={isEditing}
-                value={value}
-                className="p-4 text-xl border border-theme-text rounded-md bg-theme-background text-theme-text"
-                onChangeText={onChange}
-              />
-            )}
-          />
-
-          {errors.lastName && (
-            <Text className="text-red-500 text-sm pl-2 mt-1">
-                {errors.lastName.message}
-            </Text>
-          )}
         </View>
 
         <View>
@@ -148,7 +145,7 @@ const ProfileScreen = () => {
             rules={{
               required:"Email is required",
               maxLength: {
-                value: 20,
+                value: 40,
                 message: "Email is too long",
               },
               pattern: {
@@ -180,8 +177,7 @@ const ProfileScreen = () => {
         onPress={() => {
             handleSubmit((data) => {
                 if(isEditing){
-                  onSubmit(data)
-                  handleUpdate(data.email)
+                  handleUpdate(data.email, data.userName)
                   setIsEditing(false)
 
                   setTimeout(() => {
@@ -193,7 +189,7 @@ const ProfileScreen = () => {
                 }
               },
               (errors) => {
-                Toast.show({ text1: `Changing profile failed ${errors}`, type: "error" });
+                Toast.show({ text1: `Changing profile failed`, type: "error" });
               }
             )();
           }}

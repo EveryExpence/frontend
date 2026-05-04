@@ -17,7 +17,7 @@ export interface IAuthContext {
 
 export const AuthContext = createContext<IAuthContext>({} as IAuthContext);
 
-const getUserData = async (accessToken: string): Promise<GetUserDataDTO> => {
+export const getUserData = async (accessToken: string): Promise<GetUserDataDTO> => {
     const response = await apiFetch(getUserDataEndpoint, {
         method: "GET",
         headers: {
