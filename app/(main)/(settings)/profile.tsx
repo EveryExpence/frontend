@@ -7,9 +7,10 @@ import Toast from 'react-native-toast-message';
 import { updateUserEmail, updateUserName } from '@/context/userContext'
 import EncryptedStorage from "react-native-encrypted-storage";
 import { accessTokenKey } from "@/constants/encryptedStorageKeys";
-import { getUserData } from '@/context/authContext'
+import { getUserData, useAuth } from '@/context/authContext'
 
 const ProfileScreen = () => {
+  const { user, refreshUser } = useAuth()
   const { control, handleSubmit, reset, formState: {errors} } = useForm({
     defaultValues:{
       userName: "",
@@ -24,14 +25,10 @@ const ProfileScreen = () => {
 
   const loadUser = async () => {
     try{
-      const token = await EncryptedStorage.getItem(accessTokenKey)
+      await refreshUser()
 
-      if (!token) throw new Error("No access token");
-
-      const data = await getUserData(token)
-
-      const nextUserName = data.publicUsername || "";
-      const nextEmail = data.email || "";
+      const nextUserName = user?.publicUsername ?? "None";
+      const nextEmail = user?.email  ?? "None";
 
       reset({
         userName: nextUserName,
@@ -40,15 +37,18 @@ const ProfileScreen = () => {
 
       setDisplayUserName(nextUserName);
       setDisplayEmail(nextEmail);
-
-    }catch(err){
-      console.error(err)
+    }catch(err: any){
+      console.error(err);
+      Toast.show({ 
+        text1: err?.message || "Something went wrong", 
+        type: "error" 
+      });
     }
   }
 
-  useEffect(() =>{
+  useEffect(() => {
     loadUser()
-  }, []);
+  }, [])
 
   const handleUpdate = async (email: string, userName: string) => {
     try{
@@ -61,9 +61,15 @@ const ProfileScreen = () => {
         updateUserName(token, userName)
       ]);
 
-      await loadUser();
-      setDisplayUserName(userName);
-      setDisplayEmail(email);
+      await refreshUser()
+
+      reset({
+        userName: user?.publicUsername ?? "None",
+        email: user?.email ?? "None",
+      })
+
+      setDisplayUserName(user?.publicUsername ??  "User");
+      setDisplayEmail(user?.publicUsername ??  "User");
     }catch (err: any){
       console.error(err);
       Toast.show({ 
@@ -188,7 +194,7 @@ const ProfileScreen = () => {
                   setIsEditing(true)
                 }
               },
-              (errors) => {
+              () => {
                 Toast.show({ text1: `Changing profile failed`, type: "error" });
               }
             )();

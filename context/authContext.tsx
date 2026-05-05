@@ -38,7 +38,8 @@ export const getUserData = async (accessToken: string): Promise<GetUserDataDTO> 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isInitializing, setIsInitializing] = useState<boolean>(true); 
-    const [isLoading, setIsLoading] = useState<boolean>(false); 
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
     
     useEffect(() => {
         const checkSessionOnBoot = async () => {
@@ -145,6 +146,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setIsLoading(false);
         }
     }
+
+    const refreshUser = async  () => {
+        const accessToken = await EncryptedStorage.getItem(accessTokenKey)
+        if(!accessToken){
+            setUser(null)
+            return
+        }
+
+        const userData = await getUserData(accessToken)
+        setUser({ ...userData })
+    };
 
     return <AuthContext.Provider value={{ user, isInitializing, isLoading, login, register, logout }}>{children}</AuthContext.Provider>
 };

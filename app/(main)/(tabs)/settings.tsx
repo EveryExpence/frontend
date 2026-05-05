@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useAuth } from "@/context/authContext";
+import { getUserData, useAuth } from "@/context/authContext";
 import { useThemeColor } from "@/hooks/use-theme-color";
 import { AppTheme, Language, SettingsRowProps, SettingsSection } from "@/types/settings";
+import EncryptedStorage from "react-native-encrypted-storage";
+import { accessTokenKey } from "@/constants/encryptedStorageKeys";
 
 const SettingsRow = ({
   title,
@@ -83,7 +85,7 @@ const SettingsScreen = () => {
       items: [
         {
           id: "profile",
-          title: "User",
+          title: user?.publicUsername ?? "User",
           subtitle: user?.email ?? "",
           leftElement: (
             <View
