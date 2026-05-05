@@ -1,20 +1,21 @@
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import { Image, Modal, TextInput, TouchableOpacity, View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {Controller, useForm} from 'react-hook-form';
 import { useThemeColor } from "@/hooks/use-theme-color";
 import Toast from 'react-native-toast-message';
-import { updateUserEmail, updateUserName } from '@/context/userContext'
+import { updateUserAvatar, updateUserEmail, updateUserName } from '@/context/userContext'
 import EncryptedStorage from "react-native-encrypted-storage";
 import { accessTokenKey } from "@/constants/encryptedStorageKeys";
 import { useAuth } from '@/context/authContext'
 
 const ProfileScreen = () => {
   const { user, refreshUser } = useAuth()
-  const { control, handleSubmit, reset, formState: {errors} } = useForm({
+  const { control, handleSubmit, reset, setValue, getValues, formState: {errors} } = useForm({
     defaultValues:{
       userName: "",
       email: "",
+      avatarUrl: "",
     }
   });
 
@@ -22,6 +23,14 @@ const ProfileScreen = () => {
   const [isEditing, setIsEditing] = useState(false)
   const [displayUserName, setDisplayUserName] = useState("")
   const [displayEmail, setDisplayEmail] = useState("")
+  const [displayAvatarUrl, setDisplayAvatarUrl] = useState("")
+  const [isAvatarModalVisible, setIsAvatarModalVisible] = useState(false)
+  const [avatarDraft, setAvatarDraft] = useState("")
+
+  const isValidAvatarUrl = (value: string) => {
+    if (!value) return true;
+    return /^https?:\/\/\S+$/i.test(value);
+  }
 
   const loadUser = async () => {
     try{
@@ -48,22 +57,30 @@ const ProfileScreen = () => {
     reset({
       userName: nextUserName,
       email: nextEmail,
+      avatarUrl: user.avatarUrl ?? "",
     });
 
     setDisplayUserName(nextUserName);
     setDisplayEmail(nextEmail);
+    setDisplayAvatarUrl(user.avatarUrl ?? "");
   }, [user, reset]);
 
-  const handleUpdate = async (email: string, userName: string) => {
+  const handleUpdate = async (email: string, userName: string, avatarUrl: string) => {
     try{
       const token = await EncryptedStorage.getItem(accessTokenKey)
 
       if (!token) throw new Error("No access token");
 
-      await Promise.all([
+      const updateRequests = [
         updateUserEmail(token, email),
         updateUserName(token, userName)
-      ]);
+      ];
+
+      if (avatarUrl && avatarUrl !== user?.avatarUrl) {
+        updateRequests.push(updateUserAvatar(token, avatarUrl));
+      }
+
+      await Promise.all(updateRequests);
 
       await refreshUser();
     }catch (err: any){
@@ -80,12 +97,34 @@ const ProfileScreen = () => {
       className="px-6 pt-10 bg-theme-background"
     >
       <View className="items-center mb-8">
-        <View
+
+        <TouchableOpacity
           className="items-center justify-center rounded-full bg-theme-surface"
           style={{ width: 100, height: 100 }}
+          disabled={!isEditing}
+          activeOpacity={0.8}
+          onPress={() => {
+            const currentValue = getValues("avatarUrl") || displayAvatarUrl;
+            setAvatarDraft(currentValue);
+            setIsAvatarModalVisible(true);
+          }}
         >
-          <Ionicons name="person" size={70} color={iconColor} />
-        </View>
+          {displayAvatarUrl ? (
+            <Image
+              source={{ uri: displayAvatarUrl }}
+              style={{ width: 100, height: 100, borderRadius: 50 }}
+              resizeMode="cover"
+            />
+          ) : (
+            <Ionicons name="person" size={70} color={iconColor} />
+          )}
+
+          {isEditing && (
+            <View className="absolute bottom-0 right-0 rounded-full bg-theme-tint p-2">
+              <Ionicons name="pencil" size={16} color="#fff" />
+            </View>
+          )}
+        </TouchableOpacity>
 
         <Text className="mt-4 text-3xl font-semibold text-theme-text">
           {displayUserName}
@@ -172,6 +211,7 @@ const ProfileScreen = () => {
           )}
           
         </View>
+
       </View>
 
       <TouchableOpacity
@@ -179,7 +219,7 @@ const ProfileScreen = () => {
         onPress={() => {
             handleSubmit((data) => {
                 if(isEditing){
-                  handleUpdate(data.email, data.userName)
+                  handleUpdate(data.email, data.userName, data.avatarUrl)
                   setIsEditing(false)
 
                   setTimeout(() => {
@@ -203,6 +243,54 @@ const ProfileScreen = () => {
           
         </Text>
       </TouchableOpacity>
+
+      <Modal
+        transparent
+        visible={isAvatarModalVisible}
+        animationType="fade"
+        onRequestClose={() => setIsAvatarModalVisible(false)}
+      >
+        <View className="flex-1 items-center justify-center bg-black/50 px-6">
+          <View className="w-full rounded-lg bg-theme-surface p-5">
+            <Text className="text-2xl mb-3 text-theme-text">Change avatar</Text>
+
+            <TextInput
+              value={avatarDraft}
+              placeholder="https://..."
+              className="p-4 text-xl border border-theme-text rounded-md bg-theme-background text-theme-text"
+              onChangeText={setAvatarDraft}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+
+            <View className="mt-4 flex-row justify-end gap-3">
+              <TouchableOpacity
+                className="px-4 py-3 rounded-md bg-theme-background"
+                onPress={() => setIsAvatarModalVisible(false)}
+              >
+                <Text className="text-lg text-theme-text">Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="px-4 py-3 rounded-md bg-theme-tint"
+                onPress={() => {
+                  const trimmed = avatarDraft.trim();
+                  if (!isValidAvatarUrl(trimmed)) {
+                    Toast.show({ text1: "Invalid URL format", type: "error" });
+                    return;
+                  }
+
+                  setValue("avatarUrl", trimmed);
+                  setDisplayAvatarUrl(trimmed);
+                  setIsAvatarModalVisible(false);
+                }}
+              >
+                <Text className="text-lg text-theme-textLight">Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
     </View>
   );
