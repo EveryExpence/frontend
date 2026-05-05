@@ -7,7 +7,7 @@ import Toast from 'react-native-toast-message';
 import { updateUserEmail, updateUserName } from '@/context/userContext'
 import EncryptedStorage from "react-native-encrypted-storage";
 import { accessTokenKey } from "@/constants/encryptedStorageKeys";
-import { getUserData, useAuth } from '@/context/authContext'
+import { useAuth } from '@/context/authContext'
 
 const ProfileScreen = () => {
   const { user, refreshUser } = useAuth()
@@ -25,18 +25,7 @@ const ProfileScreen = () => {
 
   const loadUser = async () => {
     try{
-      await refreshUser()
-
-      const nextUserName = user?.publicUsername ?? "None";
-      const nextEmail = user?.email  ?? "None";
-
-      reset({
-        userName: nextUserName,
-        email: nextEmail,
-      });
-
-      setDisplayUserName(nextUserName);
-      setDisplayEmail(nextEmail);
+      await refreshUser();
     }catch(err: any){
       console.error(err);
       Toast.show({ 
@@ -50,6 +39,21 @@ const ProfileScreen = () => {
     loadUser()
   }, [])
 
+  useEffect(() => {
+    if (!user) return;
+
+    const nextUserName = user.publicUsername ?? "None";
+    const nextEmail = user.email ?? "None";
+
+    reset({
+      userName: nextUserName,
+      email: nextEmail,
+    });
+
+    setDisplayUserName(nextUserName);
+    setDisplayEmail(nextEmail);
+  }, [user, reset]);
+
   const handleUpdate = async (email: string, userName: string) => {
     try{
       const token = await EncryptedStorage.getItem(accessTokenKey)
@@ -61,15 +65,7 @@ const ProfileScreen = () => {
         updateUserName(token, userName)
       ]);
 
-      await refreshUser()
-
-      reset({
-        userName: user?.publicUsername ?? "None",
-        email: user?.email ?? "None",
-      })
-
-      setDisplayUserName(user?.publicUsername ??  "User");
-      setDisplayEmail(user?.publicUsername ??  "User");
+      await refreshUser();
     }catch (err: any){
       console.error(err);
       Toast.show({ 
