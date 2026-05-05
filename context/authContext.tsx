@@ -13,6 +13,7 @@ export interface IAuthContext {
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     register: (email: string, password: string) => Promise<void>;
+    refreshUser: () => Promise<void>
 }
 
 export const AuthContext = createContext<IAuthContext>({} as IAuthContext);
@@ -158,7 +159,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser({ ...userData })
     };
 
-    return <AuthContext.Provider value={{ user, isInitializing, isLoading, login, register, logout }}>{children}</AuthContext.Provider>
+    return <AuthContext.Provider value={{ user, isInitializing, isLoading, login, register, logout, refreshUser }}>{children}</AuthContext.Provider>
 };
 
 export const useAuth = () => {
