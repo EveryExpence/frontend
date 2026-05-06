@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -87,11 +87,21 @@ const SettingsScreen = () => {
           id: "profile",
           title: user?.publicUsername ?? "User",
           subtitle: user?.email ?? "",
-          leftElement: (
+          leftElement: user?.avatarUrl ? (
             <View
               className="w-14 h-14 rounded-full mr-3 items-center justify-center overflow-hidden bg-theme-surface"
             >
-              <Ionicons name="person-outline" size={40} color={iconColor} />
+              <Image
+                source={{ uri: user.avatarUrl }}
+                style={{ width: 60, height: 60, borderRadius: 20 }}
+                resizeMode="cover"
+              />
+            </View>
+          ): (
+            <View
+              className="w-14 h-14 rounded-full mr-3 items-center justify-center overflow-hidden bg-theme-surface"
+            >
+              <Ionicons name="person-outline" size={60} color={iconColor} />
             </View>
           ),
           rightElement: chevron,

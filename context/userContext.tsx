@@ -1,5 +1,5 @@
 import { apiFetch } from "@/utils/apiFetch";
-import { updateAvatarEndpoint, updateUserEmailEndpoint, updateUserNameEndpoint } from "@/constants/endpoints";
+import { updateAvatarEndpoint, updatePasswordEndpoint, updateUserEmailEndpoint, updateUserNameEndpoint } from "@/constants/endpoints";
 
 export async function updateUserEmail(accessToken: string, email: string){
     const response = await apiFetch(updateUserEmailEndpoint, {
@@ -58,6 +58,30 @@ export async function updateUserAvatar(accessToken: string, avatarUrl: string){
             "Authorization": `Bearer ${accessToken}`,
         },
         body: JSON.stringify({ avatarUrl })
+    })
+
+    if(!response.ok){
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.detail ?? errorData.message ?? errorData.title;
+        throw new Error(errorMessage || "Request failed");
+    }
+
+    if (response.status === 204) {
+        return null;
+    }
+
+    return await response.json();
+}
+
+export async function updateUserPassword(accessToken: string, oldPassword: string, newPassword: string){
+    const response = await apiFetch(updatePasswordEndpoint, {
+        method: "POST",
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ oldPassword, newPassword })
     })
 
     if(!response.ok){

@@ -51,7 +51,7 @@ const ProfileScreen = () => {
   useEffect(() => {
     if (!user) return;
 
-    const nextUserName = user.publicUsername ?? "None";
+    const nextUserName = user.publicUsername ?? "User";
     const nextEmail = user.email ?? "None";
 
     reset({
