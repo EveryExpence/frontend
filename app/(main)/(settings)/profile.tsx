@@ -8,8 +8,10 @@ import { updateUserAvatar, updateUserEmail, updateUserName } from '@/context/use
 import EncryptedStorage from "react-native-encrypted-storage";
 import { accessTokenKey } from "@/constants/encryptedStorageKeys";
 import { useAuth } from '@/context/authContext'
+import { useRouter } from "expo-router";
 
 const ProfileScreen = () => {
+  const router = useRouter();
   const { user, refreshUser } = useAuth()
   const { control, handleSubmit, reset, setValue, getValues, formState: {errors} } = useForm({
     defaultValues:{
@@ -21,6 +23,7 @@ const ProfileScreen = () => {
 
   const iconColor = useThemeColor({}, "icon");
   const [isEditing, setIsEditing] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [displayUserName, setDisplayUserName] = useState("")
   const [displayEmail, setDisplayEmail] = useState("")
   const [displayAvatarUrl, setDisplayAvatarUrl] = useState("")
@@ -67,6 +70,7 @@ const ProfileScreen = () => {
 
   const handleUpdate = async (email: string, userName: string, avatarUrl: string) => {
     try{
+      setIsSaving(true);
       const token = await EncryptedStorage.getItem(accessTokenKey)
 
       if (!token) throw new Error("No access token");
@@ -83,12 +87,16 @@ const ProfileScreen = () => {
       await Promise.all(updateRequests);
 
       await refreshUser();
+      return true;
     }catch (err: any){
       console.error(err);
       Toast.show({ 
         text1: err?.message || "Something went wrong", 
         type: "error" 
       });
+      return false;
+    } finally {
+      setIsSaving(false);
     }
   }
 
@@ -96,12 +104,27 @@ const ProfileScreen = () => {
     <View
       className="px-6 pt-10 bg-theme-background"
     >
+      <View className="flex-row items-center justify-between mb-4">
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="p-2"
+          activeOpacity={0.8}
+          accessibilityLabel="Go back"
+        >
+          <Ionicons name="chevron-back" size={26} color={iconColor} />
+        </TouchableOpacity>
+
+        <Text className="text-2xl font-bold text-theme-text">
+          Profile
+        </Text>
+      </View>
+
       <View className="items-center mb-8">
 
         <TouchableOpacity
           className="items-center justify-center rounded-full bg-theme-surface"
           style={{ width: 100, height: 100 }}
-          disabled={!isEditing}
+          disabled={!isEditing || isSaving}
           activeOpacity={0.8}
           onPress={() => {
             const currentValue = getValues("avatarUrl") || displayAvatarUrl;
@@ -159,7 +182,7 @@ const ProfileScreen = () => {
             }}
             render={({ field: {onChange, value}}) => (
               <TextInput
-                editable={isEditing}
+                editable={isEditing && !isSaving}
                 value={value}
                 className="p-4 text-xl border border-theme-text rounded-md bg-theme-background text-theme-text"
                 onChangeText={onChange}
@@ -196,7 +219,7 @@ const ProfileScreen = () => {
             }}
             render={({ field: {onChange, value}}) => (
               <TextInput
-                editable={isEditing}
+                editable={isEditing && !isSaving}
                 value={value}
                 className="p-4 text-xl border border-theme-text rounded-md bg-theme-background text-theme-text"
                 onChangeText={onChange}
@@ -215,23 +238,25 @@ const ProfileScreen = () => {
       </View>
 
       <TouchableOpacity
-        className={`mt-6 p-4 rounded-md items-center ${isEditing ? 'bg-theme-success' : 'bg-theme-tint' }`}
+        className={`mt-6 p-4 rounded-md items-center ${isEditing ? "bg-theme-success" : "bg-theme-tint"}`}
+        disabled={isSaving}
         onPress={() => {
-            handleSubmit((data) => {
-                if(isEditing){
-                  handleUpdate(data.email, data.userName, data.avatarUrl)
-                  setIsEditing(false)
+            handleSubmit(async (data) => {
+                if (isEditing) {
+                  const didUpdate = await handleUpdate(data.email, data.userName, data.avatarUrl)
+                  if (didUpdate) {
+                    setIsEditing(false)
 
-                  setTimeout(() => {
-                      Toast.show({ text1: 'Changed profile successfully' });
-                  }, 100);
-
-                }else{
+                    setTimeout(() => {
+                        Toast.show({ text1: "Changed profile successfully" });
+                    }, 100);
+                  }
+                } else {
                   setIsEditing(true)
                 }
               },
               () => {
-                Toast.show({ text1: `Changing profile failed`, type: "error" });
+                Toast.show({ text1: "Changing profile failed", type: "error" });
               }
             )();
           }}
@@ -239,7 +264,7 @@ const ProfileScreen = () => {
         <Text 
         className="text-xl text-center text-theme-textLight font-semibold"
         >
-          {isEditing ? "Save Changes" : "Edit Profile"}
+          {isSaving ? "Saving..." : isEditing ? "Save Changes" : "Edit Profile"}
           
         </Text>
       </TouchableOpacity>

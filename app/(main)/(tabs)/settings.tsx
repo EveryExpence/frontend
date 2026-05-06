@@ -101,7 +101,7 @@ const SettingsScreen = () => {
             <View
               className="w-14 h-14 rounded-full mr-3 items-center justify-center overflow-hidden bg-theme-surface"
             >
-              <Ionicons name="person-outline" size={60} color={iconColor} />
+              <Ionicons name="person-outline" size={40} color={iconColor} />
             </View>
           ),
           rightElement: chevron,

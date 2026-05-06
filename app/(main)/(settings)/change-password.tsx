@@ -4,7 +4,10 @@ import { Controller, useForm } from "react-hook-form";
 import Toast from 'react-native-toast-message';
 import { updateUserPassword } from '@/context/userContext'
 import EncryptedStorage from "react-native-encrypted-storage";
+import { useRouter } from "expo-router";
 import { accessTokenKey } from "@/constants/encryptedStorageKeys";
+import { Ionicons } from "@expo/vector-icons";
+import { useThemeColor } from "@/hooks/use-theme-color";
 
 type ChangePasswordForm = {
   oldPassword: string;
@@ -13,6 +16,8 @@ type ChangePasswordForm = {
 };
 
 const ChangePasswordScreen = () => {
+  const router = useRouter();
+  const iconColor = useThemeColor({}, "icon");
   const { control, handleSubmit, reset, getValues, formState: {errors} } = useForm<ChangePasswordForm>({
     defaultValues:{
       oldPassword: "",
@@ -47,6 +52,20 @@ const ChangePasswordScreen = () => {
     <View
       className="px-6 pt-10 bg-theme-background"
     >
+      <View className="flex-row items-center justify-between mb-4">
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="p-2"
+          activeOpacity={0.8}
+          accessibilityLabel="Go back"
+        >
+          <Ionicons name="chevron-back" size={26} color={iconColor} />
+        </TouchableOpacity>
+
+        <Text className="text-2xl font-bold text-theme-text">
+          Change Password
+        </Text>
+      </View>
       <View
         className="p-5 rounded-md gap-4 bg-theme-surface"
       >
