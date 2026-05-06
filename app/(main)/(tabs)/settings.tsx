@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { getUserData, useAuth } from "@/context/authContext";
+import { useAuth } from "@/context/authContext";
 import { useThemeColor } from "@/hooks/use-theme-color";
 import { AppTheme, Language, SettingsRowProps, SettingsSection } from "@/types/settings";
-import EncryptedStorage from "react-native-encrypted-storage";
-import { accessTokenKey } from "@/constants/encryptedStorageKeys";
 
 const SettingsRow = ({
   title,
@@ -47,7 +45,11 @@ const SettingsRow = ({
         {resolvedLeft}
 
         <View>
-          <Text selectable={false} className="text-xl font-bold" style={{ color: titleColor }}>
+          <Text
+            selectable={false}
+            className="text-xl font-bold"
+            style={{ color: titleColor }}
+          >
             {title}
           </Text>
 
@@ -138,7 +140,8 @@ const SettingsScreen = () => {
               {chevron}
             </React.Fragment>
           ),
-          onPress: () => setTheme((prev) => (prev === "light" ? "dark" : "light")),
+          onPress: () =>
+            setTheme((prev) => (prev === "light" ? "dark" : "light")),
         },
       ],
     },
