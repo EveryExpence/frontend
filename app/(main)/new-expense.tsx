@@ -15,10 +15,6 @@ import { createExpenseRecord } from '@/data/expenseRecords';
 import { useSQLiteContext } from 'expo-sqlite';
 import Toast from 'react-native-toast-message';
 
-const amountStringToNumber = (amount: string): number => {
-  return Number(Number(amount).toString());
-}
-
 export default function NewExpense() {
   const db = useSQLiteContext();
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
@@ -34,7 +30,7 @@ export default function NewExpense() {
       Toast.show({ text1: "All required fields are needed", type: "error" });
       return;
     }
-    const amountNumber = amountStringToNumber(amount);
+    const amountNumber = Number(amount);
     if (amountNumber === 0) {
       Toast.show({ text1: "Ammount has to be non-zero", type: "error" });
       return;
