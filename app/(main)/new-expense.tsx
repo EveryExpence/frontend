@@ -46,6 +46,7 @@ export default function NewExpense() {
       paymentMethodId: selectedPaymentMethod.id,
       categoryId: selectedCategory.id,
       accountId: selectedAccount.id,
+      createdAt: selectedDateTime.getTime() / 1000,
     };
 
     try {
