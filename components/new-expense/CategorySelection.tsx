@@ -71,7 +71,7 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory }: Props) => 
                     valueField="id"
                     placeholder="Select category"
                     searchPlaceholder="Search category..."
-                    value={selectedCategory ?? undefined}
+                    value={selectedCategory?.id ?? undefined}
                     onChange={item => setSelectedCategory(item)}
                     renderLeftIcon={() => (
                         <MaterialCommunityIcons

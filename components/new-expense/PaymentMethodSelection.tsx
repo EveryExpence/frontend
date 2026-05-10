@@ -68,7 +68,7 @@ const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMetho
                     valueField="id"
                     placeholder="Select payment method"
                     searchPlaceholder="Search payment method..."
-                    value={selectedPaymentMethod ?? undefined}
+                    value={selectedPaymentMethod?.id ?? undefined}
                     onChange={item => setSelectedPaymentMethod(item)}
                     renderLeftIcon={() => (
                         <MaterialCommunityIcons

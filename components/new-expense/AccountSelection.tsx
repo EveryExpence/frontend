@@ -55,7 +55,7 @@ const AccountSelection = ({ selectedAccount, setSelectedAccount }: Props) => {
                 valueField="id"
                 placeholder="Select account"
                 searchPlaceholder="Search account..."
-                value={selectedAccount ?? undefined}
+                value={selectedAccount?.id ?? undefined}
                 onChange={item => setSelectedAccount(item)}
                 renderLeftIcon={() => (
                     <MaterialCommunityIcons
