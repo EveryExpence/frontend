@@ -25,7 +25,7 @@ const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMetho
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [newPaymentMethodName, setNewPaymentMethodName] = useState("");
 
-    const saveNewCategory = async () => {
+    const saveNewPaymentMethod = async () => {
         await createPaymentMethod(db, { name: newPaymentMethodName });
         await fetchPaymentMethods(db, setPaymentMethods);
         setIsModalVisible(false);
@@ -103,7 +103,7 @@ const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMetho
                 }
                 confirmAction={
                     <TouchableOpacity
-                        onPress={saveNewCategory}
+                        onPress={saveNewPaymentMethod}
                         className="bg-theme-tint rounded-md px-5 py-3"
                     >
                         <Text className="text-xl text-theme-textLight">Save</Text>
