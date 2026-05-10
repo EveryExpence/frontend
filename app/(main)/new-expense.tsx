@@ -22,7 +22,8 @@ export default function NewExpense() {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
   const [selectedDateTime, setSelectedDateTime] = useState(new Date());
   const [amount, setAmount] = useState("");
-  const isAmountValid = amount.trim().length === 0 || !isNaN(Number(amount));
+  const safeAmount = (amount ?? '').toString().trim();
+  const isAmountValid = safeAmount === '' || /^-?\d*\.?\d+$/.test(safeAmount);
   const [description, setDescription] = useState("");
 
   const saveRecord = async () => {
