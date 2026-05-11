@@ -71,9 +71,7 @@ const Dashboard = () => {
           </View>
         ) : error ? (
           <View className="p-4">
-            <Text className="text-[#03060D] dark:text-white">
-              Error: {error}
-            </Text>
+            <Text className="text-theme-text">Error: {error}</Text>
           </View>
         ) : (
           <View style={{ flex: 1 }}>
@@ -98,7 +96,6 @@ const Dashboard = () => {
               pages={pages}
               pageIndex={pageIndex}
               animatedIndex={animatedIndex}
-              tintColor={Colors[colorScheme].tint}
             />
           </View>
         )}

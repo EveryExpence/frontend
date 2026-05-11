@@ -5,23 +5,15 @@ interface PaginationDotsProps {
   pages: any[];
   pageIndex: number;
   animatedIndex: Animated.Value;
-  tintColor: string;
 }
 
 export function PaginationDots({
   pages,
   pageIndex,
   animatedIndex,
-  tintColor,
 }: PaginationDotsProps) {
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        justifyContent: "center",
-        paddingVertical: 12,
-      }}
-    >
+    <View className="flex-row justify-center py-3">
       {pages.map((_, i) => {
         const dotWidth = animatedIndex.interpolate({
           inputRange: [i - 1, i, i + 1],
@@ -32,12 +24,11 @@ export function PaginationDots({
         return (
           <Animated.View
             key={i}
+            className={i === pageIndex ? "bg-theme-tint" : "bg-theme-textLight"}
             style={{
               width: dotWidth,
               height: 8,
               borderRadius: 8,
-              backgroundColor:
-                i === pageIndex ? tintColor : "#FFFFFF",
               marginHorizontal: 4,
             }}
           />

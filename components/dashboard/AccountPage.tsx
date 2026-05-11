@@ -14,10 +14,10 @@ interface AccountPageProps {
 export const AccountPage: React.FC<AccountPageProps> = ({ account }) => {
   return (
     <View style={{ width, padding: 24 }}>
-      <Text className="text-4xl mb-6 mt-28 text-center text-[#03060D] dark:text-white">
+      <Text className="text-4xl mb-6 mt-28 text-center text-theme-text">
         {account.name}
       </Text>
-      <Text className="text-6xl mt-4 text-center text-[#03060D] dark:text-white">
+      <Text className="text-6xl mt-4 text-center text-theme-text">
         {formatCurrency(
           account.computedBalance ?? account.balance,
           account.currency,
