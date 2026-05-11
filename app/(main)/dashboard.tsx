@@ -7,7 +7,6 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 import { useSQLiteContext } from "expo-sqlite";
 import { Account } from "@/types/data/account";
-import { formatCurrency } from "@/utils/formatCurrency";
 import { useAccountsData } from "@/hooks/use-account-data";
 import { TotalBalancePage } from "@/components/dashboard/TotalBalancePage";
 import { AccountPage } from "@/components/dashboard/AccountPage";
