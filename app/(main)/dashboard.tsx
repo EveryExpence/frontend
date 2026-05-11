@@ -1,5 +1,11 @@
 import React from "react";
-import { FlatList, View, Dimensions, ActivityIndicator } from "react-native";
+import {
+  FlatList,
+  View,
+  Dimensions,
+  ActivityIndicator,
+  Animated,
+} from "react-native";
 import { Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -21,14 +27,20 @@ const Dashboard = () => {
 
   const { accounts, loading, error, totalsByCurrency } = useAccountsData();
   const [pageIndex, setPageIndex] = React.useState(0);
+  const animatedIndex = React.useRef(new Animated.Value(0)).current;
 
   const pages: Array<{ type: "total" } | AccountWithComputed> = [
     { type: "total" },
     ...accounts,
   ];
 
-  console.log("pages count:", pages.length);
-  console.log("accounts:", accounts);
+  React.useEffect(() => {
+    Animated.spring(animatedIndex, {
+      toValue: pageIndex,
+      useNativeDriver: false,
+      speed: 8,
+    }).start();
+  }, [pageIndex, animatedIndex]);
 
   const onMomentumScrollEnd = (e: any) => {
     const newIndex = Math.round(e.nativeEvent.contentOffset.x / width);
@@ -90,18 +102,27 @@ const Dashboard = () => {
                 paddingVertical: 12,
               }}
             >
-              {pages.map((_, i) => (
-                <View
-                  key={i}
-                  style={{
-                    width: i === pageIndex ? 64 : 8,
-                    height: 8,
-                    borderRadius: 8,
-                    backgroundColor: i === pageIndex ? colors.tint : "#FFFFFF",
-                    marginHorizontal: 4,
-                  }}
-                />
-              ))}
+              {pages.map((_, i) => {
+                const dotWidth = animatedIndex.interpolate({
+                  inputRange: [i - 1, i, i + 1],
+                  outputRange: [8, 64, 8],
+                  extrapolate: "clamp",
+                });
+
+                return (
+                  <Animated.View
+                    key={i}
+                    style={{
+                      width: dotWidth,
+                      height: 8,
+                      borderRadius: 8,
+                      backgroundColor:
+                        i === pageIndex ? colors.tint : "#FFFFFF",
+                      marginHorizontal: 4,
+                    }}
+                  />
+                );
+              })}
             </View>
           </View>
         )}
