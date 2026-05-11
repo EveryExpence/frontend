@@ -9,22 +9,15 @@ export type AccountWithComputed = Account & { computedBalance: number };
 
 interface AccountPageProps {
   account: AccountWithComputed;
-  textColor: string;
 }
 
-export const AccountPage: React.FC<AccountPageProps> = ({
-  account,
-  textColor,
-}) => {
+export const AccountPage: React.FC<AccountPageProps> = ({ account }) => {
   return (
     <View style={{ width, padding: 24 }}>
-      <Text
-        style={{ color: textColor }}
-        className="text-4xl mb-6 mt-28 text-center"
-      >
+      <Text className="text-4xl mb-6 mt-28 text-center text-[#03060D] dark:text-white">
         {account.name}
       </Text>
-      <Text style={{ color: textColor }} className="text-6xl mt-4 text-center">
+      <Text className="text-6xl mt-4 text-center text-[#03060D] dark:text-white">
         {formatCurrency(
           account.computedBalance ?? account.balance,
           account.currency,

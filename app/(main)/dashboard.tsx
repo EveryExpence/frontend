@@ -23,8 +23,6 @@ type AccountWithComputed = Account & { computedBalance: number };
 
 const Dashboard = () => {
   const colorScheme: "light" | "dark" = useColorScheme() ?? "light";
-  const colors = Colors[colorScheme];
-  const textColor = colorScheme === "dark" ? colors.textLight : colors.text;
 
   const { accounts, loading, error, totalsByCurrency } = useAccountsData();
   const [pageIndex, setPageIndex] = React.useState(0);
@@ -50,20 +48,15 @@ const Dashboard = () => {
 
   const renderPage = ({ item }: { item: any }) => {
     if (item.type === "total") {
-      return (
-        <TotalBalancePage
-          totalsByCurrency={totalsByCurrency}
-          textColor={textColor}
-        />
-      );
+      return <TotalBalancePage totalsByCurrency={totalsByCurrency} />;
     }
 
-    return <AccountPage account={item} textColor={textColor} />;
+    return <AccountPage account={item} />;
   };
 
   return (
     <LinearGradient
-      colors={[colors.surface, colors.tint]}
+      colors={[Colors[colorScheme].surface, Colors[colorScheme].tint]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       className="flex flex-1"
@@ -71,11 +64,16 @@ const Dashboard = () => {
       <SafeAreaView className="flex flex-1">
         {loading ? (
           <View className="flex-1 justify-center items-center">
-            <ActivityIndicator size="large" color={colors.tint} />
+            <ActivityIndicator
+              size="large"
+              color={Colors[colorScheme].tint}
+            />
           </View>
         ) : error ? (
           <View className="p-4">
-            <Text style={{ color: textColor }}>Error: {error}</Text>
+            <Text className="text-[#03060D] dark:text-white">
+              Error: {error}
+            </Text>
           </View>
         ) : (
           <View style={{ flex: 1 }}>
@@ -100,7 +98,7 @@ const Dashboard = () => {
               pages={pages}
               pageIndex={pageIndex}
               animatedIndex={animatedIndex}
-              tintColor={colors.tint}
+              tintColor={Colors[colorScheme].tint}
             />
           </View>
         )}

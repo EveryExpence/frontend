@@ -6,29 +6,23 @@ const { width } = Dimensions.get("window");
 
 interface TotalBalancePageProps {
   totalsByCurrency: Record<string, number>;
-  textColor: string;
 }
 
 export const TotalBalancePage: React.FC<TotalBalancePageProps> = ({
   totalsByCurrency,
-  textColor,
 }) => {
   return (
     <View style={{ width, padding: 24 }}>
-      <Text
-        style={{ color: textColor }}
-        className="text-4xl mb-6 mt-8 text-center"
-      >
+      <Text className="text-4xl mb-6 mt-8 text-center text-[#03060D] dark:text-white">
         Total Balance
       </Text>
       {Object.keys(totalsByCurrency).length === 0 ? (
-        <Text style={{ color: textColor }}>No accounts</Text>
+        <Text className="text-[#03060D] dark:text-white">No accounts</Text>
       ) : (
         Object.entries(totalsByCurrency).map(([currency, value]) => (
           <Text
             key={currency}
-            style={{ color: textColor }}
-            className="text-6xl mt-4 text-center"
+            className="text-6xl mt-4 text-center text-[#03060D] dark:text-white"
           >
             {formatCurrency(value, currency)}
           </Text>
