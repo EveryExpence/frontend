@@ -19,7 +19,7 @@ type AccountWithComputed = Account & { computedBalance: number };
 const Dashboard = () => {
   const colorScheme: "light" | "dark" = useColorScheme() ?? "light";
   const colors = Colors[colorScheme];
-  const textColor = colorScheme === 'dark' ? colors.textLight : colors.text;
+  const textColor = colorScheme === "dark" ? colors.textLight : colors.text;
 
   const [accounts, setAccounts] = React.useState<AccountWithComputed[]>([]);
   const [loading, setLoading] = React.useState(false);
@@ -95,7 +95,10 @@ const Dashboard = () => {
     if (item.type === "total") {
       return (
         <View style={{ width, padding: 24 }}>
-          <Text style={{ color: textColor }} className="text-2xl mb-6">
+          <Text
+            style={{ color: textColor }}
+            className="text-4xl mb-6 mt-8 text-center"
+          >
             Total Balance
           </Text>
 
@@ -103,7 +106,11 @@ const Dashboard = () => {
             <Text style={{ color: textColor }}>No accounts</Text>
           ) : (
             Object.entries(totalsByCurrency).map(([currency, value]) => (
-              <Text key={currency} style={{ color: textColor }} className="text-4xl mb-2">
+              <Text
+                key={currency}
+                style={{ color: textColor }}
+                className="text-6xl mt-4 text-center"
+              >
                 {formatCurrency(value, currency)}
               </Text>
             ))
@@ -114,12 +121,17 @@ const Dashboard = () => {
 
     return (
       <View style={{ width, padding: 24 }}>
-        <Text style={{ color: textColor }} className="text-xl mb-2">{item.name}</Text>
-        <Text style={{ color: textColor }} className="text-3xl">
-          {formatCurrency(item.computedBalance ?? item.balance, item.currency)}
+        <Text
+          style={{ color: textColor }}
+          className="text-4xl mb-6 mt-28 text-center"
+        >
+          {item.name}
         </Text>
-        <Text style={{ color: textColor }} className="text-sm mt-2">
-          {item.createdAt ? `Created: ${new Date(item.createdAt).toLocaleDateString()}` : null}
+        <Text
+          style={{ color: textColor }}
+          className="text-6xl mt-4 text-center"
+        >
+          {formatCurrency(item.computedBalance ?? item.balance, item.currency)}
         </Text>
       </View>
     );
@@ -158,12 +170,13 @@ const Dashboard = () => {
                 <View
                   key={i}
                   style={{
-                      width: i === pageIndex ? 24 : 8,
-                      height: 8,
-                      borderRadius: 8,
-                      backgroundColor: i === pageIndex ? colors.tint : colors.icon,
-                      marginHorizontal: 4,
-                    }}
+                    width: i === pageIndex ? 24 : 8,
+                    height: 8,
+                    borderRadius: 8,
+                    backgroundColor:
+                      i === pageIndex ? colors.tint : colors.icon,
+                    marginHorizontal: 4,
+                  }}
                 />
               ))}
             </View>
