@@ -5,7 +5,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
-import { useSQLiteContext } from "expo-sqlite";
 import { Account } from "@/types/data/account";
 import { useAccountsData } from "@/hooks/use-account-data";
 import { TotalBalancePage } from "@/components/dashboard/TotalBalancePage";
@@ -23,12 +22,13 @@ const Dashboard = () => {
   const { accounts, loading, error, totalsByCurrency } = useAccountsData();
   const [pageIndex, setPageIndex] = React.useState(0);
 
-  const db = useSQLiteContext();
-
   const pages: Array<{ type: "total" } | AccountWithComputed> = [
     { type: "total" },
     ...accounts,
   ];
+
+  console.log("pages count:", pages.length);
+  console.log("accounts:", accounts);
 
   const onMomentumScrollEnd = (e: any) => {
     const newIndex = Math.round(e.nativeEvent.contentOffset.x / width);
@@ -65,8 +65,10 @@ const Dashboard = () => {
             <Text style={{ color: textColor }}>Error: {error}</Text>
           </View>
         ) : (
-          <>
+          <View style={{ flex: 1 }}>
             <FlatList
+              style={{ flexGrow: 0 }}
+              contentContainerStyle={{ flexGrow: 0 }}
               data={pages}
               keyExtractor={(i) => ("type" in i ? "total" : i.id)}
               horizontal
@@ -74,9 +76,20 @@ const Dashboard = () => {
               showsHorizontalScrollIndicator={false}
               onMomentumScrollEnd={onMomentumScrollEnd}
               renderItem={renderPage}
+              getItemLayout={(_, index) => ({
+                length: width,
+                offset: width * index,
+                index,
+              })}
             />
 
-            <View className="flex-row justify-center py-3">
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+                paddingVertical: 12,
+              }}
+            >
               {pages.map((_, i) => (
                 <View
                   key={i}
@@ -85,13 +98,15 @@ const Dashboard = () => {
                     height: 8,
                     borderRadius: 8,
                     backgroundColor:
-                      i === pageIndex ? colors.tint : colors.icon,
+                      i === pageIndex
+                        ? "rgba(255,255,255,1)"
+                        : "rgba(255,255,255,0.4)",
                     marginHorizontal: 4,
                   }}
                 />
               ))}
             </View>
-          </>
+          </View>
         )}
       </SafeAreaView>
     </LinearGradient>
