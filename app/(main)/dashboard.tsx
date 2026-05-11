@@ -97,10 +97,7 @@ const Dashboard = () => {
                     width: i === pageIndex ? 24 : 8,
                     height: 8,
                     borderRadius: 8,
-                    backgroundColor:
-                      i === pageIndex
-                        ? "rgba(255,255,255,1)"
-                        : "rgba(255,255,255,0.4)",
+                    backgroundColor: i === pageIndex ? colors.tint : "#FFFFFF",
                     marginHorizontal: 4,
                   }}
                 />
