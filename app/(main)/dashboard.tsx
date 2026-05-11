@@ -6,11 +6,11 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 import { useSQLiteContext } from "expo-sqlite";
-import {
-  getAllAccounts as getAllLocalAccounts,
-  getAccountBalance,
-} from "@/data/accounts";
 import { Account } from "@/types/data/account";
+import { formatCurrency } from "@/utils/formatCurrency";
+import { useAccountsData } from "@/hooks/use-account-data";
+import { TotalBalancePage } from "@/components/dashboard/TotalBalancePage";
+import { AccountPage } from "@/components/dashboard/AccountPage";
 
 const { width } = Dimensions.get("window");
 
@@ -21,53 +21,10 @@ const Dashboard = () => {
   const colors = Colors[colorScheme];
   const textColor = colorScheme === "dark" ? colors.textLight : colors.text;
 
-  const [accounts, setAccounts] = React.useState<AccountWithComputed[]>([]);
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const { accounts, loading, error, totalsByCurrency } = useAccountsData();
   const [pageIndex, setPageIndex] = React.useState(0);
 
   const db = useSQLiteContext();
-
-  const fetchAccounts = React.useCallback(async () => {
-    if (!db) return;
-    try {
-      setLoading(true);
-      setError(null);
-
-      const localAccounts = await getAllLocalAccounts(db);
-      const accountsWithBalances: AccountWithComputed[] = await Promise.all(
-        localAccounts.map(async (a) => {
-          try {
-            const computed = await getAccountBalance(db, a.id);
-            return {
-              ...a,
-              computedBalance: Number(computed ?? a.balance ?? 0),
-            };
-          } catch {
-            return { ...a, computedBalance: Number(a.balance ?? 0) };
-          }
-        }),
-      );
-
-      setAccounts(accountsWithBalances);
-    } catch (e: any) {
-      setError(e?.message ?? String(e));
-    } finally {
-      setLoading(false);
-    }
-  }, [db]);
-
-  React.useEffect(() => {
-    fetchAccounts();
-  }, [fetchAccounts]);
-
-  const totalsByCurrency = React.useMemo(() => {
-    const map: Record<string, number> = {};
-    accounts.forEach((a) => {
-      map[a.currency] = (map[a.currency] || 0) + (a.computedBalance ?? 0);
-    });
-    return map;
-  }, [accounts]);
 
   const pages: Array<{ type: "total" } | AccountWithComputed> = [
     { type: "total" },
@@ -79,62 +36,17 @@ const Dashboard = () => {
     setPageIndex(newIndex);
   };
 
-  const formatCurrency = (value: number, currency: string) => {
-    try {
-      return new Intl.NumberFormat(undefined, {
-        style: "currency",
-        currency,
-        maximumFractionDigits: 2,
-      }).format(value);
-    } catch {
-      return `${value.toFixed(2)} ${currency}`;
-    }
-  };
-
   const renderPage = ({ item }: { item: any }) => {
     if (item.type === "total") {
       return (
-        <View style={{ width, padding: 24 }}>
-          <Text
-            style={{ color: textColor }}
-            className="text-4xl mb-6 mt-8 text-center"
-          >
-            Total Balance
-          </Text>
-
-          {Object.keys(totalsByCurrency).length === 0 ? (
-            <Text style={{ color: textColor }}>No accounts</Text>
-          ) : (
-            Object.entries(totalsByCurrency).map(([currency, value]) => (
-              <Text
-                key={currency}
-                style={{ color: textColor }}
-                className="text-6xl mt-4 text-center"
-              >
-                {formatCurrency(value, currency)}
-              </Text>
-            ))
-          )}
-        </View>
+        <TotalBalancePage
+          totalsByCurrency={totalsByCurrency}
+          textColor={textColor}
+        />
       );
     }
 
-    return (
-      <View style={{ width, padding: 24 }}>
-        <Text
-          style={{ color: textColor }}
-          className="text-4xl mb-6 mt-28 text-center"
-        >
-          {item.name}
-        </Text>
-        <Text
-          style={{ color: textColor }}
-          className="text-6xl mt-4 text-center"
-        >
-          {formatCurrency(item.computedBalance ?? item.balance, item.currency)}
-        </Text>
-      </View>
-    );
+    return <AccountPage account={item} textColor={textColor} />;
   };
 
   return (
