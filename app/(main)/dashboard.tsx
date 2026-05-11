@@ -94,7 +94,7 @@ const Dashboard = () => {
                 <View
                   key={i}
                   style={{
-                    width: i === pageIndex ? 24 : 8,
+                    width: i === pageIndex ? 64 : 8,
                     height: 8,
                     borderRadius: 8,
                     backgroundColor: i === pageIndex ? colors.tint : "#FFFFFF",
