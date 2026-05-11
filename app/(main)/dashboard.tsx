@@ -15,6 +15,7 @@ import { Account } from "@/types/data/account";
 import { useAccountsData } from "@/hooks/use-account-data";
 import { TotalBalancePage } from "@/components/dashboard/TotalBalancePage";
 import { AccountPage } from "@/components/dashboard/AccountPage";
+import { PaginationDots } from "@/components/dashboard/PaginationDots";
 
 const { width } = Dimensions.get("window");
 
@@ -95,35 +96,12 @@ const Dashboard = () => {
               })}
             />
 
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "center",
-                paddingVertical: 12,
-              }}
-            >
-              {pages.map((_, i) => {
-                const dotWidth = animatedIndex.interpolate({
-                  inputRange: [i - 1, i, i + 1],
-                  outputRange: [8, 64, 8],
-                  extrapolate: "clamp",
-                });
-
-                return (
-                  <Animated.View
-                    key={i}
-                    style={{
-                      width: dotWidth,
-                      height: 8,
-                      borderRadius: 8,
-                      backgroundColor:
-                        i === pageIndex ? colors.tint : "#FFFFFF",
-                      marginHorizontal: 4,
-                    }}
-                  />
-                );
-              })}
-            </View>
+            <PaginationDots
+              pages={pages}
+              pageIndex={pageIndex}
+              animatedIndex={animatedIndex}
+              tintColor={colors.tint}
+            />
           </View>
         )}
       </SafeAreaView>
