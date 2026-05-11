@@ -118,7 +118,7 @@ export default function AccountFormModal({
             </Text>
           )}
 
-          <Text className="text-2xl text-theme-icon" style={{ marginBottom: 6 }}>Currency</Text>
+          <Text className="text-2xl text-theme-icon">Currency</Text>
           <Dropdown
             style={{
               backgroundColor: colors.background,
@@ -126,7 +126,6 @@ export default function AccountFormModal({
               borderRadius: 6,
               marginBottom: 12,
             }}
-            containerStyle={{ marginTop: 0 }}
             selectedTextStyle={{
               fontSize: 17,
               color: colors.text,
@@ -136,15 +135,21 @@ export default function AccountFormModal({
               color: colors.text,
               opacity: 0.5,
             }}
+            inputSearchStyle={{
+              fontSize: 17,
+              color: colors.text,
+            }}
             data={currencyOptions}
-            mode="default"
+            search
             maxHeight={300}
             labelField="label"
             valueField="value"
             placeholder="Select currency"
+            searchPlaceholder="Search currency..."
             value={currency}
             onChange={(item) => onChangeCurrency(item.value)}
             dropdownPosition="bottom"
+            containerStyle={{ marginTop: -25 }}
             renderRightIcon={() => (
               <AppIcon name="chevron-down" size={20} color={colors.text} />
             )}
