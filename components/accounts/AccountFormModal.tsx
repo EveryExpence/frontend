@@ -1,9 +1,9 @@
 import React from 'react';
 import { ScrollView, Text, TextInput, TouchableOpacity, View, useColorScheme } from 'react-native';
+import { Dropdown } from 'react-native-element-dropdown';
 import { Colors } from '@/constants/theme';
 import CustomModal from '@/components/Modal';
 import AppIcon from '@/components/AppIcon';
-import CurrencyDropdown from '@/components/balances/CurrencyDropdown';
 import { isValidBalanceInput } from '@/utils/balance';
 
 type Props = {
@@ -37,16 +37,12 @@ export default function AccountFormModal({
 }: Props) {
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
-  const [pickerOpen, setPickerOpen] = React.useState(false);
-
   const isBalanceValid = isValidBalanceInput(balance);
   const canSave = name.trim() && isBalanceValid && !isSaving;
-
-  React.useEffect(() => {
-    if (!visible) {
-      setPickerOpen(false);
-    }
-  }, [visible]);
+  const currencyOptions = React.useMemo(
+    () => currencies.map((item) => ({ label: item, value: item })),
+    [currencies]
+  );
 
   const handleSave = () => {
     if (!canSave) return;
@@ -123,30 +119,38 @@ export default function AccountFormModal({
           )}
 
           <Text className="text-2xl text-theme-icon" style={{ marginBottom: 6 }}>Currency</Text>
-          <TouchableOpacity
-            onPress={() => setPickerOpen(true)}
+          <Dropdown
             style={{
-              padding: 12,
               backgroundColor: colors.background,
+              padding: 12,
               borderRadius: 6,
-              flexDirection: 'row',
-              justifyContent: 'space-between',
               marginBottom: 12,
             }}
-          >
-            <Text className="text-2xl text-theme-text">{currency}</Text>
-            <AppIcon name="chevron-down" size={18} color={colors.icon} />
-          </TouchableOpacity>
+            containerStyle={{ marginTop: 0 }}
+            selectedTextStyle={{
+              fontSize: 17,
+              color: colors.text,
+            }}
+            placeholderStyle={{
+              fontSize: 17,
+              color: colors.text,
+              opacity: 0.5,
+            }}
+            data={currencyOptions}
+            mode="default"
+            maxHeight={300}
+            labelField="label"
+            valueField="value"
+            placeholder="Select currency"
+            value={currency}
+            onChange={(item) => onChangeCurrency(item.value)}
+            dropdownPosition="bottom"
+            renderRightIcon={() => (
+              <AppIcon name="chevron-down" size={20} color={colors.text} />
+            )}
+          />
         </ScrollView>
       </CustomModal>
-
-      <CurrencyDropdown
-        visible={pickerOpen}
-        value={currency}
-        options={currencies}
-        onClose={() => setPickerOpen(false)}
-        onSelect={onChangeCurrency}
-      />
     </>
   );
 }

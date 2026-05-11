@@ -34,13 +34,15 @@ const DateTimeSelection = ({ selectedDateTime, setSelectedDateTime }: Props) => 
                     display="calendar"
                     mode="date"
                     value={selectedDate}
-                    onValueChange={(_, value) => {
+                    onChange={(event, value) => {
+                        if (event.type === 'dismissed') {
+                            setShowDateSelection(false);
+                            setShowTimeSelection(true);
+                            return;
+                        }
+                        if (!value) return;
                         setSelectedDate(value);
                         setSelectedDateTime(value)
-                        setShowDateSelection(false);
-                        setShowTimeSelection(true);
-                    }}
-                    onDismiss={() => {
                         setShowDateSelection(false);
                         setShowTimeSelection(true);
                     }}
@@ -52,7 +54,12 @@ const DateTimeSelection = ({ selectedDateTime, setSelectedDateTime }: Props) => 
                     display="clock"
                     mode="time"
                     value={selectedTime}
-                    onValueChange={(_, value) => {
+                    onChange={(event, value) => {
+                        if (event.type === 'dismissed') {
+                            setShowTimeSelection(false);
+                            return;
+                        }
+                        if (!value) return;
                         setSelectedTime(value);
                         setSelectedDateTime(prev => {
                             const newDate = new Date(prev);
@@ -62,7 +69,6 @@ const DateTimeSelection = ({ selectedDateTime, setSelectedDateTime }: Props) => 
                         })
                         setShowTimeSelection(false);
                     }}
-                    onDismiss={() => setShowTimeSelection(false)}
                 /> : <></>}
         </View>
     )
