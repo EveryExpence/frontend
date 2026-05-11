@@ -12,9 +12,9 @@ import {
   getAllAccounts as getAllLocalAccounts,
   updateAccount as updateLocalAccount,
 } from '@/data/accounts';
-import AccountCard, { AccountCardItem } from '@/components/balances/AccountCard';
-import AccountFormModal from '@/components/balances/AccountFormModal';
-import DeleteAccountModal from '@/components/balances/DeleteAccountModal';
+import AccountCard, { AccountCardItem } from '@/components/accounts/AccountCard';
+import AccountFormModal from '@/components/accounts/AccountFormModal';
+import DeleteAccountModal from '@/components/accounts/DeleteAccountModal';
 import { formatBalance, normalizeNumberInput, parseBalanceInput } from '@/utils/balance';
 
 const BOTTOM_NAV_HEIGHT = 84;
