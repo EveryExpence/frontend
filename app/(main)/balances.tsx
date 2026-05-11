@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Text, TouchableOpacity, View, useColorScheme } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { Colors } from '@/constants/theme';
+import AppIcon from '@/components/AppIcon';
 import {
   createAccount as createLocalAccount,
   deleteAccount as deleteLocalAccount,
@@ -15,6 +15,7 @@ import {
 import AccountCard, { AccountCardItem } from '@/components/balances/AccountCard';
 import AccountFormModal from '@/components/balances/AccountFormModal';
 import DeleteAccountModal from '@/components/balances/DeleteAccountModal';
+import { formatBalance, normalizeNumberInput, parseBalanceInput } from '@/utils/balance';
 
 const BOTTOM_NAV_HEIGHT = 84;
 const FLOATING_BUTTON_HEIGHT = 56;
@@ -23,17 +24,7 @@ const LIST_BOTTOM_GAP = 16;
 const CORNER_RADIUS = 6;
 
 const CURRENCIES = ['USD', 'EUR', 'PLN', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD'];
-
-const formatBalance = (value: number | string): string => {
-  const numericValue = typeof value === 'string' ? Number(value) : value;
-  if (Number.isFinite(numericValue)) {
-    return new Intl.NumberFormat('pl-PL', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(numericValue);
-  }
-  return String(value);
-};
+const DEFAULT_CURRENCY = CURRENCIES[0];
 
 export default function Balances() {
   const db = useSQLiteContext();
@@ -49,7 +40,7 @@ export default function Balances() {
   const [editingAccount, setEditingAccount] = useState<AccountCardItem | null>(null);
   const [name, setName] = useState('');
   const [balanceField, setBalanceField] = useState('');
-  const [currency, setCurrency] = useState(CURRENCIES[0]);
+  const [currency, setCurrency] = useState(DEFAULT_CURRENCY);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -88,7 +79,7 @@ export default function Balances() {
     setEditingAccount(null);
     setName('');
     setBalanceField('');
-    setCurrency(CURRENCIES[0]);
+    setCurrency(DEFAULT_CURRENCY);
     setIsFormOpen(true);
   };
 
@@ -96,8 +87,8 @@ export default function Balances() {
     setFormMode('edit');
     setEditingAccount(item);
     setName(item.name);
-    setBalanceField(String(item.balance).replace(/\s/g, '').replace(',', '.'));
-    setCurrency(item.currency ?? CURRENCIES[0]);
+    setBalanceField(normalizeNumberInput(String(item.balance)));
+    setCurrency(item.currency ?? DEFAULT_CURRENCY);
     setIsFormOpen(true);
   };
 
@@ -112,7 +103,7 @@ export default function Balances() {
       return;
     }
 
-    const parsed = Number(String(balanceField).replace(/\s/g, '').replace(',', '.'));
+    const parsed = parseBalanceInput(balanceField);
     if (!Number.isFinite(parsed)) {
       Toast.show({ text1: 'Balance must be a valid number', type: 'error' });
       return;
@@ -202,7 +193,7 @@ export default function Balances() {
           className="w-full flex-row items-center justify-center py-4 bg-theme-tint rounded-lg"
           onPress={openAdd}
         >
-          <MaterialCommunityIcons name="plus" size={22} color={colors.textLight} style={{ marginRight: 8 }} />
+          <AppIcon name="plus" size={22} color={colors.textLight} style={{ marginRight: 8 }} />
           <Text className="text-xl font-semibold text-theme-textLight">Add new account</Text>
         </TouchableOpacity>
       </View>
