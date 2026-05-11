@@ -1,6 +1,7 @@
 import React from 'react';
-import { FlatList, Modal, Pressable, Text, TouchableOpacity, useColorScheme } from 'react-native';
+import { FlatList, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { Colors } from '@/constants/theme';
+import CustomModal from '@/components/Modal';
 
 type Props = {
   value: string;
@@ -15,24 +16,38 @@ export default function CurrencyDropdown({ value, options, visible, onClose, onS
   const colors = Colors[scheme];
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable onPress={onClose} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', padding: 16 }}>
-        <Pressable onPress={() => {}} style={{ backgroundColor: colors.surface, borderRadius: 6, padding: 12, maxHeight: '70%' }}>
-          <Text className = "text-3xl font-semibold text-theme-text" style={{ marginBottom: 10 }}>Select currency</Text>
-          <FlatList
-            data={options}
-            keyExtractor={(i) => i}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => { onSelect(item); onClose(); }}
-                style={{ paddingVertical: 12, paddingHorizontal: 8 }}
-              >
-                <Text className = "text-2xl" style={{ color: item === value ? colors.tint : colors.text }}>{item}</Text>
-              </TouchableOpacity>
-            )}
-          />
-        </Pressable>
-      </Pressable>
-    </Modal>
+    <CustomModal
+      isVisible={visible}
+      setIsVisible={(next) => {
+        if (!next) onClose();
+      }}
+      title="Select currency"
+      cancelAction={
+        <TouchableOpacity onPress={onClose}>
+          <Text className="text-xl text-theme-text">Close</Text>
+        </TouchableOpacity>
+      }
+      confirmAction={null}
+    >
+      <View style={{ maxHeight: '70%' }}>
+        <FlatList
+          data={options}
+          keyExtractor={(item) => item}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => {
+                onSelect(item);
+                onClose();
+              }}
+              style={{ paddingVertical: 12, paddingHorizontal: 8 }}
+            >
+              <Text className="text-2xl" style={{ color: item === value ? colors.tint : colors.text }}>
+                {item}
+              </Text>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
+    </CustomModal>
   );
 }

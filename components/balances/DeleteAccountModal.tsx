@@ -1,6 +1,7 @@
 import React from 'react';
-import { Modal, Pressable, Text, TouchableOpacity, View, useColorScheme } from 'react-native';
+import { Text, TouchableOpacity, useColorScheme } from 'react-native';
 import { Colors } from '@/constants/theme';
+import CustomModal from '@/components/Modal';
 
 type Props = {
   visible: boolean;
@@ -15,22 +16,32 @@ export default function DeleteAccountModal({ visible, name, isDeleting = false, 
   const colors = Colors[scheme];
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable onPress={onClose} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', padding: 16 }}>
-        <Pressable onPress={() => { }} style={{ backgroundColor: colors.surface, borderRadius: 6, padding: 16 }}>
-          <Text className="text-2xl font-semibold text-theme-text" style={{ marginBottom: 8 }}>Delete account</Text>
-          <Text className="text-2xl text-theme-icon" style={{ marginBottom: 16 }}>Delete {name ?? ''}?</Text>
-
-          <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
-            <TouchableOpacity onPress={onClose} style={{ padding: 8 }}>
-              <Text className="text-2xl text-theme-icon">Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={onConfirm} disabled={isDeleting} style={{ marginLeft: 10, padding: 8, backgroundColor: colors.error, borderRadius: 8 }}>
-              <Text className="text-2xl" style={{ color: colors.textLight }}>{isDeleting ? 'Deleting...' : 'Delete'}</Text>
-            </TouchableOpacity>
-          </View>
-        </Pressable>
-      </Pressable>
-    </Modal>
+    <CustomModal
+      isVisible={visible}
+      setIsVisible={(next) => {
+        if (!next) onClose();
+      }}
+      title="Delete account"
+      cancelAction={
+        <TouchableOpacity onPress={onClose} style={{ padding: 8 }}>
+          <Text className="text-2xl text-theme-icon">Cancel</Text>
+        </TouchableOpacity>
+      }
+      confirmAction={
+        <TouchableOpacity
+          onPress={onConfirm}
+          disabled={isDeleting}
+          style={{ marginLeft: 10, padding: 8, backgroundColor: colors.error, borderRadius: 8 }}
+        >
+          <Text className="text-2xl" style={{ color: colors.textLight }}>
+            {isDeleting ? 'Deleting...' : 'Delete'}
+          </Text>
+        </TouchableOpacity>
+      }
+    >
+      <Text className="text-2xl text-theme-icon" style={{ marginBottom: 4 }}>
+        Delete {name ?? ''}?
+      </Text>
+    </CustomModal>
   );
 }
