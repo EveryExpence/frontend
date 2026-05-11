@@ -191,8 +191,8 @@ const SettingsScreen = () => {
   ];
 
   return (
-    <SafeAreaView className="flex-1 bg-theme-background">
-      <ScrollView className="mt-[25px]">
+    <SafeAreaView>
+      <ScrollView>
         {sections.map((section) => (
           <View key={section.title}>
             <Text className="text-2xl font-bold pl-4 text-theme-text" selectable={false}>

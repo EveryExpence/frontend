@@ -15,7 +15,7 @@ function CustomizedToast() {
       <BaseToast
         {...props}
         style={{ borderLeftColor: colors.success, backgroundColor: colors.surface }}
-        text1Style={{ color: colors.text, fontSize: 16 }}
+        text1Style={{ color: colors.text, fontSize: 14 }}
         text2Style={{ color: colors.icon }}
       />
     ),
@@ -23,12 +23,12 @@ function CustomizedToast() {
       <ErrorToast
         {...props}
         style={{ borderLeftColor: colors.error, backgroundColor: colors.surface }}
-        text1Style={{ color: colors.text, fontSize: 16 }}
+        text1Style={{ color: colors.text, fontSize: 14 }}
         text2Style={{ color: colors.icon }}
       />
     ),
   };
-  
+
   return (
     <Toast config={toastConfig} bottomOffset={inAuthGroup ? 40 : 120} position="bottom" />
   )

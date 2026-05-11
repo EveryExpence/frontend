@@ -1,6 +1,7 @@
 import { SyncState } from "./syncState";
 
-type CategoryType = "expense" | "income";
+type CategoryType = "expense" | "income" | "varies";
+export const categoryTypes: CategoryType[] = ["expense", "income", "varies"];
 
 export interface Category {
     id: string;
