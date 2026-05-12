@@ -1,10 +1,14 @@
 import { View, Text, useColorScheme, TouchableOpacity, ActivityIndicator } from 'react-native';
-import React, { Dispatch, SetStateAction, useState, useRef } from 'react';
+import React, { Dispatch, SetStateAction, useState, useRef, useEffect } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
 import { WebView } from 'react-native-webview';
 import * as Location from 'expo-location';
-import { Coordinates } from '@/types/data/location';
+
+export type Coordinates = {
+    latitude: number;
+    longitude: number;
+};
 
 interface Props {
     location: Coordinates | null;
@@ -17,6 +21,17 @@ const LocationSelection = ({ location, setLocation }: Props) => {
     const webViewRef = useRef<WebView>(null);
     const [isFetching, setIsFetching] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [isMapLoaded, setIsMapLoaded] = useState(false);
+
+    useEffect(() => {
+        getCurrentLocation();
+    }, []);
+
+    useEffect(() => {
+        if (isMapLoaded && location) {
+            webViewRef.current?.injectJavaScript(`window.updateMapLocation(${location.latitude}, ${location.longitude}); true;`);
+        }
+    }, [isMapLoaded]);
 
     const mapHtml = `
         <!DOCTYPE html>
@@ -112,6 +127,7 @@ const LocationSelection = ({ location, setLocation }: Props) => {
                     originWhitelist={['*']}
                     source={{ html: mapHtml }}
                     onMessage={onMessage}
+                    onLoadEnd={() => setIsMapLoaded(true)}
                     scrollEnabled={false}
                     showsVerticalScrollIndicator={false}
                     showsHorizontalScrollIndicator={false}
