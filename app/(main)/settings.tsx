@@ -3,15 +3,13 @@ import {
   View,
   Text,
   TouchableOpacity,
-  useColorScheme,
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { Colors } from "@/constants/theme";
 import { useAuth } from "@/context/authContext";
+import { useTheme } from "@/context/themeContext";
 import {
-  AppTheme,
   Language,
   SettingsRowProps,
   SettingsSection,
@@ -83,12 +81,10 @@ const SettingsRow = ({
 const SettingsScreen = () => {
   const router = useRouter();
   const { logout, user } = useAuth();
-
-  const theme = useColorScheme() || "light";
-  const colors = Colors[theme];
+  const { theme, setTheme, colors } = useTheme();
 
   const [currentLanguage, setLanguage] = useState<Language>("eng");
-  const [currentTheme, setTheme] = useState<AppTheme>("light");
+  const currentTheme = theme;
   const [currentNotifications, setNotifications] = useState(true);
 
   const chevron = (
@@ -161,8 +157,9 @@ const SettingsScreen = () => {
               {chevron}
             </React.Fragment>
           ),
-          onPress: () =>
-            setTheme((prev) => (prev === "light" ? "dark" : "light")),
+          onPress: () => {
+            setTheme(theme === "light" ? "dark" : "light");
+          },
         },
       ],
     },
