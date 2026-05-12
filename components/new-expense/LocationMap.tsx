@@ -18,17 +18,16 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled }: Props) =
     const webViewRef = useRef<WebView>(null);
     const [isFetching, setIsFetching] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
-    const [isMapLoaded, setIsMapLoaded] = useState(false);
+    const isMapLoadedRef = useRef(false);
+    const locationRef = useRef(location);
 
     useEffect(() => {
-        getCurrentLocation();
+        locationRef.current = location;
+    }, [location]);
+
+    useEffect(() => {
+        getCurrentLocation(true);
     }, []);
-
-    useEffect(() => {
-        if (isMapLoaded && location) {
-            webViewRef.current?.injectJavaScript(`window.updateMapLocation(${location.latitude}, ${location.longitude}); true;`);
-        }
-    }, [isMapLoaded]);
 
     const mapHtml = `
         <!DOCTYPE html>
@@ -83,7 +82,7 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled }: Props) =
         } catch { }
     };
 
-    const getCurrentLocation = async () => {
+    const getCurrentLocation = async (onlyIfNull = false) => {
         setIsFetching(true);
         setErrorMsg(null);
         try {
@@ -93,13 +92,30 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled }: Props) =
                 return;
             }
 
-            const { coords } = await Location.getCurrentPositionAsync({});
+            const { coords } = await Location.getCurrentPositionAsync({
+                accuracy: Location.Accuracy.Balanced
+            });
+
+            if (onlyIfNull && locationRef.current !== null) {
+                return;
+            }
+
             setLocation({ latitude: coords.latitude, longitude: coords.longitude });
-            webViewRef.current?.injectJavaScript(`window.updateMapLocation(${coords.latitude}, ${coords.longitude}); true;`);
+
+            if (isMapLoadedRef.current) {
+                webViewRef.current?.injectJavaScript(`window.updateMapLocation(${coords.latitude}, ${coords.longitude}); true;`);
+            }
         } catch {
             setErrorMsg('Failed to fetch location');
         } finally {
             setIsFetching(false);
+        }
+    };
+
+    const handleLoadEnd = () => {
+        isMapLoadedRef.current = true;
+        if (locationRef.current) {
+            webViewRef.current?.injectJavaScript(`window.updateMapLocation(${locationRef.current.latitude}, ${locationRef.current.longitude}); true;`);
         }
     };
 
@@ -109,7 +125,7 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled }: Props) =
                 <Text className="text-2xl text-theme-text font-bold">Location</Text>
 
                 <TouchableOpacity
-                    onPress={getCurrentLocation}
+                    onPress={() => getCurrentLocation(false)}
                     className="flex-row items-center bg-theme-surface px-3 py-2 rounded-md"
                     disabled={isFetching}
                 >
@@ -124,13 +140,13 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled }: Props) =
                 </TouchableOpacity>
             </View>
 
-            <View className="w-full h-80 rounded-md overflow-hidden bg-theme-surface border border-transparent">
+            <View className="w-full h-[400px] rounded-md overflow-hidden bg-theme-surface border border-transparent">
                 <WebView
                     ref={webViewRef}
                     originWhitelist={['*']}
                     source={{ html: mapHtml }}
                     onMessage={onMessage}
-                    onLoadEnd={() => setIsMapLoaded(true)}
+                    onLoadEnd={handleLoadEnd}
                     scrollEnabled={false}
                     showsVerticalScrollIndicator={false}
                     showsHorizontalScrollIndicator={false}
