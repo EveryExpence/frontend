@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, TouchableOpacity, View, useColorScheme } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
-import AppIcon from '@/components/AppIcon';
 
 export type AccountCardItem = {
   id: string;
@@ -32,7 +32,7 @@ export default function AccountCard({
       style={{ backgroundColor: colors.surface, borderRadius: cornerRadius }}
     >
       <View className="flex-row items-center self-stretch flex-1 min-w-0">
-        <AppIcon
+        <MaterialCommunityIcons
           name="cash-multiple"
           size={48}
           color={colors.text}
@@ -61,7 +61,7 @@ export default function AccountCard({
             style={{ padding: 4, marginRight: 8 }}
             onPress={onEdit}
           >
-            <AppIcon name="pencil-outline" size={32} color={colors.text} />
+            <MaterialCommunityIcons name="pencil-outline" size={32} color={colors.text} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -69,7 +69,7 @@ export default function AccountCard({
             style={{ padding: 4 }}
             onPress={onDelete}
           >
-            <AppIcon name="delete-outline" size={32} color={colors.text} />
+            <MaterialCommunityIcons name="delete-outline" size={32} color={colors.text} />
           </TouchableOpacity>
         </View>
       </View>

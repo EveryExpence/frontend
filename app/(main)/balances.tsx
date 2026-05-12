@@ -4,8 +4,8 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message';
 import { useSQLiteContext } from 'expo-sqlite';
 
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
-import AppIcon from '@/components/AppIcon';
 import {
   createAccount as createLocalAccount,
   deleteAccount as deleteLocalAccount,
@@ -193,7 +193,7 @@ export default function Balances() {
           className="w-full flex-row items-center justify-center py-4 bg-theme-tint rounded-lg"
           onPress={openAdd}
         >
-          <AppIcon name="plus" size={22} color={colors.textLight} style={{ marginRight: 8 }} />
+          <MaterialCommunityIcons name="plus" size={22} color={colors.textLight} style={{ marginRight: 8 }} />
           <Text className="text-xl font-semibold text-theme-textLight">Add new account</Text>
         </TouchableOpacity>
       </View>
