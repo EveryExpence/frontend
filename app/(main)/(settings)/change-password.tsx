@@ -1,13 +1,14 @@
-import { KeyboardAvoidingView, Platform, ScrollView, TextInput, TouchableOpacity, View, Text } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, View, Text } from "react-native";
 import React, { useState } from "react";
-import { Controller, FieldErrors, useForm } from "react-hook-form";
+import { FieldErrors, useForm } from "react-hook-form";
 import Toast from 'react-native-toast-message';
 import { updateUserPassword } from '@/context/userContext'
 import EncryptedStorage from "react-native-encrypted-storage";
 import { useRouter } from "expo-router";
 import { accessTokenKey } from "@/constants/encryptedStorageKeys";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { useThemeColor } from "@/hooks/use-theme-color";
+import ControlledInputField from "@/components/settings/ControlledInputField";
 
 type ChangePasswordForm = {
   oldPassword: string;
@@ -18,7 +19,7 @@ type ChangePasswordForm = {
 const ChangePasswordScreen = () => {
   const router = useRouter();
   const iconColor = useThemeColor({}, "icon");
-  const { control, handleSubmit, reset, getValues, formState: { errors, isValid } } = useForm<ChangePasswordForm>({
+  const { control, handleSubmit, reset, getValues, formState: { isValid } } = useForm<ChangePasswordForm>({
     mode: "onChange",
     defaultValues:{
       oldPassword: "",
@@ -27,9 +28,6 @@ const ChangePasswordScreen = () => {
     }
   });
   const [isSaving, setIsSaving] = useState(false);
-  const [showOldPassword, setShowOldPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleUpdatePassword = async (oldPassword: string, newPassword: string) => {
     try {
@@ -85,146 +83,62 @@ const ChangePasswordScreen = () => {
         <View
           className="p-5 rounded-md gap-4 bg-theme-surface"
         >
-          <View>
-            <Text className="text-2xl mb-1 text-theme-icon">
-              Old Password
-            </Text>
+          <ControlledInputField
+            label="Old Password"
+            name="oldPassword"
+            control={control}
+            editable={!isSaving}
+            secureTextEntry
+          />
 
-            <View className="flex-row items-center">
-              <Controller
-                control={control}
-                name="oldPassword"
-                render={({ field: {onChange, value}}) => (
-                  <TextInput
-                    editable={!isSaving}
-                    value={value}
-                    secureTextEntry={!showOldPassword}
-                    className="w-full p-4 text-xl border border-theme-text rounded-md bg-theme-background text-theme-text"
-                    onChangeText={onChange}
-                  />
-                )}
-              />
-              <MaterialCommunityIcons
-                name={showOldPassword ? "eye-off" : "eye"}
-                size={24}
-                color={iconColor}
-                onPress={() => setShowOldPassword((prev) => !prev)}
-                className="absolute right-4 text-theme-icon"
-              />
-            </View>
+          <ControlledInputField
+            label="New Password"
+            name="newPassword"
+            control={control}
+            editable={!isSaving}
+            secureTextEntry
+            rules={{
+              required:"New password is required",
+              maxLength: {
+                value: 64,
+                message: "Password is too long",
+              },
+              minLength: {
+                value: 8,
+                message: "Password is too short",
+              },
+              pattern: {
+                value: /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).*$/,
+                message: "Password must contain at least one digit, one lowercase, and one uppercase letter",
+              },
+            }}
+          />
 
-            {errors.oldPassword && (
-              <Text className="text-red-500 text-sm pl-2 mt-1">
-                  {errors.oldPassword.message}
-              </Text>
-            )}
-
-          </View>
-
-          <View>
-            <Text className="text-2xl mb-1 text-theme-icon">
-              New Password
-            </Text>
-
-            <View className="flex-row items-center">
-              <Controller
-                control={control}
-                name="newPassword"
-                rules={{
-                  required:"New password is required",
-                  maxLength: {
-                    value: 64,
-                    message: "Password is too long",
-                  },
-                  minLength: {
-                    value: 8,
-                    message: "Password is too short",
-                  },
-                  pattern: {
-                    value: /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).*$/,
-                    message: "Password must contain at least one digit, one lowercase, and one uppercase letter",
-                  },
-                }}
-                render={({ field: {onChange, value}}) => (
-                  <TextInput
-                    editable={!isSaving}
-                    value={value}
-                    secureTextEntry={!showNewPassword}
-                    className="w-full p-4 text-xl border border-theme-text rounded-md bg-theme-background text-theme-text"
-                    onChangeText={onChange}
-                  />
-                )}
-              />
-              <MaterialCommunityIcons
-                name={showNewPassword ? "eye-off" : "eye"}
-                size={24}
-                color={iconColor}
-                onPress={() => setShowNewPassword((prev) => !prev)}
-                className="absolute right-4 text-theme-icon"
-              />
-            </View>
-
-            {errors.newPassword && (
-              <Text className="text-red-500 text-sm pl-2 mt-1">
-                  {errors.newPassword.message}
-              </Text>
-            )}
-            
-          </View>
-
-          <View>
-            <Text className="text-2xl mb-1 text-theme-icon">
-              Confirm New Password
-            </Text>
-
-            <View className="flex-row items-center">
-              <Controller
-                control={control}
-                name="confirmPassword"
-                rules={{
-                  required:"Confirm password is required",
-                  maxLength: {
-                    value: 64,
-                    message: "Password is too long",
-                  },
-                  minLength: {
-                    value: 8,
-                    message: "Password is too short",
-                  },
-                  pattern: {
-                    value: /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).*$/,
-                    message: "Password must contain at least one digit, one lowercase, and one uppercase letter",
-                  },
-                  validate: (value) => {
-                    return value === getValues("newPassword") || "Passwords do not match";
-                  }
-                }}
-                render={({ field: {onChange, value}}) => (
-                  <TextInput
-                    editable={!isSaving}
-                    value={value}
-                    secureTextEntry={!showConfirmPassword}
-                    className="w-full p-4 text-xl border border-theme-text rounded-md bg-theme-background text-theme-text"
-                    onChangeText={onChange}
-                  />
-                )}
-              />
-              <MaterialCommunityIcons
-                name={showConfirmPassword ? "eye-off" : "eye"}
-                size={24}
-                color={iconColor}
-                onPress={() => setShowConfirmPassword((prev) => !prev)}
-                className="absolute right-4 text-theme-icon"
-              />
-            </View>
-
-            {errors.confirmPassword && (
-              <Text className="text-red-500 text-sm pl-2 mt-1">
-                  {errors.confirmPassword.message}
-              </Text>
-            )}
-            
-          </View>
+          <ControlledInputField
+            label="Confirm New Password"
+            name="confirmPassword"
+            control={control}
+            editable={!isSaving}
+            secureTextEntry
+            rules={{
+              required:"Confirm password is required",
+              maxLength: {
+                value: 64,
+                message: "Password is too long",
+              },
+              minLength: {
+                value: 8,
+                message: "Password is too short",
+              },
+              pattern: {
+                value: /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).*$/,
+                message: "Password must contain at least one digit, one lowercase, and one uppercase letter",
+              },
+              validate: (value) => {
+                return value === getValues("newPassword") || "Passwords do not match";
+              }
+            }}
+          />
 
         </View>
 
