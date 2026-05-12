@@ -4,18 +4,15 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
 import { WebView } from 'react-native-webview';
 import * as Location from 'expo-location';
-
-export type Coordinates = {
-    latitude: number;
-    longitude: number;
-};
+import { Coordinates } from '@/types/data/location';
 
 interface Props {
     location: Coordinates | null;
     setLocation: Dispatch<SetStateAction<Coordinates | null>>;
+    setScrollEnabled: Dispatch<SetStateAction<boolean>>;
 }
 
-const LocationSelection = ({ location, setLocation }: Props) => {
+const LocationSelection = ({ location, setLocation, setScrollEnabled }: Props) => {
     const scheme = useColorScheme() ?? 'light';
     const colors = Colors[scheme];
     const webViewRef = useRef<WebView>(null);
@@ -45,7 +42,11 @@ const LocationSelection = ({ location, setLocation }: Props) => {
         <body>
             <div id="map"></div>
             <script>
-                const map = L.map('map').setView([51.7592, 19.4559], 13);
+                document.addEventListener('touchstart', () => window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'touchstart' })));
+                document.addEventListener('touchend', () => window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'touchend' })));
+                document.addEventListener('touchcancel', () => window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'touchend' })));
+
+                const map = L.map('map', { dragging: true }).setView([51.7592, 19.4559], 13);
                 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
@@ -53,7 +54,7 @@ const LocationSelection = ({ location, setLocation }: Props) => {
 
                 map.on('click', (e) => {
                     setMarker(e.latlng.lat, e.latlng.lng);
-                    window.ReactNativeWebView.postMessage(JSON.stringify({ latitude: e.latlng.lat, longitude: e.latlng.lng }));
+                    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'coords', latitude: e.latlng.lat, longitude: e.latlng.lng }));
                 });
 
                 window.updateMapLocation = (lat, lng) => {
@@ -73,7 +74,9 @@ const LocationSelection = ({ location, setLocation }: Props) => {
     const onMessage = (event: any) => {
         try {
             const data = JSON.parse(event.nativeEvent.data);
-            if (data.latitude && data.longitude) {
+            if (data.type === 'touchstart') setScrollEnabled(false);
+            if (data.type === 'touchend') setScrollEnabled(true);
+            if (data.type === 'coords' && data.latitude && data.longitude) {
                 setLocation({ latitude: data.latitude, longitude: data.longitude });
                 setErrorMsg(null);
             }
@@ -121,7 +124,7 @@ const LocationSelection = ({ location, setLocation }: Props) => {
                 </TouchableOpacity>
             </View>
 
-            <View className="w-full h-64 rounded-md overflow-hidden bg-theme-surface border border-transparent">
+            <View className="w-full h-80 rounded-md overflow-hidden bg-theme-surface border border-transparent">
                 <WebView
                     ref={webViewRef}
                     originWhitelist={['*']}

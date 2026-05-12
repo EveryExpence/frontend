@@ -28,6 +28,7 @@ export default function NewExpense() {
   const isAmountValid = safeAmount === '' || /^-?\d*\.?\d+$/.test(safeAmount);
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState<Coordinates | null>(null);
+  const [scrollEnabled, setScrollEnabled] = useState(true);
 
   const saveRecord = async () => {
     if (selectedAccount === null || selectedCategory === null || selectedPaymentMethod === null || !isAmountValid) {
@@ -47,6 +48,7 @@ export default function NewExpense() {
       categoryId: selectedCategory.id,
       accountId: selectedAccount.id,
       createdAt: selectedDateTime.getTime() / 1000,
+      location: location === null ? undefined : `${location?.latitude};${location?.longitude}`,
     };
 
     try {
@@ -58,6 +60,7 @@ export default function NewExpense() {
       setSelectedDateTime(new Date());
       setAmount("");
       setDescription("");
+      setLocation(null);
     } catch {
       Toast.show({ text1: "Failed to add a new record", type: "error" });
     }
@@ -65,7 +68,7 @@ export default function NewExpense() {
 
   return (
     <SafeAreaView>
-      <ScrollView className="px-4">
+      <ScrollView className="px-4" scrollEnabled={scrollEnabled}>
         <AccountSelection selectedAccount={selectedAccount} setSelectedAccount={setSelectedAccount} />
 
         <AmountInput selectedAccount={selectedAccount} amount={amount} setAmount={setAmount} isValid={isAmountValid} />
@@ -78,7 +81,7 @@ export default function NewExpense() {
 
         <DescriptionInput description={description} setDescription={setDescription} />
 
-        <LocationSelection location={location} setLocation={setLocation} />
+        <LocationSelection location={location} setLocation={setLocation} setScrollEnabled={setScrollEnabled} />
 
         <TouchableOpacity onPress={saveRecord} className="w-full bg-theme-tint py-4 rounded-md">
           <Text className="text-xl text-theme-textLight text-center font-bold">Save a new record</Text>
