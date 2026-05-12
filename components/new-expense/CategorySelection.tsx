@@ -1,4 +1,4 @@
-import { View, Text, useColorScheme, TouchableOpacity, TextInput } from 'react-native'
+import { View, Text, TouchableOpacity, TextInput } from 'react-native'
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Dropdown } from 'react-native-element-dropdown'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
@@ -8,6 +8,7 @@ import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite'
 import { createCategory, getAllCategories } from '@/data/categories'
 import CustomModal from '../Modal'
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 interface Props {
     selectedCategory: Category | null;

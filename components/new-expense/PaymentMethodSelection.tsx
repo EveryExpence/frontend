@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, useColorScheme, TextInput } from 'react-native'
+import { View, Text, TouchableOpacity, TextInput } from 'react-native'
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Dropdown } from 'react-native-element-dropdown'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
@@ -7,6 +7,7 @@ import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite'
 import { Colors } from '@/constants/theme'
 import { createPaymentMethod, getAllPaymentMethods } from '@/data/paymentMethods'
 import CustomModal from '../Modal'
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 interface Props {
     selectedPaymentMethod: PaymentMethod | null;

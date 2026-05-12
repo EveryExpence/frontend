@@ -1,6 +1,7 @@
 import React from 'react';
-import { FlatList, Modal, Pressable, Text, TouchableOpacity, useColorScheme } from 'react-native';
+import { FlatList, Modal, Pressable, Text, TouchableOpacity } from 'react-native';
 import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 type Props = {
   value: string;

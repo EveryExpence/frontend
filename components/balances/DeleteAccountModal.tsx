@@ -1,6 +1,7 @@
 import React from 'react';
-import { Modal, Pressable, Text, TouchableOpacity, View, useColorScheme } from 'react-native';
+import { Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 type Props = {
   visible: boolean;

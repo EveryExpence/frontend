@@ -1,7 +1,8 @@
-import { View, TextInput, Text, TouchableOpacity, useColorScheme } from 'react-native';
+import { View, TextInput, Text, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import * as z from 'zod'
 import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"

@@ -1,8 +1,9 @@
-import { View, Text, TouchableOpacity, useColorScheme } from 'react-native'
+import { View, Text, TouchableOpacity } from 'react-native'
 import React, { Dispatch, SetStateAction, useState } from 'react'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 interface Props {
     selectedDateTime: Date;

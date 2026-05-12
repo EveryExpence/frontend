@@ -1,7 +1,7 @@
 import { Colors } from '@/constants/theme';
 import { useSegments } from 'expo-router';
 import React from 'react'
-import { useColorScheme } from 'react-native';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
 
 function CustomizedToast() {

@@ -1,8 +1,9 @@
 import React from 'react';
-import { Modal, ScrollView, Text, TextInput, TouchableOpacity, View, useColorScheme } from 'react-native';
+import { Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Colors } from '@/constants/theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import CurrencyDropdown from './CurrencyDropdown';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 type Props = {
   visible: boolean;

@@ -1,8 +1,9 @@
-import { View, Text, useColorScheme, TextInput } from 'react-native'
+import { View, Text, TextInput } from 'react-native'
 import React, { Dispatch, SetStateAction } from 'react'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { Colors } from '@/constants/theme';
 import { Account } from '@/types/data/account';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 interface Props {
     selectedAccount: Account | null;

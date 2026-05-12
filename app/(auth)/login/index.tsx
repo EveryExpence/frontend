@@ -3,7 +3,6 @@ import {
   TextInput,
   Text,
   TouchableOpacity,
-  useColorScheme,
   ActivityIndicator,
 } from "react-native";
 import React, { useState } from "react";
@@ -11,6 +10,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Colors } from "@/constants/theme";
 import { useAuth } from "@/context/authContext";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import * as z from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
