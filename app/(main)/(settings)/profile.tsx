@@ -53,10 +53,9 @@ const ProfileScreen = () => {
       });
     }
   }
-
   useEffect(() => {
     loadUser()
-  },)
+  },[loadUser])
 
   useEffect(() => {
     if (!user) return;
