@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 
-export type ThemeColors = (typeof import("@/constants/theme").Colors)[keyof typeof import("@/constants/theme").Colors];
 export type Language = "eng" | "pl";
 export type AppTheme = "light" | "dark";
 
@@ -24,7 +23,6 @@ export type SettingsRowProps = {
 	rightElement?: ReactNode;
 	tone?: "danger";
 	onPress?: () => void;
-	colors: ThemeColors;
 };
 
 export type SettingsItem = {

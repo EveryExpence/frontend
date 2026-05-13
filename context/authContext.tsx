@@ -13,11 +13,12 @@ export interface IAuthContext {
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     register: (email: string, password: string) => Promise<void>;
+    refreshUser: () => Promise<void>
 }
 
 export const AuthContext = createContext<IAuthContext>({} as IAuthContext);
 
-const getUserData = async (accessToken: string): Promise<GetUserDataDTO> => {
+export const getUserData = async (accessToken: string): Promise<GetUserDataDTO> => {
     const response = await apiFetch(getUserDataEndpoint, {
         method: "GET",
         headers: {
@@ -38,7 +39,8 @@ const getUserData = async (accessToken: string): Promise<GetUserDataDTO> => {
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isInitializing, setIsInitializing] = useState<boolean>(true); 
-    const [isLoading, setIsLoading] = useState<boolean>(false); 
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
     
     useEffect(() => {
         const checkSessionOnBoot = async () => {
@@ -146,7 +148,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }
 
-    return <AuthContext.Provider value={{ user, isInitializing, isLoading, login, register, logout }}>{children}</AuthContext.Provider>
+    const refreshUser = async  () => {
+        const accessToken = await EncryptedStorage.getItem(accessTokenKey)
+        if(!accessToken){
+            setUser(null)
+            return
+        }
+
+        const userData = await getUserData(accessToken)
+        setUser({ ...userData })
+    };
+
+    return <AuthContext.Provider value={{ user, isInitializing, isLoading, login, register, logout, refreshUser }}>{children}</AuthContext.Provider>
 };
 
 export const useAuth = () => {
