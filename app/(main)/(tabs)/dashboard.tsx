@@ -1,31 +1,107 @@
-import React from 'react'
-import { useAuth } from '@/context/authContext';
-import { TouchableOpacity, Text } from 'react-native';
-import Toast from 'react-native-toast-message';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React from "react";
+import {
+  FlatList,
+  View,
+  Dimensions,
+  ActivityIndicator,
+  Animated,
+} from "react-native";
+import { Text } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Colors } from "@/constants/theme";
+import { Account } from "@/types/data/account";
+import { useAccountsData } from "@/hooks/use-account-data";
+import { TotalBalancePage } from "@/components/dashboard/TotalBalancePage";
+import { AccountPage } from "@/components/dashboard/AccountPage";
+import { PaginationDots } from "@/components/dashboard/PaginationDots";
 
-const Main = () => {
-  const { user, logout } = useAuth();
+const { width } = Dimensions.get("window");
 
-  const onPress = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      Toast.show({ text1: `${error}`, type: "error" });
+type AccountWithComputed = Account & { computedBalance: number };
+
+const Dashboard = () => {
+  const colorScheme: "light" | "dark" = useColorScheme() ?? "light";
+
+  const { accounts, loading, error, totalsByCurrency } = useAccountsData();
+  const [pageIndex, setPageIndex] = React.useState(0);
+  const animatedIndex = React.useRef(new Animated.Value(0)).current;
+
+  const pages: Array<{ type: "total" } | AccountWithComputed> = [
+    { type: "total" },
+    ...accounts,
+  ];
+
+  React.useEffect(() => {
+    Animated.spring(animatedIndex, {
+      toValue: pageIndex,
+      useNativeDriver: false,
+      speed: 8,
+    }).start();
+  }, [pageIndex, animatedIndex]);
+
+  const onMomentumScrollEnd = (e: any) => {
+    const newIndex = Math.round(e.nativeEvent.contentOffset.x / width);
+    setPageIndex(newIndex);
+  };
+
+  const renderPage = ({ item }: { item: any }) => {
+    if (item.type === "total") {
+      return <TotalBalancePage totalsByCurrency={totalsByCurrency} />;
     }
+
+    return <AccountPage account={item} />;
   };
 
   return (
-    <SafeAreaView className="flex flex-1 justify-center items-center">
-      <Text className="2xl">
-        {user?.email} {user?.publicUsername}
-      </Text>
+    <LinearGradient
+      colors={[Colors[colorScheme].surface, Colors[colorScheme].tint]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      className="flex flex-1"
+    >
+      <SafeAreaView className="flex flex-1">
+        {loading ? (
+          <View className="flex-1 justify-center items-center">
+            <ActivityIndicator
+              size="large"
+              color={Colors[colorScheme].tint}
+            />
+          </View>
+        ) : error ? (
+          <View className="p-4">
+            <Text className="text-theme-text">Error: {error}</Text>
+          </View>
+        ) : (
+          <View style={{ flex: 1 }}>
+            <FlatList
+              style={{ flexGrow: 0 }}
+              contentContainerStyle={{ flexGrow: 0 }}
+              data={pages}
+              keyExtractor={(i) => ("type" in i ? "total" : i.id)}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onMomentumScrollEnd={onMomentumScrollEnd}
+              renderItem={renderPage}
+              getItemLayout={(_, index) => ({
+                length: width,
+                offset: width * index,
+                index,
+              })}
+            />
 
-      <TouchableOpacity onPress={onPress}>
-        <Text className="2xl">Logout</Text>
-      </TouchableOpacity>
-    </SafeAreaView>
-  )
-}
+            <PaginationDots
+              pages={pages}
+              pageIndex={pageIndex}
+              animatedIndex={animatedIndex}
+            />
+          </View>
+        )}
+      </SafeAreaView>
+    </LinearGradient>
+  );
+};
 
-export default Main;
+export default Dashboard;

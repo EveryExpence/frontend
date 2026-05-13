@@ -13,8 +13,8 @@ export type AccountCardItem = {
 type AccountCardProps = {
   item: AccountCardItem;
   cornerRadius: number;
-  onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 };
 
 export default function AccountCard({
@@ -59,7 +59,7 @@ export default function AccountCard({
           <TouchableOpacity
             activeOpacity={0.8}
             style={{ padding: 4, marginRight: 8 }}
-            onPress={() => onEdit?.(item.id)}
+            onPress={onEdit}
           >
             <MaterialCommunityIcons name="pencil-outline" size={32} color={colors.text} />
           </TouchableOpacity>
@@ -67,7 +67,7 @@ export default function AccountCard({
           <TouchableOpacity
             activeOpacity={0.8}
             style={{ padding: 4 }}
-            onPress={() => onDelete?.(item.id)}
+            onPress={onDelete}
           >
             <MaterialCommunityIcons name="delete-outline" size={32} color={colors.text} />
           </TouchableOpacity>
