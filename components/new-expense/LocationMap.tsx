@@ -19,14 +19,9 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled }: Props) =
     const [isFetching, setIsFetching] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const isMapLoadedRef = useRef(false);
-    const locationRef = useRef(location);
 
     useEffect(() => {
-        locationRef.current = location;
-    }, [location]);
-
-    useEffect(() => {
-        getCurrentLocation(true);
+        getCurrentLocation();
     }, []);
 
     const mapHtml = `
@@ -46,24 +41,21 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled }: Props) =
                 document.addEventListener('touchcancel', () => window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'touchend' })));
 
                 const map = L.map('map', { dragging: true }).setView([51.7592, 19.4559], 13);
-                
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
                 let marker;
+                window.setMarker = (lat, lng) => {
+                    if (marker) map.removeLayer(marker);
+                    marker = L.marker([lat, lng]).addTo(map);
+                }
 
                 map.on('click', (e) => {
-                    setMarker(e.latlng.lat, e.latlng.lng);
+                    window.setMarker(e.latlng.lat, e.latlng.lng);
                     window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'coords', latitude: e.latlng.lat, longitude: e.latlng.lng }));
                 });
 
                 window.updateMapLocation = (lat, lng) => {
                     map.setView([lat, lng], 15);
-                    setMarker(lat, lng);
-                }
-
-                const setMarker = (lat, lng) => {
-                    if (marker) map.removeLayer(marker);
-                    marker = L.marker([lat, lng]).addTo(map);
                 }
             </script>
         </body>
@@ -82,7 +74,7 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled }: Props) =
         } catch { }
     };
 
-    const getCurrentLocation = async (onlyIfNull = false) => {
+    const getCurrentLocation = async () => {
         setIsFetching(true);
         setErrorMsg(null);
         try {
@@ -96,16 +88,16 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled }: Props) =
                 accuracy: Location.Accuracy.Balanced
             });
 
-            if (onlyIfNull && locationRef.current !== null) {
+            if (isMapLoadedRef.current) {
+                webViewRef.current?.injectJavaScript(`window.updateMapLocation(${coords.latitude}, ${coords.longitude}); true;`);
+            }
+
+            if (location !== null) {
                 return;
             }
 
             setLocation({ latitude: coords.latitude, longitude: coords.longitude });
-
-            if (isMapLoadedRef.current) {
-                webViewRef.current?.injectJavaScript(`window.updateMapLocation(${coords.latitude}, ${coords.longitude}); true;`);
-            }
-        } catch {
+        } catch (e) {
             setErrorMsg('Failed to fetch location');
         } finally {
             setIsFetching(false);
@@ -114,8 +106,9 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled }: Props) =
 
     const handleLoadEnd = () => {
         isMapLoadedRef.current = true;
-        if (locationRef.current) {
-            webViewRef.current?.injectJavaScript(`window.updateMapLocation(${locationRef.current.latitude}, ${locationRef.current.longitude}); true;`);
+        if (location !== null) {
+            webViewRef.current?.injectJavaScript(`window.updateMapLocation(${location.latitude}, ${location.longitude}); true;`);
+            webViewRef.current?.injectJavaScript(`window.setMarker(${location.latitude}, ${location.longitude}); true;`);
         }
     };
 
@@ -125,7 +118,7 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled }: Props) =
                 <Text className="text-2xl text-theme-text font-bold">Location</Text>
 
                 <TouchableOpacity
-                    onPress={() => getCurrentLocation(false)}
+                    onPress={getCurrentLocation}
                     className="flex-row items-center bg-theme-surface px-3 py-2 rounded-md"
                     disabled={isFetching}
                 >
