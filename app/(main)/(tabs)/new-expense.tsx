@@ -16,6 +16,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import Toast from 'react-native-toast-message';
 import LocationSelection from '@/components/new-expense/LocationMap';
 import { Coordinates } from '@/types/data/location';
+import Topbar from '@/components/Topbar';
 
 export default function NewExpense() {
   const db = useSQLiteContext();
@@ -68,6 +69,7 @@ export default function NewExpense() {
 
   return (
     <SafeAreaView>
+      <Topbar title="New Expense" />
       <ScrollView className="px-4" scrollEnabled={scrollEnabled}>
         <AccountSelection selectedAccount={selectedAccount} setSelectedAccount={setSelectedAccount} />
 
