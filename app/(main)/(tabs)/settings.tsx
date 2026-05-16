@@ -39,10 +39,10 @@ const SettingsScreen = () => {
         </Text>
         <View className="rounded-md overflow-hidden bg-theme-surface">
           <SettingsProfileRow
-            userName={user?.publicUsername ?? "User"}
-            email={user?.email ?? ""}
+            userName={user?.publicUsername ?? "Not logged in"}
+            email={user?.email ?? "Tap to login to access full features"}
             avatarUrl={user?.avatarUrl}
-            onPress={() => router.push("/profile")}
+            onPress={() => user ? router.push("/profile") : router.replace("/(auth)/login")}
           />
         </View>
 
@@ -81,26 +81,30 @@ const SettingsScreen = () => {
           />
         </View>
 
-        <View className="h-2.5 bg-theme-background" />
+        {user ? (
+          <>
+            <View className="h-2.5 bg-theme-background" />
 
-        <Text className="text-2xl font-bold text-theme-text" selectable={false}>
-          Security
-        </Text>
-        <View className="rounded-md overflow-hidden bg-theme-surface">
-          <SettingsActionRow
-            title="Change Password"
-            iconName="lock-closed-outline"
-            showChevron
-            onPress={() => router.push("/change-password")}
-          />
-          <Divider />
-          <SettingsActionRow
-            title="Log Out"
-            iconName="log-out-outline"
-            tone="danger"
-            onPress={handleLogout}
-          />
-        </View>
+            <Text className="text-2xl font-bold text-theme-text" selectable={false}>
+              Security
+            </Text>
+            <View className="rounded-md overflow-hidden bg-theme-surface">
+              <SettingsActionRow
+                title="Change Password"
+                iconName="lock-closed-outline"
+                showChevron
+                onPress={() => router.push("/change-password")}
+              />
+              <Divider />
+              <SettingsActionRow
+                title="Log Out"
+                iconName="log-out-outline"
+                tone="danger"
+                onPress={handleLogout}
+              />
+            </View>
+          </>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );
