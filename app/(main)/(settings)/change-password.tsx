@@ -74,6 +74,7 @@ const ChangePasswordScreen = () => {
             control={control}
             editable={!isSaving}
             secureTextEntry
+            placeholder="Enter old password"
           />
 
           <ControlledInputField
@@ -82,6 +83,7 @@ const ChangePasswordScreen = () => {
             control={control}
             editable={!isSaving}
             secureTextEntry
+            placeholder="Enter new password"
             rules={{
               required:"New password is required",
               maxLength: {
@@ -105,6 +107,7 @@ const ChangePasswordScreen = () => {
             control={control}
             editable={!isSaving}
             secureTextEntry
+            placeholder="Confirm new password"
             rules={{
               required:"Confirm password is required",
               maxLength: {
