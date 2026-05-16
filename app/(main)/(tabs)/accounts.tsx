@@ -1,59 +1,42 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, Text, TouchableOpacity, View, useColorScheme } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { useSQLiteContext } from 'expo-sqlite';
-
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
 import {
-  createAccount as createLocalAccount,
-  deleteAccount as deleteLocalAccount,
-  getAllAccounts as getAllLocalAccounts,
-  updateAccount as updateLocalAccount,
+  createAccount,
+  deleteAccount,
+  getAllAccounts,
+  updateAccount,
 } from '@/data/accounts';
 import AccountCard, { AccountCardItem } from '@/components/accounts/AccountCard';
-import AccountFormModal from '@/components/accounts/AccountFormModal';
+import AccountFormModal, { AccountFormData } from '@/components/accounts/AccountFormModal';
 import DeleteAccountModal from '@/components/accounts/DeleteAccountModal';
-import { formatBalance, normalizeNumberInput, parseBalanceInput } from '@/utils/balance';
+import { formatBalance } from '@/utils/balance';
+import Topbar from '@/components/Topbar';
+import { useFocusEffect } from 'expo-router';
 
-const BOTTOM_NAV_HEIGHT = 84;
-const FLOATING_BUTTON_HEIGHT = 56;
-const FLOATING_BUTTON_GAP = 12;
-const LIST_BOTTOM_GAP = 16;
-const CORNER_RADIUS = 6;
-
-const CURRENCIES = ['USD', 'EUR', 'PLN', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD'];
-const DEFAULT_CURRENCY = CURRENCIES[0];
-
-export default function Balances() {
+export default function AccountsScreen() {
   const db = useSQLiteContext();
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
-  const insets = useSafeAreaInsets();
 
   const [accounts, setAccounts] = useState<AccountCardItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [formMode, setFormMode] = useState<'add' | 'edit'>('add');
   const [editingAccount, setEditingAccount] = useState<AccountCardItem | null>(null);
-  const [name, setName] = useState('');
-  const [balanceField, setBalanceField] = useState('');
-  const [currency, setCurrency] = useState(DEFAULT_CURRENCY);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState<AccountCardItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const fixedButtonBottom = insets.bottom + BOTTOM_NAV_HEIGHT + FLOATING_BUTTON_GAP;
-  const listBottomPadding = fixedButtonBottom + FLOATING_BUTTON_HEIGHT + LIST_BOTTOM_GAP;
-
   const loadAccounts = useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await getAllLocalAccounts(db);
+      const data = await getAllAccounts(db);
       setAccounts(
         data.map((a) => ({
           id: a.id,
@@ -64,31 +47,25 @@ export default function Balances() {
       );
     } catch (e) {
       setAccounts([]);
-      Toast.show({ text1: `Failed to load local accounts: ${e}`, type: 'error' });
+      Toast.show({ text1: `Failed to load accounts: ${e}`, type: 'error' });
     } finally {
       setIsLoading(false);
     }
   }, [db]);
 
-  useEffect(() => {
-    loadAccounts();
-  }, [loadAccounts]);
+  useFocusEffect(
+    useCallback(() => {
+      loadAccounts();
+    }, [loadAccounts])
+  );
 
   const openAdd = () => {
-    setFormMode('add');
     setEditingAccount(null);
-    setName('');
-    setBalanceField('');
-    setCurrency(DEFAULT_CURRENCY);
     setIsFormOpen(true);
   };
 
   const openEdit = (item: AccountCardItem) => {
-    setFormMode('edit');
     setEditingAccount(item);
-    setName(item.name);
-    setBalanceField(normalizeNumberInput(String(item.balance)));
-    setCurrency(item.currency ?? DEFAULT_CURRENCY);
     setIsFormOpen(true);
   };
 
@@ -97,51 +74,28 @@ export default function Balances() {
     setIsDeleteOpen(true);
   };
 
-  const submitForm = async () => {
-    if (!name.trim()) {
-      Toast.show({ text1: 'Name is required', type: 'error' });
-      return;
-    }
-
-    const parsed = parseBalanceInput(balanceField);
-    if (!Number.isFinite(parsed)) {
-      Toast.show({ text1: 'Balance must be a valid number', type: 'error' });
-      return;
-    }
-
-    setIsSubmitting(true);
+  const handleSave = async (data: AccountFormData) => {
     try {
-      if (formMode === 'add') {
-        await createLocalAccount(db, {
-          name: name.trim(),
-          currency,
-          balance: parsed,
-        });
-        Toast.show({ text1: 'Account created', type: 'success' });
-      } else if (editingAccount) {
-        await updateLocalAccount(db, editingAccount.id, {
-          name: name.trim(),
-          currency,
-          balance: parsed,
-        });
+      if (editingAccount) {
+        await updateAccount(db, editingAccount.id, data);
         Toast.show({ text1: 'Account updated', type: 'success' });
+      } else {
+        await createAccount(db, data);
+        Toast.show({ text1: 'Account created', type: 'success' });
       }
-
       setIsFormOpen(false);
       await loadAccounts();
     } catch (e) {
       Toast.show({ text1: `${e}`, type: 'error' });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
-  const confirmDelete = async () => {
+  const handleDelete = async () => {
     if (!deletingAccount) return;
 
     setIsDeleting(true);
     try {
-      await deleteLocalAccount(db, deletingAccount.id);
+      await deleteAccount(db, deletingAccount.id);
       Toast.show({ text1: 'Account deleted', type: 'success' });
       setIsDeleteOpen(false);
       setDeletingAccount(null);
@@ -155,12 +109,8 @@ export default function Balances() {
 
   return (
     <SafeAreaView className="flex-1 bg-theme-background">
-      <View className="flex-1 px-4 pt-4">
-        <View className="mb-5 flex-row items-center justify-between">
-          <Text className="text-2xl font-semibold text-theme-text">Your accounts</Text>
-          <Text className="text-xl font-semibold text-theme-tint">{accounts.length} Total accounts</Text>
-        </View>
-
+      <Topbar title="Accounts" />
+      <View className="flex-1 px-4">
         {isLoading ? (
           <View className="flex-1 items-center justify-center">
             <ActivityIndicator size={32} color={colors.tint} />
@@ -170,12 +120,11 @@ export default function Balances() {
             data={accounts}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: listBottomPadding }}
+            contentContainerStyle={{ paddingBottom: 160 }}
             ListEmptyComponent={<Text className="pt-4 text-lg text-theme-icon">No accounts yet</Text>}
             renderItem={({ item }) => (
               <AccountCard
                 item={item}
-                cornerRadius={CORNER_RADIUS}
                 onEdit={() => openEdit(item)}
                 onDelete={() => openDelete(item)}
               />
@@ -186,7 +135,7 @@ export default function Balances() {
 
       <View
         pointerEvents="box-none"
-        style={{ position: 'absolute', left: 16, right: 16, bottom: fixedButtonBottom }}
+        className="absolute left-4 right-4 bottom-28"
       >
         <TouchableOpacity
           activeOpacity={0.85}
@@ -200,17 +149,9 @@ export default function Balances() {
 
       <AccountFormModal
         visible={isFormOpen}
-        mode={formMode}
-        name={name}
-        balance={balanceField}
-        currency={currency}
-        currencies={CURRENCIES}
-        isSaving={isSubmitting}
+        editingAccount={editingAccount}
         onClose={() => setIsFormOpen(false)}
-        onChangeName={setName}
-        onChangeBalance={setBalanceField}
-        onChangeCurrency={setCurrency}
-        onSave={submitForm}
+        onSave={handleSave}
       />
 
       <DeleteAccountModal
@@ -218,7 +159,7 @@ export default function Balances() {
         name={deletingAccount?.name}
         isDeleting={isDeleting}
         onClose={() => setIsDeleteOpen(false)}
-        onConfirm={confirmDelete}
+        onConfirm={handleDelete}
       />
     </SafeAreaView>
   );

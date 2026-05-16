@@ -12,14 +12,12 @@ export type AccountCardItem = {
 
 type AccountCardProps = {
   item: AccountCardItem;
-  cornerRadius: number;
   onEdit?: () => void;
   onDelete?: () => void;
 };
 
 export default function AccountCard({
   item,
-  cornerRadius,
   onEdit,
   onDelete,
 }: AccountCardProps) {
@@ -28,8 +26,8 @@ export default function AccountCard({
 
   return (
     <View
-      className="mb-6 flex-row items-center justify-between px-4 py-4"
-      style={{ backgroundColor: colors.surface, borderRadius: cornerRadius }}
+      className="mb-6 flex-row items-center justify-between px-4 py-4 rounded-md"
+      style={{ backgroundColor: colors.surface }}
     >
       <View className="flex-row items-center self-stretch flex-1 min-w-0">
         <MaterialCommunityIcons

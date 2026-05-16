@@ -18,8 +18,8 @@ export default function TabLayout() {
         <Label>Dashboard</Label>
         <Icon src={<VectorIcon family={MaterialCommunityIcons} name="view-dashboard-outline" />} />
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="balances">
-        <Label>Balances</Label>
+      <NativeTabs.Trigger name="accounts">
+        <Label>Accounts</Label>
         <Icon src={<VectorIcon family={MaterialCommunityIcons} name="wallet-outline" />} />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="new-expense">

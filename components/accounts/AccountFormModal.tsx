@@ -1,52 +1,72 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, Text, TextInput, TouchableOpacity, useColorScheme } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Dropdown } from 'react-native-element-dropdown';
 import { Colors } from '@/constants/theme';
 import CustomModal from '@/components/Modal';
-import { isValidBalanceInput } from '@/utils/balance';
+import { AccountCardItem } from '@/components/accounts/AccountCard';
+import { isValidBalanceInput, normalizeNumberInput, parseBalanceInput } from '@/utils/balance';
+
+const CURRENCIES = ['USD', 'EUR', 'PLN', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD'];
+const DEFAULT_CURRENCY = CURRENCIES[0];
+
+export type AccountFormData = {
+  name: string;
+  currency: string;
+  balance: number;
+};
 
 type Props = {
   visible: boolean;
-  mode: 'add' | 'edit';
-  name: string;
-  balance: string;
-  currency: string;
-  currencies: string[];
-  isSaving?: boolean;
+  editingAccount: AccountCardItem | null;
   onClose: () => void;
-  onChangeName: (v: string) => void;
-  onChangeBalance: (v: string) => void;
-  onChangeCurrency: (v: string) => void;
-  onSave: () => void;
+  onSave: (data: AccountFormData) => Promise<void>;
 };
 
-export default function AccountFormModal({
-  visible,
-  mode,
-  name,
-  balance,
-  currency,
-  currencies,
-  isSaving = false,
-  onClose,
-  onChangeName,
-  onChangeBalance,
-  onChangeCurrency,
-  onSave,
-}: Props) {
+export default function AccountFormModal({ visible, editingAccount, onClose, onSave }: Props) {
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
-  const isBalanceValid = isValidBalanceInput(balance);
+
+  const [name, setName] = useState('');
+  const [balanceField, setBalanceField] = useState('');
+  const [currency, setCurrency] = useState(DEFAULT_CURRENCY);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const isEditing = editingAccount !== null;
+  const isBalanceValid = isValidBalanceInput(balanceField);
   const canSave = name.trim() && isBalanceValid && !isSaving;
+
   const currencyOptions = React.useMemo(
-    () => currencies.map((item) => ({ label: item, value: item })),
-    [currencies]
+    () => CURRENCIES.map((c) => ({ label: c, value: c })),
+    []
   );
 
-  const handleSave = () => {
+  useEffect(() => {
+    if (!visible) return;
+
+    if (editingAccount) {
+      setName(editingAccount.name);
+      setBalanceField(normalizeNumberInput(String(editingAccount.balance)));
+      setCurrency(editingAccount.currency ?? DEFAULT_CURRENCY);
+    } else {
+      setName('');
+      setBalanceField('');
+      setCurrency(DEFAULT_CURRENCY);
+    }
+  }, [visible, editingAccount]);
+
+  const handleSave = async () => {
     if (!canSave) return;
-    onSave();
+
+    const parsed = parseBalanceInput(balanceField);
+    if (!Number.isFinite(parsed)) return;
+
+    setIsSaving(true);
+    try {
+      await onSave({ name: name.trim(), currency, balance: parsed });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -55,7 +75,7 @@ export default function AccountFormModal({
       setIsVisible={(next) => {
         if (!next) onClose();
       }}
-      title={mode === 'add' ? 'Add account' : 'Edit account'}
+      title={isEditing ? 'Edit account' : 'Add account'}
       cancelAction={
         <TouchableOpacity onPress={onClose} style={{ padding: 10 }}>
           <Text className="text-2xl text-theme-icon">Cancel</Text>
@@ -84,7 +104,7 @@ export default function AccountFormModal({
         <TextInput
           className="text-2xl text-theme-text"
           value={name}
-          onChangeText={onChangeName}
+          onChangeText={setName}
           placeholder="My wallet"
           placeholderTextColor={colors.icon}
           style={{
@@ -98,20 +118,20 @@ export default function AccountFormModal({
         <Text className="text-2xl text-theme-icon" style={{ marginBottom: 6 }}>Balance</Text>
         <TextInput
           className="text-2xl text-theme-text"
-          value={balance}
-          onChangeText={onChangeBalance}
+          value={balanceField}
+          onChangeText={setBalanceField}
           keyboardType="decimal-pad"
           placeholder="0.00"
           placeholderTextColor={colors.icon}
           style={{
             backgroundColor: colors.background,
-            color: isBalanceValid || !balance ? colors.text : colors.error,
+            color: isBalanceValid || !balanceField ? colors.text : colors.error,
             padding: 10,
             borderRadius: 6,
-            marginBottom: balance && !isBalanceValid ? 4 : 12,
+            marginBottom: balanceField && !isBalanceValid ? 4 : 12,
           }}
         />
-        {balance && !isBalanceValid && (
+        {balanceField && !isBalanceValid && (
           <Text style={{ color: colors.error, fontSize: 12, marginBottom: 8 }}>
             Balance must be a valid positive number
           </Text>
@@ -146,7 +166,7 @@ export default function AccountFormModal({
           placeholder="Select currency"
           searchPlaceholder="Search currency..."
           value={currency}
-          onChange={(item) => onChangeCurrency(item.value)}
+          onChange={(item) => setCurrency(item.value)}
           dropdownPosition="bottom"
           containerStyle={{ marginTop: -25 }}
           renderRightIcon={() => (
