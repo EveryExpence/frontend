@@ -35,7 +35,7 @@ const SettingsScreen = () => {
       <Topbar title="Settings" />
       <ScrollView className="px-4">
         <Text className="text-2xl font-bold text-theme-text" selectable={false}>
-          Account
+          Profile
         </Text>
         <View className="rounded-md overflow-hidden bg-theme-surface">
           <SettingsProfileRow
