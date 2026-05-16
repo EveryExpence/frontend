@@ -120,8 +120,8 @@ export default function AccountsScreen() {
             data={accounts}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 160 }}
-            ListEmptyComponent={<Text className="pt-4 text-lg text-theme-icon">No accounts yet</Text>}
+            contentContainerStyle={{ paddingBottom: 24 }}
+            ListEmptyComponent={<Text className="pt-4 text-lg text-theme-icon mb-4">No accounts yet</Text>}
             renderItem={({ item }) => (
               <AccountCard
                 item={item}
@@ -129,22 +129,21 @@ export default function AccountsScreen() {
                 onDelete={() => openDelete(item)}
               />
             )}
+            ListFooterComponent={
+              <View>
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  className="w-full flex-row items-center justify-center py-4 bg-theme-tint rounded-lg mt-4"
+                  onPress={openAdd}
+                >
+                  <MaterialCommunityIcons name="plus" size={22} color={colors.textLight} style={{ marginRight: 8 }} />
+                  <Text className="text-xl font-semibold text-theme-textLight">Add new account</Text>
+                </TouchableOpacity>
+                <View className="py-20" />
+              </View>
+            }
           />
         )}
-      </View>
-
-      <View
-        pointerEvents="box-none"
-        className="absolute left-4 right-4 bottom-28"
-      >
-        <TouchableOpacity
-          activeOpacity={0.85}
-          className="w-full flex-row items-center justify-center py-4 bg-theme-tint rounded-lg"
-          onPress={openAdd}
-        >
-          <MaterialCommunityIcons name="plus" size={22} color={colors.textLight} style={{ marginRight: 8 }} />
-          <Text className="text-xl font-semibold text-theme-textLight">Add new account</Text>
-        </TouchableOpacity>
       </View>
 
       <AccountFormModal
