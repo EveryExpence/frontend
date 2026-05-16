@@ -53,5 +53,5 @@ export const useAccountsData = () => {
         });
         return map;
     }, [accounts]);
-    return { accounts, loading, error, totalsByCurrency };
+    return { accounts, loading, error, totalsByCurrency, refetch: fetchAccounts };
 }
