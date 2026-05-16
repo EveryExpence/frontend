@@ -39,7 +39,7 @@ const SettingsScreen = () => {
         </Text>
         <View className="rounded-md overflow-hidden bg-theme-surface">
           <SettingsProfileRow
-            userName={user?.publicUsername ?? "Not logged in"}
+            userName={user === null ? "Not logged in" : (user.publicUsername ?? "User")}
             email={user?.email ?? "Tap to login to access full features"}
             avatarUrl={user?.avatarUrl}
             onPress={() => user ? router.push("/profile") : router.replace("/(auth)/login")}
