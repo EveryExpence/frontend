@@ -1,77 +1,26 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/context/authContext";
-import { useThemeColor } from "@/hooks/use-theme-color";
-import { AppTheme, Language, SettingsRowProps, SettingsSection } from "@/types/settings";
+import SettingsProfileRow from "@/components/settings/SettingsProfileRow";
+import SettingsPreferenceRow from "@/components/settings/SettingsPreferenceRow";
+import SettingsToggleRow from "@/components/settings/SettingsToggleRow";
+import SettingsActionRow from "@/components/settings/SettingsActionRow";
+import Topbar from "@/components/Topbar";
 
-const SettingsRow = ({
-  title,
-  subtitle,
-  iconName,
-  leftElement,
-  rightElement,
-  tone,
-  onPress,
-}: SettingsRowProps) => {
-  const titleColor = useThemeColor({}, tone === "danger" ? "error" : "text");
-  const iconColor = useThemeColor({}, tone === "danger" ? "error" : "icon");
+type Language = "eng" | "pl";
+type AppTheme = "light" | "dark";
 
-  const resolvedLeft =
-    leftElement ?? (
-      <View style={{ marginRight: 12 }}>
-        <Ionicons name={iconName as undefined} size={30} color={iconColor} />
-      </View>
-    );
-
-  const subtitleELement = subtitle ? (
-    <Text selectable={false} className="text-base mt-1 font-semibold text-theme-icon">
-      {subtitle}
-    </Text>
-  ) : null;
-
-  const rightElementValid = rightElement ? <View className="flex-row items-center">{rightElement}</View> : null;
-
-  return (
-    <TouchableOpacity
-      activeOpacity={0.8}
-      className="h-[75px] flex-row items-center px-3 justify-between bg-theme-surface"
-      onPress={onPress}
-      disabled={!onPress}
-    >
-      <View className="flex-row items-center">
-        {resolvedLeft}
-
-        <View>
-          <Text
-            selectable={false}
-            className="text-xl font-bold"
-            style={{ color: titleColor }}
-          >
-            {title}
-          </Text>
-
-          {subtitleELement}
-        </View>
-      </View>
-
-      {rightElementValid}
-    </TouchableOpacity>
-  );
-};
+const Divider = () => <View className="h-px bg-theme-icon opacity-20 mx-6" />;
 
 const SettingsScreen = () => {
   const router = useRouter();
   const { logout, user } = useAuth();
-  const iconColor = useThemeColor({}, "icon");
 
   const [currentLanguage, setLanguage] = useState<Language>("eng");
   const [currentTheme, setTheme] = useState<AppTheme>("light");
-  const [currentNotifications, setNotifications] = useState(true);
-
-  const chevron = <Ionicons name="chevron-forward" size={28} color={iconColor} />;
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   const handleLogout = async () => {
     try {
@@ -81,148 +30,77 @@ const SettingsScreen = () => {
     }
   };
 
-  const sections: SettingsSection[] = [
-    {
-      title: "Account",
-      items: [
-        {
-          id: "profile",
-          title: user?.publicUsername ?? "User",
-          subtitle: user?.email ?? "",
-          leftElement: user?.avatarUrl ? (
-            <View
-              className="w-14 h-14 rounded-full mr-3 items-center justify-center overflow-hidden bg-theme-surface"
-            >
-              <Image
-                source={{ uri: user.avatarUrl }}
-                style={{ width: 60, height: 60, borderRadius: 20 }}
-                resizeMode="cover"
-              />
-            </View>
-          ): (
-            <View
-              className="w-14 h-14 rounded-full mr-3 items-center justify-center overflow-hidden bg-theme-surface"
-            >
-              <Ionicons name="person-outline" size={40} color={iconColor} />
-            </View>
-          ),
-          rightElement: chevron,
-          onPress: () => router.push("/profile"),
-        },
-      ],
-    },
-    {
-      title: "Preferences",
-      items: [
-        {
-          id: "language",
-          title: "Language",
-          iconName: "language-outline",
-          rightElement: (
-            <React.Fragment>
-              <Text selectable={false} className="text-xl font-semibold text-theme-icon">
-                {currentLanguage === "eng" ? "English" : "Polish"}
-              </Text>
-              {chevron}
-            </React.Fragment>
-          ),
-          onPress: () => setLanguage((prev) => (prev === "eng" ? "pl" : "eng")),
-        },
-        {
-          id: "theme",
-          title: "Theme",
-          iconName: "contrast-outline",
-          rightElement: (
-            <React.Fragment>
-              <Text selectable={false} className="text-xl font-semibold text-theme-icon">
-                {currentTheme === "light" ? "Light" : "Dark"}
-              </Text>
-              {chevron}
-            </React.Fragment>
-          ),
-          onPress: () =>
-            setTheme((prev) => (prev === "light" ? "dark" : "light")),
-        },
-      ],
-    },
-    {
-      title: "Notifications",
-      items: [
-        {
-          id: "push-notifications",
-          title: "Push Notifications",
-          iconName: "notifications-outline",
-          rightElement: (
-            <View
-              className={`w-12 h-6 rounded-full p-0.5 justify-center ${
-                currentNotifications ? "bg-theme-tint" : "bg-theme-icon"
-              }`}
-            >
-              <View
-                className={`w-6 h-5 rounded-full bg-theme-textLight ${
-                  currentNotifications ? "self-end" : "self-start"
-                }`}
-              />
-            </View>
-          ),
-          onPress: () => setNotifications((prev) => !prev),
-        },
-      ],
-    },
-    {
-      title: "Security",
-      items: [
-        {
-          id: "change-password",
-          title: "Change Password",
-          iconName: "lock-closed-outline",
-          rightElement: chevron,
-          onPress: () => router.push("/change-password"),
-        },
-        {
-          id: "logout",
-          title: "Log Out",
-          iconName: "log-out-outline",
-          tone: "danger",
-          onPress: handleLogout,
-        },
-      ],
-    },
-  ];
-
   return (
     <SafeAreaView>
-      <ScrollView>
-        {sections.map((section) => (
-          <View key={section.title}>
-            <Text className="text-2xl font-bold pl-4 text-theme-text" selectable={false}>
-              {section.title}
-            </Text>
+      <Topbar title="Settings" />
+      <ScrollView className="px-4">
+        <Text className="text-2xl font-bold text-theme-text" selectable={false}>
+          Account
+        </Text>
+        <View className="rounded-md overflow-hidden bg-theme-surface">
+          <SettingsProfileRow
+            userName={user?.publicUsername ?? "User"}
+            email={user?.email ?? ""}
+            avatarUrl={user?.avatarUrl}
+            onPress={() => router.push("/profile")}
+          />
+        </View>
 
-            <View className="mx-4 rounded-md overflow-hidden bg-theme-surface">
-              {section.items.map((item, index) => (
-                <React.Fragment key={item.id}>
-                  <SettingsRow
-                    title={item.title}
-                    subtitle={item.subtitle}
-                    iconName={item.iconName}
-                    leftElement={item.leftElement}
-                    rightElement={item.rightElement}
-                    tone={item.tone}
-                    onPress={item.onPress}
-                  />
-                  {index < section.items.length - 1 ? (
-                    <View
-                      className="h-px bg-theme-icon opacity-20 mx-6"
-                    />
-                  ) : null}
-                </React.Fragment>
-              ))}
-            </View>
+        <View className="h-2.5 bg-theme-background" />
 
-            <View className="h-2.5 bg-theme-background" />
-          </View>
-        ))}
+        <Text className="text-2xl font-bold text-theme-text" selectable={false}>
+          Preferences
+        </Text>
+        <View className="rounded-md overflow-hidden bg-theme-surface">
+          <SettingsPreferenceRow
+            title="Language"
+            iconName="language-outline"
+            currentValue={currentLanguage === "eng" ? "English" : "Polish"}
+            onPress={() => setLanguage((prev) => (prev === "eng" ? "pl" : "eng"))}
+          />
+          <Divider />
+          <SettingsPreferenceRow
+            title="Theme"
+            iconName="contrast-outline"
+            currentValue={currentTheme === "light" ? "Light" : "Dark"}
+            onPress={() => setTheme((prev) => (prev === "light" ? "dark" : "light"))}
+          />
+        </View>
+
+        <View className="h-2.5 bg-theme-background" />
+
+        <Text className="text-2xl font-bold text-theme-text" selectable={false}>
+          Notifications
+        </Text>
+        <View className="rounded-md overflow-hidden bg-theme-surface">
+          <SettingsToggleRow
+            title="Push Notifications"
+            iconName="notifications-outline"
+            isEnabled={notificationsEnabled}
+            onToggle={() => setNotificationsEnabled((prev) => !prev)}
+          />
+        </View>
+
+        <View className="h-2.5 bg-theme-background" />
+
+        <Text className="text-2xl font-bold text-theme-text" selectable={false}>
+          Security
+        </Text>
+        <View className="rounded-md overflow-hidden bg-theme-surface">
+          <SettingsActionRow
+            title="Change Password"
+            iconName="lock-closed-outline"
+            showChevron
+            onPress={() => router.push("/change-password")}
+          />
+          <Divider />
+          <SettingsActionRow
+            title="Log Out"
+            iconName="log-out-outline"
+            tone="danger"
+            onPress={handleLogout}
+          />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
