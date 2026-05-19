@@ -39,6 +39,7 @@ export const migrateDatabase = async (db: SQLiteDatabase) => {
         );
 
         CREATE TABLE IF NOT EXISTS attachments (
+            id TEXT PRIMARY KEY NOT NULL,
             expense_record_id TEXT NOT NULL,
             content BLOB NOT NULL,
             FOREIGN KEY(expense_record_id) REFERENCES expense_records(id)
