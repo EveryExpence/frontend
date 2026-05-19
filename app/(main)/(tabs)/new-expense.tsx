@@ -10,6 +10,7 @@ import CategorySelection from '@/components/new-expense/CategorySelection';
 import PaymentMethodSelection from '@/components/new-expense/PaymentMethodSelection';
 import DateTimeSelection from '@/components/new-expense/DateTimeSelection';
 import DescriptionInput from '@/components/new-expense/DescriptionInput';
+import ImageAttachmentSelection from '@/components/new-expense/ImageAttachmentSelection';
 import { ExpenseRecordInputDTO } from '@/types/data/expenseRecord';
 import { createExpenseRecord } from '@/data/expenseRecords';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -28,6 +29,7 @@ export default function NewExpense() {
   const safeAmount = (amount ?? '').toString().trim();
   const isAmountValid = safeAmount === '' || /^-?\d*\.?\d+$/.test(safeAmount);
   const [description, setDescription] = useState("");
+  const [images, setImages] = useState<string[]>([]);
   const [location, setLocation] = useState<Coordinates | null>(null);
   const [scrollEnabled, setScrollEnabled] = useState(true);
 
@@ -61,6 +63,7 @@ export default function NewExpense() {
       setSelectedDateTime(new Date());
       setAmount("");
       setDescription("");
+      setImages([]);
       setLocation(null);
     } catch {
       Toast.show({ text1: "Failed to add a new record", type: "error" });
@@ -82,6 +85,8 @@ export default function NewExpense() {
         <DateTimeSelection selectedDateTime={selectedDateTime} setSelectedDateTime={setSelectedDateTime} />
 
         <DescriptionInput description={description} setDescription={setDescription} />
+
+        <ImageAttachmentSelection images={images} setImages={setImages} />
 
         <LocationSelection location={location} setLocation={setLocation} setScrollEnabled={setScrollEnabled} />
 
