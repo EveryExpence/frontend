@@ -17,7 +17,7 @@ export const saveAttachments = async (db: SQLiteDatabase, expenseRecordId: strin
 
     await db.withExclusiveTransactionAsync(async () => {
         for (const uri of imageUris) {
-            const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
+            const base64 = await FileSystem.readAsStringAsync(uri, { encoding: 'base64' });
             const binaryString = atob(base64);
             const bytes = new Uint8Array(binaryString.length);
             for (let i = 0; i < binaryString.length; i++) {
