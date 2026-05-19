@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import {
   FlatList,
   View,
@@ -16,6 +16,7 @@ import { useAccountsData } from "@/hooks/use-account-data";
 import { TotalBalancePage } from "@/components/dashboard/TotalBalancePage";
 import { AccountPage } from "@/components/dashboard/AccountPage";
 import { PaginationDots } from "@/components/dashboard/PaginationDots";
+import { useFocusEffect } from "expo-router";
 
 const { width } = Dimensions.get("window");
 
@@ -24,9 +25,15 @@ type AccountWithComputed = Account & { computedBalance: number };
 const Dashboard = () => {
   const colorScheme: "light" | "dark" = useColorScheme() ?? "light";
 
-  const { accounts, loading, error, totalsByCurrency } = useAccountsData();
+  const { accounts, loading, error, totalsByCurrency, refetch } = useAccountsData();
   const [pageIndex, setPageIndex] = React.useState(0);
   const animatedIndex = React.useRef(new Animated.Value(0)).current;
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   const pages: Array<{ type: "total" } | AccountWithComputed> = [
     { type: "total" },

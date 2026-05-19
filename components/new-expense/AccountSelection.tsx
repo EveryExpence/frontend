@@ -1,11 +1,12 @@
 import { View, Text, useColorScheme } from 'react-native'
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import React, { Dispatch, SetStateAction, useCallback, useState } from 'react'
 import { Account } from '@/types/data/account'
 import { useSQLiteContext } from 'expo-sqlite';
 import { getAllAccounts } from '@/data/accounts';
 import { Dropdown } from 'react-native-element-dropdown';
 import { Colors } from '@/constants/theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useFocusEffect } from 'expo-router';
 
 interface Props {
     selectedAccount: Account | null;
@@ -18,11 +19,13 @@ const AccountSelection = ({ selectedAccount, setSelectedAccount }: Props) => {
     const db = useSQLiteContext();
     const [accounts, setAccounts] = useState<Account[]>([]);
 
-    useEffect(() => {
-        (async () => {
-            setAccounts(await getAllAccounts(db));
-        })();
-    }, [db]);
+    useFocusEffect(
+        useCallback(() => {
+            (async () => {
+                setAccounts(await getAllAccounts(db));
+            })();
+        }, [db])
+    );
 
     return (
         <View className="mb-8">

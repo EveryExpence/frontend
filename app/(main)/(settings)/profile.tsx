@@ -7,7 +7,7 @@ import EncryptedStorage from "react-native-encrypted-storage";
 import { accessTokenKey } from "@/constants/encryptedStorageKeys";
 import { useAuth } from '@/context/authContext'
 import { useRouter } from "expo-router";
-import ProfileHeader from "@/components/settings/ProfileHeader";
+import Topbar from "@/components/Topbar";
 import ProfileIdentityCard from "@/components/settings/ProfileIdentityCard";
 import ProfileFormSection from "@/components/settings/ProfileFormSection";
 import ProfileActionButton from "@/components/settings/ProfileActionButton";
@@ -118,9 +118,9 @@ const ProfileScreen = () => {
     >
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 40, paddingBottom: 24 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 40, paddingBottom: 24 }}
       >
-        <ProfileHeader
+        <Topbar
           title="Profile"
           onBack={() => router.back()}
         />

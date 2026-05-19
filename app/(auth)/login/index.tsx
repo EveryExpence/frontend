@@ -6,8 +6,7 @@ import {
   useColorScheme,
   ActivityIndicator,
 } from "react-native";
-import React, { useState } from "react";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import React from "react";
 import { useRouter } from "expo-router";
 import { Colors } from "@/constants/theme";
 import { useAuth } from "@/context/authContext";
@@ -16,6 +15,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Toast from "react-native-toast-message";
 import EncryptedStorage from "react-native-encrypted-storage";
+import ControlledInputField from "@/components/ControlledInputField";
 
 const formSchema = z.object({
   email: z.email("Must be a valid email"),
@@ -26,7 +26,6 @@ type FormSchema = z.infer<typeof formSchema>;
 
 const LoginScreen = () => {
   const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
   const theme = useColorScheme() || "light";
   const colors = Colors[theme];
   const form = useForm<FormSchema>({
@@ -98,42 +97,19 @@ const LoginScreen = () => {
       </View>
 
       <View className="w-full px-8 justify-start">
-        <Text className="text-2xl pl-2 text-theme-text">Password</Text>
-
-        <View className="flex-row items-center gap-3">
-          <Controller
-            control={form.control}
-            name="password"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                secureTextEntry={!showPassword}
-                placeholder="Enter password"
-                placeholderTextColor={colors.text}
-                textContentType="password"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                className={`w-full p-4 text-xl border rounded-md text-theme-text ${
-                  form.formState.errors.password
-                    ? "border-red-500"
-                    : "border-theme-text"
-                }`}
-              />
-            )}
-          />
-          <MaterialCommunityIcons
-            name={showPassword ? "eye-off" : "eye"}
-            size={24}
-            color={colors.text}
-            onPress={() => setShowPassword((prev) => !prev)}
-            className="absolute right-4 text-theme-icon"
-          />
-        </View>
-        {form.formState.errors.password && (
-          <Text className="text-red-500 text-sm pl-2 mt-1">
-            {form.formState.errors.password.message}
-          </Text>
-        )}
+        <ControlledInputField
+          label="Password"
+          name="password"
+          control={form.control}
+          secureTextEntry
+          placeholder="Enter password"
+          placeholderTextColor={colors.text}
+          inputClassName={`w-full p-4 text-xl border rounded-md text-theme-text ${
+            form.formState.errors.password
+              ? "border-red-500"
+              : "border-theme-text"
+          }`}
+        />
       </View>
 
       <View className="w-full px-8 mt-4">
