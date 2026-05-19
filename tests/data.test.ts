@@ -258,7 +258,8 @@ describe("data module", () => {
         
         const attachments = await getAttachmentsForExpense(db, expenseRecord.id);
         expect(attachments.length).toBe(1);
-        expect(attachments[0].content).toEqual(new Uint8Array([1, 2, 3]));
+        const contentArray = Array.from(attachments[0].content);
+        expect(contentArray).toEqual([1, 2, 3]);
         
         await deleteAttachmentsForExpense(db, expenseRecord.id);
         const remainingAttachments = await getAttachmentsForExpense(db, expenseRecord.id);
