@@ -69,7 +69,7 @@ export default function NewExpense() {
       setDescription("");
       setImages([]);
       setLocation(null);
-    } catch {
+    } catch (e) {
       Toast.show({ text1: "Failed to add a new record", type: "error" });
     }
   }
