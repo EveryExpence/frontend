@@ -42,7 +42,7 @@ const ImageAttachmentSelection = ({ images, setImages }: Props) => {
                             <Image source={{ uri }} className="w-24 h-24 rounded-md" />
                             <TouchableOpacity
                                 onPress={() => removeImage(index)}
-                                className="absolute -top-2 -right-2 bg-theme-tint rounded-full p-1"
+                                className="absolute top-1.5 right-1.5 bg-theme-tint rounded-full p-1"
                             >
                                 <MaterialIcons name="close" size={16} color="white" />
                             </TouchableOpacity>
