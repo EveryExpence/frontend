@@ -2,7 +2,7 @@ import { ExpenseRecord, ExpenseRecordInputDTO } from "@/types/data/expenseRecord
 import { SQLiteDatabase } from "expo-sqlite"
 import { nanoid } from 'nanoid'
 
-export const createExpenseRecord = async (db: SQLiteDatabase, expenseRecordDTO: ExpenseRecordInputDTO) => {
+export const createExpenseRecord = async (db: SQLiteDatabase, expenseRecordDTO: ExpenseRecordInputDTO): Promise<string> => {
     const stmt = await db.prepareAsync(`
         INSERT INTO expense_records (
             id,
@@ -28,9 +28,10 @@ export const createExpenseRecord = async (db: SQLiteDatabase, expenseRecordDTO: 
         );
     `);
 
+    const id = nanoid();
     await db.withExclusiveTransactionAsync(async () => {
         await stmt.executeAsync({
-            $id: nanoid(),
+            $id: id,
             $amount: expenseRecordDTO.amount,
             $location: expenseRecordDTO.location ?? null,
             $description: expenseRecordDTO.description,
@@ -40,6 +41,7 @@ export const createExpenseRecord = async (db: SQLiteDatabase, expenseRecordDTO: 
             $createdAt: expenseRecordDTO.createdAt ?? null,
         });
     });
+    return id;
 };
 
 export const getAllExpenseRecords = async (db: SQLiteDatabase): Promise<ExpenseRecord[]> => {

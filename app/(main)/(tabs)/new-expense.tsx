@@ -13,6 +13,7 @@ import DescriptionInput from '@/components/new-expense/DescriptionInput';
 import ImageAttachmentSelection from '@/components/new-expense/ImageAttachmentSelection';
 import { ExpenseRecordInputDTO } from '@/types/data/expenseRecord';
 import { createExpenseRecord } from '@/data/expenseRecords';
+import { saveAttachments } from '@/data/attachments';
 import { useSQLiteContext } from 'expo-sqlite';
 import Toast from 'react-native-toast-message';
 import LocationSelection from '@/components/new-expense/LocationMap';
@@ -55,7 +56,10 @@ export default function NewExpense() {
     };
 
     try {
-      await createExpenseRecord(db, expenseRecord);
+      const id = await createExpenseRecord(db, expenseRecord);
+      if (images.length > 0) {
+        await saveAttachments(db, id, images);
+      }
       Toast.show({ text1: "Record was added" });
       setSelectedAccount(null);
       setSelectedCategory(null);
