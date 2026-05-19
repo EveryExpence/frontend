@@ -4,6 +4,12 @@ import { createExpenseRecord, deleteExpenseRecord, getAllExpenseRecords, updateE
 import { migrateDatabase } from "@/data/init";
 import { createPaymentMethod, deletePaymentMethod, getAllPaymentMethods, updatePaymentMethod } from "@/data/paymentMethods";
 import { openDatabaseAsync, SQLiteDatabase } from "expo-sqlite";
+import { saveAttachments, getAttachmentsForExpense, deleteAttachmentsForExpense } from "@/data/attachments";
+
+jest.mock('expo-file-system', () => ({
+    readAsStringAsync: jest.fn().mockResolvedValue('AQID'),
+    EncodingType: { Base64: 'base64' }
+}));
 
 describe("data module", () => {
     let db: SQLiteDatabase
@@ -236,6 +242,27 @@ describe("data module", () => {
         
         const accountBalance = await getAccountBalance(db, expenseRecord.accountId);
         expect(accountBalance).toBeCloseTo(5359.63);
+    });
+
+    test("attachments should be saved", async () => {
+        const expenseRecords = await getAllExpenseRecords(db);
+        const expenseRecord = expenseRecords.find((expenseRecord) => expenseRecord.description === "Monthly salary")!;
+        
+        await saveAttachments(db, expenseRecord.id, ["file://fake/path/image1.jpg"]);
+        expect(true).toBe(true);
+    });
+
+    test("attachments should be retrieved and deleted", async () => {
+        const expenseRecords = await getAllExpenseRecords(db);
+        const expenseRecord = expenseRecords.find((expenseRecord) => expenseRecord.description === "Monthly salary")!;
+        
+        const attachments = await getAttachmentsForExpense(db, expenseRecord.id);
+        expect(attachments.length).toBe(1);
+        expect(attachments[0].content).toEqual(new Uint8Array([1, 2, 3]));
+        
+        await deleteAttachmentsForExpense(db, expenseRecord.id);
+        const remainingAttachments = await getAttachmentsForExpense(db, expenseRecord.id);
+        expect(remainingAttachments.length).toBe(0);
     });
 
     test("should add 10_000 expense records", async () => {
