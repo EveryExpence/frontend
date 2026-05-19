@@ -6,7 +6,7 @@ import { createPaymentMethod, deletePaymentMethod, getAllPaymentMethods, updateP
 import { openDatabaseAsync, SQLiteDatabase } from "expo-sqlite";
 import { saveAttachments, getAttachmentsForExpense, deleteAttachmentsForExpense } from "@/data/attachments";
 
-jest.mock('expo-file-system', () => ({
+jest.mock('expo-file-system/legacy', () => ({
     readAsStringAsync: jest.fn().mockResolvedValue('AQID'),
     EncodingType: { Base64: 'base64' }
 }));

@@ -1,5 +1,5 @@
 import { SQLiteDatabase } from "expo-sqlite";
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { nanoid } from 'nanoid';
 
 export const saveAttachments = async (db: SQLiteDatabase, expenseRecordId: string, imageUris: string[]) => {
