@@ -1,29 +1,14 @@
 import React from "react";
-import { View, ViewProps, useColorScheme } from "react-native";
-import { Colors } from "@/constants/theme";
+import { View, ViewProps } from "react-native";
 
 type CardProps = ViewProps & {
   className?: string;
 };
 
-export function Card({ style, className = "", ...props }: CardProps) {
-  const scheme = useColorScheme() ?? "light";
-  const colors = Colors[scheme];
-
+export function Card({ className = "", ...props }: CardProps) {
   return (
     <View
-      className={`overflow-hidden rounded-lg ${className}`}
-      style={[
-        {
-          backgroundColor: colors.surface,
-          borderColor:
-            scheme === "light"
-              ? "rgba(3, 6, 13, 0.05)"
-              : "rgba(255, 255, 255, 0.06)",
-          borderWidth: 1,
-        },
-        style,
-      ]}
+      className={`overflow-hidden rounded-lg bg-theme-surface ${className}`}
       {...props}
     />
   );
@@ -34,9 +19,8 @@ type CardContentProps = ViewProps & {
 };
 
 export function CardContent({
-  style,
   className = "",
   ...props
 }: CardContentProps) {
-  return <View className={`p-0 ${className}`} style={style} {...props} />;
+  return <View className={`p-0 ${className}`} {...props} />;
 }

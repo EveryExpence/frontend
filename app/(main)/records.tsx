@@ -20,11 +20,12 @@ function TransactionRow({ item }: { item: TransactionRecord }) {
   return (
     <View className="flex-row items-center justify-between py-1.5">
       <View className="flex-row items-center gap-3 flex-1 pr-3">
-        <View
-          className="h-10 w-10 items-center justify-center rounded-full"
-          style={{ backgroundColor: colors.tint }}
-        >
-          <MaterialCommunityIcons name="swap-vertical" size={20} color={colors.textLight} />
+        <View className="h-10 w-10 items-center justify-center rounded-full bg-theme-tint">
+          <MaterialCommunityIcons
+            name="swap-vertical"
+            size={20}
+            color={colors.textLight}
+          />
         </View>
 
         <Text className="flex-1 text-[18px] text-theme-text" numberOfLines={1}>
@@ -32,7 +33,9 @@ function TransactionRow({ item }: { item: TransactionRecord }) {
         </Text>
       </View>
 
-      <Text className="text-[18px]" style={{ color: amountColor }}>
+      <Text
+        className={`text-[18px] ${item.kind === "income" ? "text-theme-success" : "text-theme-text"}`}
+      >
         {item.kind === "income"
           ? `+${item.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${item.currency}`
           : `${item.amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${item.currency}`}
@@ -64,9 +67,6 @@ function TransactionSectionCard({ section }: { section: TransactionSection }) {
 }
 
 export default function RecordsScreen() {
-  const scheme = useColorScheme() ?? "light";
-  const colors = Colors[scheme];
-
   return (
     <SafeAreaView className="flex-1 bg-theme-background">
       <ScrollView
@@ -82,8 +82,7 @@ export default function RecordsScreen() {
             <MaterialCommunityIcons
               name="magnify"
               size={22}
-              color={colors.icon}
-              style={{ position: "absolute", left: 14, top: 12, zIndex: 1 }}
+              className="absolute left-3 top-3 z-10 text-theme-icon"
             />
             <Input
               value=""
@@ -95,7 +94,7 @@ export default function RecordsScreen() {
         </View>
 
         <View className="mt-8 gap-6">
-            {mockTransactionSections.map((section: TransactionSection) => (
+          {mockTransactionSections.map((section: TransactionSection) => (
             <TransactionSectionCard key={section.id} section={section} />
           ))}
         </View>

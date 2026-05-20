@@ -18,15 +18,11 @@ export const TransactionHistoryRow = ({
 }) => {
   const scheme = useColorScheme() ?? "light";
   const colors = Colors[scheme];
-  const amountColor = record.kind === "income" ? colors.success : colors.text;
 
   return (
     <View className="flex-row items-center justify-between py-1">
       <View className="flex-1 flex-row items-center">
-        <View
-          className="h-11 w-11 items-center justify-center rounded-full"
-          style={{ backgroundColor: colors.tint }}
-        >
+        <View className="h-11 w-11 items-center justify-center rounded-full bg-theme-tint">
           <MaterialCommunityIcons
             name="swap-vertical"
             size={20}
@@ -44,7 +40,9 @@ export const TransactionHistoryRow = ({
         </View>
       </View>
 
-      <Text className="text-[18px] font-medium" style={{ color: amountColor }}>
+      <Text
+        className={`text-[18px] font-medium ${record.kind === "income" ? "text-theme-success" : "text-theme-text"}`}
+      >
         {formatCurrency(record.amount, record.currency)}
       </Text>
     </View>
