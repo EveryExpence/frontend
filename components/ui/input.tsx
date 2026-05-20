@@ -11,12 +11,14 @@ export const Input = React.forwardRef<TextInput, TextInputProps>(
     return (
       <TextInput
         ref={ref}
-        className={`h-12 rounded-xl px-4 text-base text-theme-text ${className}`}
+        className={`h-12 rounded-lg px-4 text-base text-theme-text ${className}`}
         placeholderTextColor={colors.icon}
         style={[
           {
             backgroundColor: isLight ? "#E3E3ED" : "#303338",
-            borderColor: isLight ? "rgba(3, 6, 13, 0.08)" : "rgba(255, 255, 255, 0.08)",
+            borderColor: isLight
+              ? "rgba(3, 6, 13, 0.08)"
+              : "rgba(255, 255, 255, 0.08)",
             borderWidth: 1,
           },
           style,
@@ -24,7 +26,7 @@ export const Input = React.forwardRef<TextInput, TextInputProps>(
         {...props}
       />
     );
-  }
+  },
 );
 
 Input.displayName = "Input";

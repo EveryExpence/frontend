@@ -12,11 +12,14 @@ export function Card({ style, className = "", ...props }: CardProps) {
 
   return (
     <View
-      className={`overflow-hidden rounded-2xl ${className}`}
+      className={`overflow-hidden rounded-lg ${className}`}
       style={[
         {
           backgroundColor: colors.surface,
-          borderColor: scheme === "light" ? "rgba(3, 6, 13, 0.05)" : "rgba(255, 255, 255, 0.06)",
+          borderColor:
+            scheme === "light"
+              ? "rgba(3, 6, 13, 0.05)"
+              : "rgba(255, 255, 255, 0.06)",
           borderWidth: 1,
         },
         style,
@@ -30,6 +33,10 @@ type CardContentProps = ViewProps & {
   className?: string;
 };
 
-export function CardContent({ style, className = "", ...props }: CardContentProps) {
+export function CardContent({
+  style,
+  className = "",
+  ...props
+}: CardContentProps) {
   return <View className={`p-0 ${className}`} style={style} {...props} />;
 }
