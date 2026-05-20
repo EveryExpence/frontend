@@ -4,7 +4,8 @@ import { Text, View, useColorScheme } from "react-native";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { Colors } from "@/constants/theme";
 import { DashboardWidgetCard } from "./DashboardWidgetCard";
-import { mockTransactionRecords, TransactionRecord } from "./mockTransactions";
+import { TransactionRecord } from "./mockTransactions";
+import { useExpenseRecords } from "@/hooks/use-expense-records";
 
 interface TransactionHistoryWidgetProps {
   records?: TransactionRecord[];
@@ -49,22 +50,20 @@ export const TransactionHistoryRow = ({
   );
 };
 
-export const TransactionHistoryWidget: React.FC<
-  TransactionHistoryWidgetProps
-> = ({ records = mockTransactionRecords.slice(0, 3), onSeeAllPress }) => {
+export const TransactionHistoryWidget: React.FC<TransactionHistoryWidgetProps> = ({ records: propRecords, onSeeAllPress }) => {
+  const { records: localRecords, loading, error } = useExpenseRecords();
+
+  const toShow = propRecords && propRecords.length > 0 ? propRecords : (localRecords ?? []).slice(0, 3);
+
   return (
-    <DashboardWidgetCard
-      title="Transaction History"
-      actionLabel="See all"
-      onActionPress={onSeeAllPress}
-    >
+    <DashboardWidgetCard title="Transaction History" actionLabel="See all" onActionPress={onSeeAllPress}>
       <View>
-        {records.map((record, index) => (
+        {loading ? <Text className="text-theme-text">Loading...</Text> : null}
+        {error ? <Text className="text-theme-text">{error}</Text> : null}
+        {toShow.map((record, index) => (
           <View key={record.id}>
             <TransactionHistoryRow record={record} />
-            {index < records.length - 1 ? (
-              <View className="h-px bg-black/5" />
-            ) : null}
+            {index < toShow.length - 1 ? <View className="h-px bg-black/5" /> : null}
           </View>
         ))}
       </View>

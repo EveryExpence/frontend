@@ -6,11 +6,8 @@ import { Colors } from "@/constants/theme";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import {
-  mockTransactionSections,
-  TransactionRecord,
-  TransactionSection,
-} from "@/components/dashboard/widgets/mockTransactions";
+import { TransactionRecord, TransactionSection } from "@/components/dashboard/widgets/mockTransactions";
+import { useExpenseRecords } from "@/hooks/use-expense-records";
 
 function TransactionRow({ item }: { item: TransactionRecord }) {
   const scheme = useColorScheme() ?? "light";
@@ -67,6 +64,7 @@ function TransactionSectionCard({ section }: { section: TransactionSection }) {
 }
 
 export default function RecordsScreen() {
+  const { sections, loading } = useExpenseRecords();
   return (
     <SafeAreaView className="flex-1 bg-theme-background">
       <ScrollView
@@ -94,7 +92,7 @@ export default function RecordsScreen() {
         </View>
 
         <View className="mt-8 gap-6">
-          {mockTransactionSections.map((section: TransactionSection) => (
+          {sections.map((section: TransactionSection) => (
             <TransactionSectionCard key={section.id} section={section} />
           ))}
         </View>

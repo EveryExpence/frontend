@@ -15,5 +15,3 @@ export const getAccountsEndpoint = `${base}/accounts/getAll`;
 export const createAccountEndpoint = `${base}/accounts/create`;
 export const updateAccountEndpoint = (id: string) => `${base}/accounts/${id}`;
 export const deleteAccountEndpoint = (id: string) => `${base}/accounts/${id}`;
-export const getExpenseRecordsEndpoint = `${base}/expenseRecord/getAll`;
-export const getExpenseRecordsAfterEndpoint = `${base}/expenseRecord/getAfter`;
