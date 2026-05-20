@@ -10,7 +10,7 @@ export const Input = React.forwardRef<TextInput, TextInputProps>(
     return (
       <TextInput
         ref={ref}
-        className={`h-12 rounded-lg bg-theme-surface px-4 text-base text-theme-text placeholder:text-theme-icon ${className}`}
+        className={`h-12 rounded-lg bg-theme-surface px-4 text-base text-theme-text ${className}`}
         placeholderTextColor={colors.icon}
         {...props}
       />
