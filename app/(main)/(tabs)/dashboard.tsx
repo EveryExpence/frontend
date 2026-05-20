@@ -28,14 +28,15 @@ const Dashboard = () => {
   const colorScheme: "light" | "dark" = useColorScheme() ?? "light";
   const router = useRouter();
 
-  const { accounts, loading, error, totalsByCurrency, refetch } = useAccountsData();
+  const { accounts, loading, error, totalsByCurrency, refetch } =
+    useAccountsData();
   const [pageIndex, setPageIndex] = React.useState(0);
   const animatedIndex = React.useRef(new Animated.Value(0)).current;
 
   useFocusEffect(
     useCallback(() => {
       refetch();
-    }, [refetch])
+    }, [refetch]),
   );
 
   const pages: Array<{ type: "total" } | AccountWithComputed> = [
@@ -74,10 +75,7 @@ const Dashboard = () => {
       <SafeAreaView className="flex flex-1">
         {loading ? (
           <View className="flex-1 justify-center items-center">
-            <ActivityIndicator
-              size="large"
-              color={Colors[colorScheme].tint}
-            />
+            <ActivityIndicator size="large" color={Colors[colorScheme].tint} />
           </View>
         ) : error ? (
           <View className="p-4">
@@ -85,37 +83,40 @@ const Dashboard = () => {
           </View>
         ) : (
           <View style={{ flex: 1 }}>
-            <View style={{ flexShrink: 0 }}>
-              <FlatList
-                style={{ flexGrow: 0 }}
-                contentContainerStyle={{ flexGrow: 0 }}
-                data={pages}
-                keyExtractor={(i) => ("type" in i ? "total" : i.id)}
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                onMomentumScrollEnd={onMomentumScrollEnd}
-                renderItem={renderPage}
-                getItemLayout={(_, index) => ({
-                  length: width,
-                  offset: width * index,
-                  index,
-                })}
-              />
+            <FlatList
+              style={{ flexGrow: 0 }}
+              contentContainerStyle={{ flexGrow: 0 }}
+              data={pages}
+              keyExtractor={(i) => ("type" in i ? "total" : i.id)}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onMomentumScrollEnd={onMomentumScrollEnd}
+              renderItem={renderPage}
+              getItemLayout={(_, index) => ({
+                length: width,
+                offset: width * index,
+                index,
+              })}
+            />
 
-              <PaginationDots
-                pages={pages}
-                pageIndex={pageIndex}
-                animatedIndex={animatedIndex}
-              />
-            </View>
+            <PaginationDots
+              pages={pages}
+              pageIndex={pageIndex}
+              animatedIndex={animatedIndex}
+            />
 
             <ScrollView
               className="flex-1"
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
+              contentContainerStyle={{
+                paddingHorizontal: 16,
+                paddingBottom: 24,
+              }}
             >
-              <TransactionHistoryWidget onSeeAllPress={() => router.push("/records")} />
+              <TransactionHistoryWidget
+                onSeeAllPress={() => router.push("/records")}
+              />
             </ScrollView>
           </View>
         )}
