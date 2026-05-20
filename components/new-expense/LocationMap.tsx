@@ -21,11 +21,41 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const isMapLoadedRef = useRef(false);
 
+    const getCurrentLocation = React.useCallback(async () => {
+        setIsFetching(true);
+        setErrorMsg(null);
+        try {
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                setErrorMsg('Permission denied');
+                return;
+            }
+
+            const { coords } = await Location.getCurrentPositionAsync({
+                accuracy: Location.Accuracy.Balanced
+            });
+
+            if (isMapLoadedRef.current) {
+                webViewRef.current?.injectJavaScript(`window.updateMapLocation(${coords.latitude}, ${coords.longitude}); true;`);
+            }
+
+            if (location !== null) {
+                return;
+            }
+
+            setLocation({ latitude: coords.latitude, longitude: coords.longitude });
+        } catch {
+            setErrorMsg('Failed to fetch location');
+        } finally {
+            setIsFetching(false);
+        }
+    }, [location, setLocation]);
+
     useEffect(() => {
         if (!disabled) {
             getCurrentLocation();
         }
-    }, [disabled]);
+    }, [disabled, getCurrentLocation]);
 
     const mapHtml = `
         <!DOCTYPE html>
@@ -76,36 +106,6 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
                 setErrorMsg(null);
             }
         } catch { }
-    };
-
-    const getCurrentLocation = async () => {
-        setIsFetching(true);
-        setErrorMsg(null);
-        try {
-            const { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-                setErrorMsg('Permission denied');
-                return;
-            }
-
-            const { coords } = await Location.getCurrentPositionAsync({
-                accuracy: Location.Accuracy.Balanced
-            });
-
-            if (isMapLoadedRef.current) {
-                webViewRef.current?.injectJavaScript(`window.updateMapLocation(${coords.latitude}, ${coords.longitude}); true;`);
-            }
-
-            if (location !== null) {
-                return;
-            }
-
-            setLocation({ latitude: coords.latitude, longitude: coords.longitude });
-        } catch (e) {
-            setErrorMsg('Failed to fetch location');
-        } finally {
-            setIsFetching(false);
-        }
     };
 
     const handleLoadEnd = () => {

@@ -3,7 +3,22 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { getAllExpenseRecords } from '@/data/expenseRecords';
 import { getAllAccounts } from '@/data/accounts';
 import { formatCurrency } from '@/utils/formatCurrency';
-import { TransactionRecord } from '@/components/dashboard/widgets/mockTransactions';
+
+export interface TransactionRecord {
+    id: string;
+    title: string;
+    amount: number;
+    currency: string;
+    kind: 'income' | 'expense';
+    dateLabel: string;
+}
+
+export interface TransactionSection {
+    id: string;
+    title: string;
+    summary: string;
+    items: TransactionRecord[];
+}
 
 function formatDateLabel(ts?: number) {
     if (!ts) return '';

@@ -7,13 +7,11 @@ import { Colors } from "@/constants/theme";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { TransactionRecord, TransactionSection } from "@/components/dashboard/widgets/mockTransactions";
-import { useExpenseRecords } from "@/hooks/use-expense-records";
+import { useExpenseRecords, TransactionRecord, TransactionSection } from "@/hooks/use-expense-records";
 
 function TransactionRow({ item }: { item: TransactionRecord }) {
   const scheme = useColorScheme() ?? "light";
   const colors = Colors[scheme];
-  const amountColor = item.kind === "income" ? colors.success : colors.text;
   const router = useRouter();
 
   return (
@@ -56,7 +54,7 @@ function TransactionSectionCard({ section }: { section: TransactionSection }) {
 
       <Card>
         <CardContent className="px-4 py-3">
-          {section.items.map((item, index) => (
+          {section.items.map((item: TransactionRecord, index: number) => (
             <View key={item.id}>
               <TransactionRow item={item} />
               {index < section.items.length - 1 ? <Separator className="my-1" /> : null}
@@ -69,7 +67,7 @@ function TransactionSectionCard({ section }: { section: TransactionSection }) {
 }
 
 export default function RecordsScreen() {
-  const { sections, loading } = useExpenseRecords();
+  const { sections } = useExpenseRecords();
   return (
     <SafeAreaView className="flex-1 bg-theme-background">
       <ScrollView

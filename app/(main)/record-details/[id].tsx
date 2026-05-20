@@ -1,7 +1,7 @@
-import { ScrollView, Text, View, ActivityIndicator } from "react-native";
+import { ScrollView, Text, View, ActivityIndicator, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 
 import { Account } from "@/types/data/account";
@@ -9,7 +9,7 @@ import { Category } from "@/types/data/category";
 import { PaymentMethod } from "@/types/data/paymentMethod";
 import { Coordinates } from "@/types/data/location";
 
-import { getExpenseRecordById } from "@/data/expenseRecords";
+import { getExpenseRecordById, updateExpenseRecord } from "@/data/expenseRecords";
 import { getAllAccounts } from "@/data/accounts";
 import { getAllCategories } from "@/data/categories";
 import { getAllPaymentMethods } from "@/data/paymentMethods";
@@ -25,9 +25,7 @@ import LocationSelection from "@/components/new-expense/LocationMap";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
-import { updateExpenseRecord } from "@/data/expenseRecords";
 import Toast from "react-native-toast-message";
-import { TouchableOpacity } from "react-native";
 
 export default function RecordDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -126,7 +124,7 @@ export default function RecordDetailsScreen() {
       });
       Toast.show({ text1: "Record updated successfully", type: "success" });
       setIsEditing(false);
-    } catch (e) {
+    } catch {
       Toast.show({ text1: "Failed to update record", type: "error" });
     }
   };

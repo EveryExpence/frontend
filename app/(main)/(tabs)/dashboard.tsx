@@ -6,8 +6,8 @@ import {
   ActivityIndicator,
   Animated,
   ScrollView,
+  Text 
 } from "react-native";
-import { Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -39,7 +39,7 @@ const Dashboard = () => {
     }, [refetch]),
   );
 
-  const pages: Array<{ type: "total" } | AccountWithComputed> = [
+  const pages: ({ type: "total" } | AccountWithComputed)[] = [
     { type: "total" },
     ...accounts,
   ];

@@ -4,8 +4,7 @@ import { Text, View, useColorScheme } from "react-native";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { Colors } from "@/constants/theme";
 import { DashboardWidgetCard } from "./DashboardWidgetCard";
-import { TransactionRecord } from "./mockTransactions";
-import { useExpenseRecords } from "@/hooks/use-expense-records";
+import { useExpenseRecords, TransactionRecord } from "@/hooks/use-expense-records";
 
 interface TransactionHistoryWidgetProps {
   records?: TransactionRecord[];
