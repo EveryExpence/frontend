@@ -5,6 +5,7 @@ import {
   Dimensions,
   ActivityIndicator,
   Animated,
+  ScrollView,
 } from "react-native";
 import { Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -16,7 +17,8 @@ import { useAccountsData } from "@/hooks/use-account-data";
 import { TotalBalancePage } from "@/components/dashboard/TotalBalancePage";
 import { AccountPage } from "@/components/dashboard/AccountPage";
 import { PaginationDots } from "@/components/dashboard/PaginationDots";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
+import { TransactionHistoryWidget } from "@/components/dashboard/widgets/TransactionHistoryWidget";
 
 const { width } = Dimensions.get("window");
 
@@ -24,6 +26,7 @@ type AccountWithComputed = Account & { computedBalance: number };
 
 const Dashboard = () => {
   const colorScheme: "light" | "dark" = useColorScheme() ?? "light";
+  const router = useRouter();
 
   const { accounts, loading, error, totalsByCurrency, refetch } = useAccountsData();
   const [pageIndex, setPageIndex] = React.useState(0);
@@ -82,28 +85,38 @@ const Dashboard = () => {
           </View>
         ) : (
           <View style={{ flex: 1 }}>
-            <FlatList
-              style={{ flexGrow: 0 }}
-              contentContainerStyle={{ flexGrow: 0 }}
-              data={pages}
-              keyExtractor={(i) => ("type" in i ? "total" : i.id)}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              onMomentumScrollEnd={onMomentumScrollEnd}
-              renderItem={renderPage}
-              getItemLayout={(_, index) => ({
-                length: width,
-                offset: width * index,
-                index,
-              })}
-            />
+            <View style={{ flexShrink: 0 }}>
+              <FlatList
+                style={{ flexGrow: 0 }}
+                contentContainerStyle={{ flexGrow: 0 }}
+                data={pages}
+                keyExtractor={(i) => ("type" in i ? "total" : i.id)}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onMomentumScrollEnd={onMomentumScrollEnd}
+                renderItem={renderPage}
+                getItemLayout={(_, index) => ({
+                  length: width,
+                  offset: width * index,
+                  index,
+                })}
+              />
 
-            <PaginationDots
-              pages={pages}
-              pageIndex={pageIndex}
-              animatedIndex={animatedIndex}
-            />
+              <PaginationDots
+                pages={pages}
+                pageIndex={pageIndex}
+                animatedIndex={animatedIndex}
+              />
+            </View>
+
+            <ScrollView
+              className="flex-1"
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
+            >
+              <TransactionHistoryWidget onSeeAllPress={() => router.push("/records")} />
+            </ScrollView>
           </View>
         )}
       </SafeAreaView>
