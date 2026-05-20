@@ -1,7 +1,8 @@
 import React from "react";
-import { ScrollView, Text, View, useColorScheme } from "react-native";
+import { ScrollView, Text, View, useColorScheme, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { Colors } from "@/constants/theme";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,9 +14,13 @@ function TransactionRow({ item }: { item: TransactionRecord }) {
   const scheme = useColorScheme() ?? "light";
   const colors = Colors[scheme];
   const amountColor = item.kind === "income" ? colors.success : colors.text;
+  const router = useRouter();
 
   return (
-    <View className="flex-row items-center justify-between py-1.5">
+    <Pressable
+      onPress={() => router.push(`/record-details/${item.id}`)}
+      className="flex-row items-center justify-between py-1.5 active:opacity-70"
+    >
       <View className="flex-row items-center gap-3 flex-1 pr-3">
         <View className="h-10 w-10 items-center justify-center rounded-full bg-theme-tint">
           <MaterialCommunityIcons
@@ -37,7 +42,7 @@ function TransactionRow({ item }: { item: TransactionRecord }) {
           ? `+${item.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${item.currency}`
           : `${item.amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${item.currency}`}
       </Text>
-    </View>
+    </Pressable>
   );
 }
 

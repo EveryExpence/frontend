@@ -46,6 +46,12 @@ export const getAllExpenseRecords = async (db: SQLiteDatabase): Promise<ExpenseR
     return await db.getAllAsync<ExpenseRecord>("SELECT * FROM expense_records WHERE syncState != 'deleted'");
 };
 
+export const getExpenseRecordById = async (db: SQLiteDatabase, id: string): Promise<ExpenseRecord | null> => {
+    return await db.getFirstAsync<ExpenseRecord>("SELECT * FROM expense_records WHERE id = $id AND syncState != 'deleted'", {
+        $id: id
+    });
+};
+
 export const updateExpenseRecord = async (db: SQLiteDatabase, id: string, expenseRecordDTO: ExpenseRecordInputDTO) => {
     const stmt = await db.prepareAsync(`
         UPDATE expense_records SET

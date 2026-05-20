@@ -7,9 +7,10 @@ import { Colors } from '@/constants/theme';
 interface Props {
     selectedDateTime: Date;
     setSelectedDateTime: Dispatch<SetStateAction<Date>>;
+    disabled?: boolean;
 }
 
-const DateTimeSelection = ({ selectedDateTime, setSelectedDateTime }: Props) => {
+const DateTimeSelection = ({ selectedDateTime, setSelectedDateTime, disabled }: Props) => {
     const scheme = useColorScheme() ?? 'light';
     const colors = Colors[scheme];
     const [showDateSelection, setShowDateSelection] = useState(false);
@@ -22,7 +23,8 @@ const DateTimeSelection = ({ selectedDateTime, setSelectedDateTime }: Props) => 
             <Text className="text-2xl text-theme-text font-bold">Expense timestamp</Text>
 
             <TouchableOpacity
-                onPress={() => setShowDateSelection(true)}
+                onPress={() => disabled ? null : setShowDateSelection(true)}
+                activeOpacity={disabled ? 1 : 0.2}
                 className="bg-theme-surface py-4 px-3 rounded-md flex-row items-center gap-2"
             >
                 <MaterialCommunityIcons name="clock" size={20} color={colors.text} />

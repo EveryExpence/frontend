@@ -9,9 +9,10 @@ interface Props {
     amount: string;
     setAmount: Dispatch<SetStateAction<string>>;
     isValid: boolean;
+    disabled?: boolean;
 }
 
-const AmountInput = ({ selectedAccount, amount, setAmount, isValid }: Props) => {
+const AmountInput = ({ selectedAccount, amount, setAmount, isValid, disabled }: Props) => {
     const scheme = useColorScheme() ?? 'light';
     const colors = Colors[scheme];
 
@@ -31,6 +32,7 @@ const AmountInput = ({ selectedAccount, amount, setAmount, isValid }: Props) => 
                     placeholderClassName="text-theme-text opacity-35"
                     value={amount}
                     onChangeText={setAmount}
+                    editable={!disabled}
                     className={`px-16 w-full py-4 text-xl rounded-md bg-theme-surface text-theme-text
                         ${amount !== "" && selectedAccount !== null ? 'pr-16' : 'pr-4'}
                         ${isValid ? '' : "border border-red-500"}`}
