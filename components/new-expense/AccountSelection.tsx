@@ -70,7 +70,7 @@ const AccountSelection = ({ selectedAccount, setSelectedAccount, disabled }: Pro
                         color={colors.text}
                     />
                 )}
-                renderRightIcon={() => (
+                renderRightIcon={() => disabled ? <></> : (
                     <MaterialCommunityIcons
                         name="chevron-down"
                         size={20}

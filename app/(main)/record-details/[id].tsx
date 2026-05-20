@@ -25,6 +25,10 @@ import LocationSelection from "@/components/new-expense/LocationMap";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
+import { updateExpenseRecord } from "@/data/expenseRecords";
+import Toast from "react-native-toast-message";
+import { TouchableOpacity } from "react-native";
+
 export default function RecordDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const db = useSQLiteContext();
@@ -43,6 +47,8 @@ export default function RecordDetailsScreen() {
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState<Coordinates | null>(null);
   const [scrollEnabled, setScrollEnabled] = useState(true);
+
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     const fetchRecord = async () => {
@@ -86,6 +92,45 @@ export default function RecordDetailsScreen() {
     fetchRecord();
   }, [id, db]);
 
+  const handleSave = async () => {
+    if (
+      !id ||
+      !selectedAccount ||
+      !selectedCategory ||
+      !selectedPaymentMethod ||
+      !amount
+    ) {
+      Toast.show({ text1: "Please fill all required fields", type: "error" });
+      return;
+    }
+
+    try {
+      const amountValue =
+        selectedCategory.type === "income"
+          ? Math.abs(parseFloat(amount))
+          : -Math.abs(parseFloat(amount));
+
+      let locationString = null;
+      if (location) {
+        locationString = `${location.latitude};${location.longitude}`;
+      }
+
+      await updateExpenseRecord(db, id as string, {
+        amount: amountValue,
+        accountId: selectedAccount.id,
+        categoryId: selectedCategory.id,
+        paymentMethodId: selectedPaymentMethod.id,
+        description: description,
+        location: locationString ? locationString : undefined,
+        createdAt: selectedDateTime.getTime(),
+      });
+      Toast.show({ text1: "Record updated successfully", type: "success" });
+      setIsEditing(false);
+    } catch (e) {
+      Toast.show({ text1: "Failed to update record", type: "error" });
+    }
+  };
+
   if (loading) {
     return (
       <SafeAreaView className="flex-1 bg-theme-background">
@@ -104,7 +149,7 @@ export default function RecordDetailsScreen() {
         <AccountSelection
           selectedAccount={selectedAccount}
           setSelectedAccount={setSelectedAccount}
-          disabled={true}
+          disabled={!isEditing}
         />
 
         <AmountInput
@@ -112,31 +157,31 @@ export default function RecordDetailsScreen() {
           amount={amount}
           setAmount={setAmount}
           isValid={true}
-          disabled={true}
+          disabled={!isEditing}
         />
 
         <CategorySelection
           selectedCategory={selectedCategory}
           setSelectedCategory={setSelectedCategory}
-          disabled={true}
+          disabled={!isEditing}
         />
 
         <PaymentMethodSelection
           selectedPaymentMethod={selectedPaymentMethod}
           setSelectedPaymentMethod={setSelectedPaymentMethod}
-          disabled={true}
+          disabled={!isEditing}
         />
 
         <DateTimeSelection
           selectedDateTime={selectedDateTime}
           setSelectedDateTime={setSelectedDateTime}
-          disabled={true}
+          disabled={!isEditing}
         />
 
         <DescriptionInput
           description={description}
           setDescription={setDescription}
-          disabled={true}
+          disabled={!isEditing}
         />
 
         {(location || location === null) && (
@@ -144,11 +189,27 @@ export default function RecordDetailsScreen() {
             location={location}
             setLocation={setLocation}
             setScrollEnabled={setScrollEnabled}
-            disabled={true}
+            disabled={!isEditing}
           />
         )}
 
-        <View className="py-10" />
+        <View className="mt-8 mb-10">
+          {!isEditing ? (
+            <TouchableOpacity
+              onPress={() => setIsEditing(true)}
+              className="w-full bg-theme-tint py-4 rounded-md flex-row justify-center items-center"
+            >
+              <Text className="text-white font-bold text-lg">Edit Record</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={handleSave}
+              className="w-full bg-theme-tint py-4 rounded-md flex-row justify-center items-center"
+            >
+              <Text className="text-white font-bold text-lg">Save Changes</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

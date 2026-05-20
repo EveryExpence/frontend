@@ -83,7 +83,7 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled }: 
                             color={colors.text}
                         />
                     )}
-                    renderRightIcon={() => (
+                    renderRightIcon={() => disabled ? <></> : (
                         <MaterialCommunityIcons
                             name="chevron-down"
                             size={20}
