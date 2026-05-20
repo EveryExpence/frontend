@@ -1,6 +1,8 @@
 import React from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
 import { getAllExpenseRecords } from '@/data/expenseRecords';
+import { getAllAccounts } from '@/data/accounts';
+import { formatCurrency } from '@/utils/formatCurrency';
 import { TransactionRecord } from '@/components/dashboard/widgets/mockTransactions';
 
 function formatDateLabel(ts?: number) {
@@ -12,8 +14,8 @@ function formatDateLabel(ts?: number) {
     yesterday.setDate(now.getDate() - 1);
     const isYesterday = d.toDateString() === yesterday.toDateString();
     const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-    if (isToday) return `Today  ${time}`;
-    if (isYesterday) return `Yesterday  ${time}`;
+    if (isToday) return `Today ${time}`;
+    if (isYesterday) return `Yesterday ${time}`;
     return d.toLocaleDateString();
 }
 
@@ -29,6 +31,10 @@ export function useExpenseRecords() {
             setLoading(true);
             setError(null);
             const local = await getAllExpenseRecords(db);
+            const accounts = await getAllAccounts(db);
+            const accountMap: Record<string, string> = {};
+            accounts.forEach((a) => (accountMap[a.id] = a.currency));
+
             const mapped: TransactionRecord[] = local
                 .slice()
                 .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
@@ -36,7 +42,7 @@ export function useExpenseRecords() {
                     id: r.id,
                     title: r.description || 'Payment',
                     amount: r.amount,
-                    currency: 'PLN',
+                    currency: accountMap[r.accountId] ?? 'PLN',
                     kind: r.amount >= 0 ? 'income' : 'expense',
                     dateLabel: formatDateLabel(r.createdAt),
                 }));
@@ -62,12 +68,22 @@ export function useExpenseRecords() {
             map.set(key, arr);
         });
 
-        return Array.from(map.entries()).map(([title, items], idx) => ({
-            id: `section-${idx}`,
-            title,
-            summary: '',
-            items,
-        }));
+        return Array.from(map.entries()).map(([title, items], idx) => {
+            const totals: Record<string, number> = {};
+            items.forEach((it) => {
+                totals[it.currency] = (totals[it.currency] || 0) + it.amount;
+            });
+            const summary = Object.entries(totals)
+                .map(([curr, sum]) => formatCurrency(sum, curr))
+                .join(' | ');
+
+            return {
+                id: `section-${idx}`,
+                title,
+                summary,
+                items,
+            };
+        });
     }, [records]);
 
     return { records, sections, loading, error, refetch: fetch } as const;
