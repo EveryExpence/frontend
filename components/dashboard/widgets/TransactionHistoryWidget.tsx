@@ -53,7 +53,7 @@ export const TransactionHistoryRow = ({
 
 export const TransactionHistoryWidget: React.FC<
   TransactionHistoryWidgetProps
-> = ({ records = mockTransactionRecords, onSeeAllPress }) => {
+> = ({ records = mockTransactionRecords.slice(0, 3), onSeeAllPress }) => {
   return (
     <DashboardWidgetCard
       title="Transaction History"
