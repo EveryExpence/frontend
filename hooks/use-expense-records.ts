@@ -13,9 +13,8 @@ function formatDateLabel(ts?: number) {
     const yesterday = new Date();
     yesterday.setDate(now.getDate() - 1);
     const isYesterday = d.toDateString() === yesterday.toDateString();
-    const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-    if (isToday) return `Today ${time}`;
-    if (isYesterday) return `Yesterday ${time}`;
+    if (isToday) return 'Today';
+    if (isYesterday) return 'Yesterday';
     return d.toLocaleDateString();
 }
 
