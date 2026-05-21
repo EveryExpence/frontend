@@ -12,13 +12,14 @@ import SegmentedControl from '@react-native-segmented-control/segmented-control'
 interface Props {
     selectedCategory: Category | null;
     setSelectedCategory: Dispatch<SetStateAction<Category | null>>;
+    disabled?: boolean;
 }
 
 const fetchCategories = async (db: SQLiteDatabase, callback: Dispatch<SetStateAction<Category[]>>) => {
     callback(await getAllCategories(db));
 }
 
-const CategorySelection = ({ selectedCategory, setSelectedCategory }: Props) => {
+const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled }: Props) => {
     const scheme = useColorScheme() ?? 'light';
     const colors = Colors[scheme];
     const db = useSQLiteContext();
@@ -70,6 +71,7 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory }: Props) => 
                     labelField="name"
                     valueField="id"
                     placeholder="Select category"
+                    disable={disabled}
                     searchPlaceholder="Search category..."
                     value={selectedCategory?.id ?? undefined}
                     onChange={item => setSelectedCategory(item)}
@@ -81,7 +83,7 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory }: Props) => 
                             color={colors.text}
                         />
                     )}
-                    renderRightIcon={() => (
+                    renderRightIcon={() => disabled ? <></> : (
                         <MaterialCommunityIcons
                             name="chevron-down"
                             size={20}
@@ -90,9 +92,11 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory }: Props) => 
                     )}
                 />
 
-                <TouchableOpacity onPress={() => setIsModalVisible(true)}>
-                    <MaterialCommunityIcons name="plus" size={32} color={colors.text} />
-                </TouchableOpacity>
+                {!disabled && (
+                    <TouchableOpacity onPress={() => setIsModalVisible(true)}>
+                        <MaterialCommunityIcons name="plus" size={32} color={colors.text} />
+                    </TouchableOpacity>
+                )}
             </View>
 
             <CustomModal

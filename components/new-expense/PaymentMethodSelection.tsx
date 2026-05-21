@@ -11,13 +11,14 @@ import CustomModal from '../Modal'
 interface Props {
     selectedPaymentMethod: PaymentMethod | null;
     setSelectedPaymentMethod: Dispatch<SetStateAction<PaymentMethod | null>>;
+    disabled?: boolean;
 }
 
 const fetchPaymentMethods = async (db: SQLiteDatabase, callback: Dispatch<SetStateAction<PaymentMethod[]>>) => {
     callback(await getAllPaymentMethods(db));
 }
 
-const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMethod }: Props) => {
+const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMethod, disabled }: Props) => {
     const scheme = useColorScheme() ?? 'light';
     const colors = Colors[scheme];
     const db = useSQLiteContext();
@@ -67,6 +68,7 @@ const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMetho
                     labelField="name"
                     valueField="id"
                     placeholder="Select payment method"
+                    disable={disabled}
                     searchPlaceholder="Search payment method..."
                     value={selectedPaymentMethod?.id ?? undefined}
                     onChange={item => setSelectedPaymentMethod(item)}
@@ -78,7 +80,7 @@ const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMetho
                             color={colors.text}
                         />
                     )}
-                    renderRightIcon={() => (
+                    renderRightIcon={() => disabled ? <></> : (
                         <MaterialCommunityIcons
                             name="chevron-down"
                             size={20}
@@ -87,9 +89,11 @@ const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMetho
                     )}
                 />
 
-                <TouchableOpacity onPress={() => setIsModalVisible(true)}>
-                    <MaterialCommunityIcons name="plus" size={32} color={colors.text} />
-                </TouchableOpacity>
+                {!disabled && (
+                    <TouchableOpacity onPress={() => setIsModalVisible(true)}>
+                        <MaterialCommunityIcons name="plus" size={32} color={colors.text} />
+                    </TouchableOpacity>
+                )}
             </View>
 
             <CustomModal

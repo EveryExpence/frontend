@@ -10,10 +10,11 @@ import { useFocusEffect } from 'expo-router';
 
 interface Props {
     selectedAccount: Account | null;
-    setSelectedAccount: Dispatch<SetStateAction<Account | null>>
+    setSelectedAccount: Dispatch<SetStateAction<Account | null>>;
+    disabled?: boolean;
 }
 
-const AccountSelection = ({ selectedAccount, setSelectedAccount }: Props) => {
+const AccountSelection = ({ selectedAccount, setSelectedAccount, disabled }: Props) => {
     const scheme = useColorScheme() ?? 'light';
     const colors = Colors[scheme];
     const db = useSQLiteContext();
@@ -58,6 +59,7 @@ const AccountSelection = ({ selectedAccount, setSelectedAccount }: Props) => {
                 valueField="id"
                 placeholder="Select account"
                 searchPlaceholder="Search account..."
+                disable={disabled}
                 value={selectedAccount?.id ?? undefined}
                 onChange={item => setSelectedAccount(item)}
                 renderLeftIcon={() => (
@@ -68,7 +70,7 @@ const AccountSelection = ({ selectedAccount, setSelectedAccount }: Props) => {
                         color={colors.text}
                     />
                 )}
-                renderRightIcon={() => (
+                renderRightIcon={() => disabled ? <></> : (
                     <MaterialCommunityIcons
                         name="chevron-down"
                         size={20}
