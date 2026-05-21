@@ -1,24 +1,35 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { View } from 'react-native'
+import React from 'react'
+import { Slot } from 'expo-router'
+import './global.css'
+import { AuthProvider } from '@/context/authContext'
+import CustomizedToast from '@/components/Toast'
+import { SQLiteProvider } from 'expo-sqlite';
+import { migrateDatabase } from '@/data/init'
+import 'react-native-get-random-values';
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
+const RootLayout = () => {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
-  );
+    <SafeAreaProvider>
+      <View
+        style={{
+          flex: 1,
+        }}
+        className="bg-theme-background"
+      >
+        <AuthProvider>
+          <SQLiteProvider 
+            databaseName="app.db"
+            onInit={migrateDatabase}
+          >
+              <Slot />
+          </SQLiteProvider>
+        </AuthProvider>
+        <CustomizedToast />
+      </View>
+    </SafeAreaProvider>
+  )
 }
+
+export default RootLayout

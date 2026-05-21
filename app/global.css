@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --theme-text: #03060D;
+    --theme-background: #FFFFFF;
+    --theme-tint: #4370C7;
+    --theme-surface: #E3E3ED;
+    --theme-icon: #687076;
+    --theme-text-light: #FFFFFF;
+    --theme-text-dark: #2C3033;
+    --theme-error: #C02C2C;
+    --theme-warning: #F0C62F;
+    --theme-success: #5AAF58;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --theme-text: #FFFFFF;
+      --theme-background: #2C3033;
+      --theme-tint: #365AA1;
+      --theme-surface: #181819;
+      --theme-icon: #9BA1A6;
+      --theme-text-light: #FFFFFF;
+      --theme-text-dark: #2C3033;
+      --theme-error: #C02C2C;
+      --theme-warning: #F0C62F;
+      --theme-success: #5AAF58;
+    }
+  }
+}
