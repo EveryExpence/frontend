@@ -69,7 +69,6 @@ const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMetho
                         fontSize: 17,
                         color: colors.text,
                     }}
-                    searchTextStyle={{ color: colors.text }}
                     data={paymentMethods}
                     search
                     maxHeight={300}
@@ -118,7 +117,7 @@ const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMetho
                         onPress={saveNewPaymentMethod}
                         className="bg-theme-tint rounded-md px-5 py-3"
                     >
-                        <Text className="text-xl text-theme-textLight">Save</Text>
+                        <Text className="text-xl text-theme-text">Save</Text>
                     </TouchableOpacity>
                 }
             >

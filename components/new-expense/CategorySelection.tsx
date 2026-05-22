@@ -72,7 +72,6 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled }: 
                         fontSize: 17,
                         color: colors.text,
                     }}
-                    searchTextStyle={{ color: colors.text }}
                     data={categories}
                     search
                     maxHeight={300}
@@ -121,7 +120,7 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled }: 
                         onPress={saveNewCategory}
                         className="bg-theme-tint rounded-md px-5 py-3"
                     >
-                        <Text className="text-xl text-theme-textLight">Save</Text>
+                        <Text className="text-xl text-theme-text">Save</Text>
                     </TouchableOpacity>
                 }
             >
