@@ -3,6 +3,7 @@ import React from 'react'
 import { Slot } from 'expo-router'
 import './global.css'
 import { AuthProvider } from '@/context/authContext'
+import { ThemeProvider } from '@/context/themeContext'
 import CustomizedToast from '@/components/Toast'
 import { SQLiteProvider } from 'expo-sqlite';
 import { migrateDatabase } from '@/data/init'
@@ -18,14 +19,16 @@ const RootLayout = () => {
         }}
         className="bg-theme-background"
       >
-        <AuthProvider>
-          <SQLiteProvider 
-            databaseName="app.db"
-            onInit={migrateDatabase}
-          >
-              <Slot />
-          </SQLiteProvider>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <SQLiteProvider 
+              databaseName="app.db"
+              onInit={migrateDatabase}
+            >
+                <Slot />
+            </SQLiteProvider>
+          </AuthProvider>
+        </ThemeProvider>
         <CustomizedToast />
       </View>
     </SafeAreaProvider>
