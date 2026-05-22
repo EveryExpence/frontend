@@ -29,10 +29,11 @@ const AmountInput = ({ selectedAccount, amount, setAmount, isValid, disabled }: 
                 />
                 <TextInput
                     placeholder='Enter amount'
-                    placeholderClassName="text-theme-text opacity-35"
+                    placeholderTextColor={colors.icon}
                     value={amount}
                     onChangeText={setAmount}
                     editable={!disabled}
+                    style={{ color: colors.text }}
                     className={`px-16 w-full py-4 text-xl rounded-md bg-theme-surface text-theme-text
                         ${amount !== "" && selectedAccount !== null ? 'pr-16' : 'pr-4'}
                         ${isValid ? '' : "border border-red-500"}`}

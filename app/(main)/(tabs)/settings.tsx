@@ -8,18 +8,18 @@ import SettingsPreferenceRow from "@/components/settings/SettingsPreferenceRow";
 import SettingsToggleRow from "@/components/settings/SettingsToggleRow";
 import SettingsActionRow from "@/components/settings/SettingsActionRow";
 import Topbar from "@/components/Topbar";
+import { useTheme } from "@/context/themeContext";
 
 type Language = "eng" | "pl";
-type AppTheme = "light" | "dark";
 
 const Divider = () => <View className="h-px bg-theme-icon opacity-20 mx-6" />;
 
 const SettingsScreen = () => {
   const router = useRouter();
   const { logout, user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const [currentLanguage, setLanguage] = useState<Language>("eng");
-  const [currentTheme, setTheme] = useState<AppTheme>("light");
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   const handleLogout = async () => {
@@ -62,8 +62,8 @@ const SettingsScreen = () => {
           <SettingsPreferenceRow
             title="Theme"
             iconName="contrast-outline"
-            currentValue={currentTheme === "light" ? "Light" : "Dark"}
-            onPress={() => setTheme((prev) => (prev === "light" ? "dark" : "light"))}
+            currentValue={theme === "light" ? "Light" : "Dark"}
+            onPress={toggleTheme}
           />
         </View>
 

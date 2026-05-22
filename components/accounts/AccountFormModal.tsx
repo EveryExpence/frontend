@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, Text, TextInput, TouchableOpacity, useColorScheme } from 'react-native';
+import { ScrollView, Text, TextInput, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Dropdown } from 'react-native-element-dropdown';
 import { Colors } from '@/constants/theme';
 import CustomModal from '@/components/Modal';
 import { AccountCardItem } from '@/components/accounts/AccountCard';
 import { isValidBalanceInput, normalizeNumberInput, parseBalanceInput } from '@/utils/balance';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 const CURRENCIES = ['USD', 'EUR', 'PLN', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD'];
 const DEFAULT_CURRENCY = CURRENCIES[0];
@@ -145,6 +146,13 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
             borderRadius: 6,
             marginBottom: 12,
           }}
+          containerStyle={{
+            backgroundColor: colors.surface,
+            borderColor: colors.icon,
+            marginTop: -25,
+          }}
+          activeColor={colors.tint}
+          itemTextStyle={{ color: colors.text }}
           selectedTextStyle={{
             fontSize: 17,
             color: colors.text,
@@ -168,7 +176,6 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
           value={currency}
           onChange={(item) => setCurrency(item.value)}
           dropdownPosition="bottom"
-          containerStyle={{ marginTop: -25 }}
           renderRightIcon={() => (
             <MaterialCommunityIcons name="chevron-down" size={20} color={colors.text} />
           )}

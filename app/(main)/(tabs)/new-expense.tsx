@@ -95,7 +95,7 @@ export default function NewExpense() {
         <LocationSelection location={location} setLocation={setLocation} setScrollEnabled={setScrollEnabled} />
 
         <TouchableOpacity onPress={saveRecord} className="w-full bg-theme-tint py-4 rounded-md">
-          <Text className="text-xl text-theme-textLight text-center font-bold">Save a new record</Text>
+          <Text className="text-xl text-theme-text text-center font-bold">Save a new record</Text>
         </TouchableOpacity>
 
         <View className="py-20" />

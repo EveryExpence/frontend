@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, useColorScheme, TextInput } from 'react-native'
+import { View, Text, TouchableOpacity, TextInput } from 'react-native'
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Dropdown } from 'react-native-element-dropdown'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
@@ -7,6 +7,7 @@ import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite'
 import { Colors } from '@/constants/theme'
 import { createPaymentMethod, getAllPaymentMethods } from '@/data/paymentMethods'
 import CustomModal from '../Modal'
+import { useColorScheme } from '@/hooks/use-color-scheme'
 
 interface Props {
     selectedPaymentMethod: PaymentMethod | null;
@@ -49,6 +50,12 @@ const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMetho
                         borderRadius: 6,
                         flex: 1,
                     }}
+                    containerStyle={{
+                        backgroundColor: colors.surface,
+                        borderColor: colors.icon,
+                    }}
+                    activeColor={colors.background}
+                    itemTextStyle={{ color: colors.text }}
                     selectedTextStyle={{
                         fontSize: 17,
                         color: colors.text,
@@ -110,7 +117,7 @@ const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMetho
                         onPress={saveNewPaymentMethod}
                         className="bg-theme-tint rounded-md px-5 py-3"
                     >
-                        <Text className="text-xl text-theme-textLight">Save</Text>
+                        <Text className="text-xl text-theme-text">Save</Text>
                     </TouchableOpacity>
                 }
             >

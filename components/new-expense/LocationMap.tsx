@@ -2,9 +2,16 @@ import { View, Text, useColorScheme, TouchableOpacity, ActivityIndicator } from 
 import React, { Dispatch, SetStateAction, useState, useRef, useEffect } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
-import { WebView } from 'react-native-webview';
 import * as Location from 'expo-location';
 import { Coordinates } from '@/types/data/location';
+
+let WebView: any = null;
+
+try {
+    ({ WebView } = require('react-native-webview'));
+} catch {
+    WebView = null;
+}
 
 interface Props {
     location: Coordinates | null;
@@ -140,17 +147,26 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
                 )}
             </View>
 
-            <View className="w-full h-[400px] rounded-md overflow-hidden bg-theme-surface border border-transparent">
-                <WebView
-                    ref={webViewRef}
-                    originWhitelist={['*']}
-                    source={{ html: mapHtml }}
-                    onMessage={onMessage}
-                    onLoadEnd={handleLoadEnd}
-                    scrollEnabled={false}
-                    showsVerticalScrollIndicator={false}
-                    showsHorizontalScrollIndicator={false}
-                />
+            <View className="w-full h-[400px] rounded-md overflow-hidden bg-theme-surface border border-transparent items-center justify-center px-4">
+                {WebView ? (
+                    <WebView
+                        ref={webViewRef}
+                        originWhitelist={['*']}
+                        source={{ html: mapHtml }}
+                        onMessage={onMessage}
+                        onLoadEnd={handleLoadEnd}
+                        scrollEnabled={false}
+                        showsVerticalScrollIndicator={false}
+                        showsHorizontalScrollIndicator={false}
+                    />
+                ) : (
+                    <View className="items-center gap-3">
+                        <MaterialCommunityIcons name="map-off-outline" size={34} color={colors.icon} />
+                        <Text className="text-center text-theme-text">
+                            Map preview is unavailable in this build. Location entry still works without the map.
+                        </Text>
+                    </View>
+                )}
             </View>
 
             <View className="flex-row justify-between mt-2">

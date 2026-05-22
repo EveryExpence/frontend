@@ -1,4 +1,4 @@
-import { View, Text, useColorScheme, TouchableOpacity, TextInput } from 'react-native'
+import { View, Text, TouchableOpacity, TextInput } from 'react-native'
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Dropdown } from 'react-native-element-dropdown'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
@@ -8,6 +8,7 @@ import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite'
 import { createCategory, getAllCategories } from '@/data/categories'
 import CustomModal from '../Modal'
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
+import { useColorScheme } from '@/hooks/use-color-scheme'
 
 interface Props {
     selectedCategory: Category | null;
@@ -52,6 +53,12 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled }: 
                         borderRadius: 6,
                         flex: 1,
                     }}
+                    containerStyle={{
+                        backgroundColor: colors.surface,
+                        borderColor: colors.icon,
+                    }}
+                    activeColor={colors.background}
+                    itemTextStyle={{ color: colors.text }}
                     selectedTextStyle={{
                         fontSize: 17,
                         color: colors.text,
@@ -113,7 +120,7 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled }: 
                         onPress={saveNewCategory}
                         className="bg-theme-tint rounded-md px-5 py-3"
                     >
-                        <Text className="text-xl text-theme-textLight">Save</Text>
+                        <Text className="text-xl text-theme-text">Save</Text>
                     </TouchableOpacity>
                 }
             >
@@ -149,7 +156,7 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled }: 
                         activeFontStyle={{
                             color: colors.textLight,
                         }}
-                        backgroundColor={colors.background}
+                        backgroundColor={colors.surface}
                         style={{
                             height: 36
                         }}
