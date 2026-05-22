@@ -1,4 +1,4 @@
-import { View, Text, useColorScheme } from 'react-native'
+import { View, Text } from 'react-native'
 import React, { Dispatch, SetStateAction, useCallback, useState } from 'react'
 import { Account } from '@/types/data/account'
 import { useSQLiteContext } from 'expo-sqlite';
@@ -7,6 +7,7 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { Colors } from '@/constants/theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 interface Props {
     selectedAccount: Account | null;
@@ -39,6 +40,16 @@ const AccountSelection = ({ selectedAccount, setSelectedAccount, disabled }: Pro
                     borderRadius: 6,
                     flex: 1,
                 }}
+                containerStyle={{
+                    backgroundColor: colors.surface,
+                    borderColor: colors.icon,
+                }}
+                activeColor={colors.background}
+                itemTextStyle={{ color: colors.text }}
+                selectedTextStyle={{
+                    fontSize: 17,
+                    color: colors.text,
+                }}
                 selectedTextStyle={{
                     fontSize: 17,
                     color: colors.text,
@@ -52,6 +63,7 @@ const AccountSelection = ({ selectedAccount, setSelectedAccount, disabled }: Pro
                     fontSize: 17,
                     color: colors.text,
                 }}
+                searchTextStyle={{ color: colors.text }}
                 data={accounts}
                 search
                 maxHeight={300}
