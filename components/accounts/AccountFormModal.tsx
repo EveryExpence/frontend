@@ -149,8 +149,9 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
           containerStyle={{
             backgroundColor: colors.surface,
             borderColor: colors.icon,
+            marginTop: -25,
           }}
-          activeColor={colors.background}
+          activeColor={colors.tint}
           itemTextStyle={{ color: colors.text }}
           selectedTextStyle={{
             fontSize: 17,
@@ -165,7 +166,6 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
             fontSize: 17,
             color: colors.text,
           }}
-          searchTextStyle={{ color: colors.text }}
           data={currencyOptions}
           search
           maxHeight={300}
@@ -176,7 +176,6 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
           value={currency}
           onChange={(item) => setCurrency(item.value)}
           dropdownPosition="bottom"
-          containerStyle={{ marginTop: -25 }}
           renderRightIcon={() => (
             <MaterialCommunityIcons name="chevron-down" size={20} color={colors.text} />
           )}
