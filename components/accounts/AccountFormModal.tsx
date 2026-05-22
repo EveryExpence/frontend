@@ -176,6 +176,7 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
           value={currency}
           onChange={(item) => setCurrency(item.value)}
           dropdownPosition="bottom"
+          containerStyle={{ marginTop: -25 }}
           renderRightIcon={() => (
             <MaterialCommunityIcons name="chevron-down" size={20} color={colors.text} />
           )}
