@@ -50,10 +50,6 @@ const AccountSelection = ({ selectedAccount, setSelectedAccount, disabled }: Pro
                     fontSize: 17,
                     color: colors.text,
                 }}
-                selectedTextStyle={{
-                    fontSize: 17,
-                    color: colors.text,
-                }}
                 placeholderStyle={{
                     fontSize: 17,
                     color: colors.text,
@@ -63,7 +59,6 @@ const AccountSelection = ({ selectedAccount, setSelectedAccount, disabled }: Pro
                     fontSize: 17,
                     color: colors.text,
                 }}
-                searchTextStyle={{ color: colors.text }}
                 data={accounts}
                 search
                 maxHeight={300}
