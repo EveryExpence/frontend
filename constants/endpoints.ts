@@ -19,3 +19,4 @@ export const deleteAccountEndpoint = (id: string) => `${base}/accounts/${id}`;
 export const updateCategoryEndpoint = (id: string) => `${base}/categories/${id}`;
 export const deleteCategoryEndpoint = (id: string) => `${base}/categories/${id}`;
 export const createCategoryEndpoint = `${base}/categories/create`;
+export const getCategoryEndpoint = `${base}/categories/getAll`;
