@@ -49,3 +49,38 @@ export const deleteCategory = async (db: SQLiteDatabase, id: string) => {
         });
     });
 };
+
+export const getCategoriesWithSyncState = async (db: SQLiteDatabase, syncState: string): Promise<Category[]> => {
+    return await db.getAllAsync(
+        "SELECT * FROM categories WHERE syncState = $state",
+        { $state: syncState }
+    );
+}
+
+export const setCategoryBatchSynced = async (db: SQLiteDatabase, ids: string[]) => {
+    if (ids.length === 0) {
+        return;
+    }
+    const stmt = await db.prepareAsync(`
+        UPDATE categories SET syncState = 'synced' WHERE id IN (SELECT value FROM json_each($ids))
+    `);
+    await db.withExclusiveTransactionAsync(async () => {
+        await stmt.executeAsync({
+            $ids: JSON.stringify(ids),
+        });
+    })
+}
+
+export const deleteCategoryBatch = async (db: SQLiteDatabase, ids: string[]) => {
+    if (ids.length === 0) {
+        return;
+    }
+    const stmt = await db.prepareAsync(`
+        DELETE FROM categories WHERE id IN (SELECT value FROM json_each($ids))
+    `);
+    await db.withExclusiveTransactionAsync(async () => {
+        await stmt.executeAsync({
+            $ids: JSON.stringify(ids),
+        });
+    })
+}
