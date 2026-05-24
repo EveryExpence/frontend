@@ -15,6 +15,9 @@ export const syncCategories = async (db: SQLiteDatabase) => {
                 name: category.name,
                 type: category.type,
             }),
+            headers: {
+                'Content-Type': 'application/json',
+            },
         });
         if (response.ok) {
             synchedCategoriesIds.push(category.id);
@@ -30,6 +33,9 @@ export const syncCategories = async (db: SQLiteDatabase) => {
                 name: category.name,
                 type: category.type,
             }),
+            headers: {
+                'Content-Type': 'application/json',
+            },
         });
         if (response.ok) {
             synchedCategoriesIds.push(category.id);
@@ -52,7 +58,8 @@ export const syncCategories = async (db: SQLiteDatabase) => {
 
     const response = await apiFetch(getCategoryEndpoint);
     if (!response.ok) {
-        throw "Failed to fetch categories";
+        console.error("FAILED TO FETCH CATEGORIES");
+        return;
     }
     const remoteCategories: CategoryResponseDTO[] = await response.json();
     const localIds = await getAllLocalCategoryIds(db);

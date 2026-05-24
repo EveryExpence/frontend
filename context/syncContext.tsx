@@ -2,25 +2,17 @@ import { createContext, useEffect, useRef } from "react";
 import { useAuth } from "./authContext";
 import { useSQLiteContext } from "expo-sqlite";
 import { syncCategories } from "@/utils/sync";
+import NetInfo from '@react-native-community/netinfo';
 
-export interface ISyncContext {
-    startDataSync: () => void,
-}
+const SyncContext = createContext(null);
 
-const SyncContext = createContext({} as ISyncContext);
-
-const syncInterval = 5 * 60 * 1000;
+const syncInterval = 10 * 1000;
 
 export const SyncProvider = ({ children }: { children: React.ReactNode }) => {
     const db = useSQLiteContext();
     const timeoutRef = useRef<number | null>(null);
-    const isEnabled = useRef(false);
     const isInternetReachable = useRef(false);
     const { user } = useAuth();
-
-    const startDataSync = () => {
-        isEnabled.current = true;
-    };
 
     const syncData = async () => {
         if (timeoutRef.current !== null) {
@@ -31,12 +23,21 @@ export const SyncProvider = ({ children }: { children: React.ReactNode }) => {
             syncCategories(db),
         ];
 
+        console.log("SYNCHRONIZING");
         await Promise.allSettled(syncRequests);
+        console.log("SYNCHRONIZED");
         timeoutRef.current = setTimeout(syncData, syncInterval);
     };
 
     useEffect(() => {
-        if (!isInternetReachable.current || user === null || !isEnabled.current) {
+        const unsubscribe = NetInfo.addEventListener(state => {
+            isInternetReachable.current = !!state.isInternetReachable;
+        });
+        return () => unsubscribe();
+    }, []);
+
+    useEffect(() => {
+        if (!isInternetReachable.current || user === null) {
             return;
         }
 
@@ -47,7 +48,7 @@ export const SyncProvider = ({ children }: { children: React.ReactNode }) => {
                 clearTimeout(timeoutRef.current);
             }
         }
-    }, [isInternetReachable.current, isEnabled.current, user]);
+    }, [isInternetReachable.current, user]);
 
-    return <SyncContext.Provider value={{ startDataSync }}>{children}</SyncContext.Provider>
+    return <SyncContext.Provider value={null}>{children}</SyncContext.Provider>
 }
