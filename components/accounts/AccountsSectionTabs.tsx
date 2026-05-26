@@ -4,14 +4,14 @@ import { Pressable, Text, useColorScheme, View } from "react-native";
 
 type SectionKey = "accounts" | "payments" | "categories";
 type SectionPath =
-    | "/(main)/(tabs)/accounts"
-    | "/(main)/(accounts)/payments"
-    | "/(main)/(accounts)/categories";
+    | "/accounts"
+    | "/payments"
+    | "/categories";
 
 const sections: Array<{ key: SectionKey; label: string; path: SectionPath }> = [
-    { key: "accounts", label: "Accounts", path: "/(main)/(tabs)/accounts" },
-    { key: "payments", label: "Payments", path: "/(main)/(accounts)/payments" },
-    { key: "categories", label: "Categories", path: "/(main)/(accounts)/categories" },
+    { key: "accounts", label: "Accounts", path: "/accounts" },
+    { key: "payments", label: "Payments", path: "/payments" },
+    { key: "categories", label: "Categories", path: "/categories" },
 ];
 
 export default function AccountsSectionTabs() {
@@ -23,14 +23,7 @@ export default function AccountsSectionTabs() {
     return (
         <View className="flex-row flex-nowrap gap-2 rounded-2xl bg-theme-surface p-1.5">
             {sections.map((section) => {
-                const shortAlias =
-                    section.path === "/(main)/(tabs)/accounts"
-                        ? "/accounts"
-                        : section.path === "/(main)/(accounts)/payments"
-                            ? "/payments"
-                            : "/categories";
-
-                const isActive = pathname === section.path || pathname === shortAlias;
+                const isActive = pathname === section.path || pathname === `/${section.key}`;
 
                 return (
                     <Pressable

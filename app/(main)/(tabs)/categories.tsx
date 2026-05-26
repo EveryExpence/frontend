@@ -6,38 +6,41 @@ import { useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
-import { createPaymentMethod, deletePaymentMethod, getAllPaymentMethods, updatePaymentMethod } from '@/data/paymentMethods';
+import { createCategory, deleteCategory, getAllCategories, updateCategory } from '@/data/categories';
 import Topbar from '@/components/Topbar';
 import AccountsSectionTabs from '@/components/accounts/AccountsSectionTabs';
-import PaymentMethodCard, { PaymentMethodCardItem } from '@/components/payments/PaymentMethodCard';
-import PaymentMethodFormModal, { PaymentMethodFormData } from '@/components/payments/PaymentMethodFormModal';
-import DeletePaymentMethodModal from '@/components/payments/DeletePaymentMethodModal';
+import CategoryCard, { CategoryCardItem } from '@/components/categories/CategoryCard';
+import CategoryFormModal, { CategoryFormData } from '@/components/categories/CategoryFormModal';
+import DeleteCategoryModal from '@/components/categories/DeleteCategoryModal';
 
-export default function PaymentsScreen() {
+export default function CategoriesScreen() {
 	const db = useSQLiteContext();
 	const scheme = useColorScheme() ?? 'light';
 	const colors = Colors[scheme];
 
-	const [paymentMethods, setPaymentMethods] = useState<PaymentMethodCardItem[]>([]);
-	const [editingPaymentMethod, setEditingPaymentMethod] = useState<PaymentMethodCardItem | null>(null);
-	const [deletingPaymentMethod, setDeletingPaymentMethod] = useState<PaymentMethodCardItem | null>(null);
-	
+	const [categories, setCategories] = useState<CategoryCardItem[]>([]);
+	const [editingCategory, setEditingCategory] = useState<CategoryCardItem | null>(null);
+	const [deletingCategory, setDeletingCategory] = useState<CategoryCardItem | null>(null);
+
 	const [isLoading, setIsLoading] = useState(true);
 	const [isFormOpen, setIsFormOpen] = useState(false);
 	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 
-	const loadPaymentMethods = useCallback(async () => {
+	const loadCategories = useCallback(async () => {
 		setIsLoading(true);
 		try {
-			const data = await getAllPaymentMethods(db);
-			setPaymentMethods(data.map((paymentMethod) => ({
-				id: paymentMethod.id,
-				name: paymentMethod.name,
-			})));
+			const data = await getAllCategories(db);
+			setCategories(
+				data.map((category) => ({
+					id: category.id,
+					name: category.name,
+					type: category.type,
+				}))
+			);
 		} catch (e) {
-			setPaymentMethods([]);
-			Toast.show({ text1: `Failed to load payment methods: ${e}`, type: 'error' });
+			setCategories([]);
+			Toast.show({ text1: `Failed to load categories: ${e}`, type: 'error' });
 		} finally {
 			setIsLoading(false);
 		}
@@ -45,51 +48,51 @@ export default function PaymentsScreen() {
 
 	useFocusEffect(
 		useCallback(() => {
-			loadPaymentMethods();
-		}, [loadPaymentMethods])
+			loadCategories();
+		}, [loadCategories])
 	);
 
 	const openAdd = () => {
-		setEditingPaymentMethod(null);
+		setEditingCategory(null);
 		setIsFormOpen(true);
 	};
 
-	const openEdit = (item: PaymentMethodCardItem) => {
-		setEditingPaymentMethod(item);
+	const openEdit = (item: CategoryCardItem) => {
+		setEditingCategory(item);
 		setIsFormOpen(true);
 	};
 
-	const openDelete = (item: PaymentMethodCardItem) => {
-		setDeletingPaymentMethod(item);
+	const openDelete = (item: CategoryCardItem) => {
+		setDeletingCategory(item);
 		setIsDeleteOpen(true);
 	};
 
-	const handleSave = async (data: PaymentMethodFormData) => {
+	const handleSave = async (data: CategoryFormData) => {
 		try {
-			if (editingPaymentMethod) {
-				await updatePaymentMethod(db, editingPaymentMethod.id, data);
-				Toast.show({ text1: 'Payment method updated', type: 'success' });
+			if (editingCategory) {
+				await updateCategory(db, editingCategory.id, data);
+				Toast.show({ text1: 'Category updated', type: 'success' });
 			} else {
-				await createPaymentMethod(db, data);
-				Toast.show({ text1: 'Payment method created', type: 'success' });
+				await createCategory(db, data);
+				Toast.show({ text1: 'Category created', type: 'success' });
 			}
 			setIsFormOpen(false);
-			await loadPaymentMethods();
+			await loadCategories();
 		} catch (e) {
 			Toast.show({ text1: `${e}`, type: 'error' });
 		}
 	};
 
 	const handleDelete = async () => {
-		if (!deletingPaymentMethod) return;
+		if (!deletingCategory) return;
 
 		setIsDeleting(true);
 		try {
-			await deletePaymentMethod(db, deletingPaymentMethod.id);
-			Toast.show({ text1: 'Payment method deleted', type: 'success' });
+			await deleteCategory(db, deletingCategory.id);
+			Toast.show({ text1: 'Category deleted', type: 'success' });
 			setIsDeleteOpen(false);
-			setDeletingPaymentMethod(null);
-			await loadPaymentMethods();
+			setDeletingCategory(null);
+			await loadCategories();
 		} catch (e) {
 			Toast.show({ text1: `${e}`, type: 'error' });
 		} finally {
@@ -99,7 +102,7 @@ export default function PaymentsScreen() {
 
 	return (
 		<SafeAreaView className="flex-1 bg-theme-background">
-			<Topbar title="Payment Methods" />
+			<Topbar title="Categories" />
 			<View className="px-4 pt-2">
 				<AccountsSectionTabs />
 			</View>
@@ -110,13 +113,13 @@ export default function PaymentsScreen() {
 					</View>
 				) : (
 					<FlatList
-						data={paymentMethods}
+						data={categories}
 						keyExtractor={(item) => item.id}
 						showsVerticalScrollIndicator={false}
 						contentContainerStyle={{ paddingBottom: 24 }}
-						ListEmptyComponent={<Text className="pt-4 text-lg text-theme-icon mb-4">No payment methods yet</Text>}
+						ListEmptyComponent={<Text className="pt-4 text-lg text-theme-icon mb-4">No categories yet</Text>}
 						renderItem={({ item }) => (
-							<PaymentMethodCard
+							<CategoryCard
 								item={item}
 								onEdit={() => openEdit(item)}
 								onDelete={() => openDelete(item)}
@@ -130,7 +133,7 @@ export default function PaymentsScreen() {
 									onPress={openAdd}
 								>
 									<MaterialCommunityIcons name="plus" size={22} color={colors.textLight} style={{ marginRight: 8 }} />
-									<Text className="text-xl font-semibold text-theme-textLight">Add new payment method</Text>
+									<Text className="text-xl font-semibold text-theme-textLight">Add new category</Text>
 								</TouchableOpacity>
 								<View className="py-20" />
 							</View>
@@ -139,16 +142,16 @@ export default function PaymentsScreen() {
 				)}
 			</View>
 
-			<PaymentMethodFormModal
+			<CategoryFormModal
 				visible={isFormOpen}
-				editingPaymentMethod={editingPaymentMethod}
+				editingCategory={editingCategory}
 				onClose={() => setIsFormOpen(false)}
 				onSave={handleSave}
 			/>
 
-			<DeletePaymentMethodModal
+			<DeleteCategoryModal
 				visible={isDeleteOpen}
-				name={deletingPaymentMethod?.name}
+				name={deletingCategory?.name}
 				isDeleting={isDeleting}
 				onClose={() => setIsDeleteOpen(false)}
 				onConfirm={handleDelete}
