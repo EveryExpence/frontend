@@ -17,8 +17,6 @@ export default function MainLayout() {
       <Stack.Screen name="records" />
       <Stack.Screen name="(settings)/change-password" />
       <Stack.Screen name="(settings)/profile" />
-      <Stack.Screen name="(tabs)/categories" />
-      <Stack.Screen name="(tabs)/payments" />
     </Stack>
   );
 }

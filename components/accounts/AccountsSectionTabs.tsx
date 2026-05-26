@@ -5,13 +5,13 @@ import { Pressable, Text, useColorScheme, View } from "react-native";
 type SectionKey = "accounts" | "payments" | "categories";
 type SectionPath =
     | "/accounts"
-    | "/payments"
-    | "/categories";
+    | "/accounts/payments"
+    | "/accounts/categories";
 
 const sections: Array<{ key: SectionKey; label: string; path: SectionPath }> = [
     { key: "accounts", label: "Accounts", path: "/accounts" },
-    { key: "payments", label: "Payments", path: "/payments" },
-    { key: "categories", label: "Categories", path: "/categories" },
+    { key: "payments", label: "Payments", path: "/accounts/payments" },
+    { key: "categories", label: "Categories", path: "/accounts/categories" },
 ];
 
 export default function AccountsSectionTabs() {
