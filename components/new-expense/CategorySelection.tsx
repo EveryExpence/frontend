@@ -9,6 +9,7 @@ import { createCategory, getAllCategories } from '@/data/categories'
 import CustomModal from '../Modal'
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import { useColorScheme } from '@/hooks/use-color-scheme'
+import { useFocusEffect } from 'expo-router'
 
 interface Props {
     selectedCategory: Category | null;
@@ -37,9 +38,11 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled }: 
         setNewCategoryTypeIndex(2);
     }
 
-    useEffect(() => {
-        fetchCategories(db, setCategories);
-    }, [db]);
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchCategories(db, setCategories);
+        }, [db])
+    );
 
     return (
         <View className="mb-8">
