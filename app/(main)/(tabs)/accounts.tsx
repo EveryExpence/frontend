@@ -14,6 +14,7 @@ import {
 import AccountCard, { AccountCardItem } from '@/components/accounts/AccountCard';
 import AccountFormModal, { AccountFormData } from '@/components/accounts/AccountFormModal';
 import DeleteAccountModal from '@/components/accounts/DeleteAccountModal';
+import AccountsSectionTabs from '@/components/accounts/AccountsSectionTabs';
 import { formatBalance } from '@/utils/balance';
 import Topbar from '@/components/Topbar';
 import { useFocusEffect } from 'expo-router';
@@ -110,7 +111,10 @@ export default function AccountsScreen() {
   return (
     <SafeAreaView className="flex-1 bg-theme-background">
       <Topbar title="Accounts" />
-      <View className="flex-1 px-4">
+      <View className="px-4 pt-2">
+        <AccountsSectionTabs />
+      </View>
+      <View className="flex-1 px-4 pt-4">
         {isLoading ? (
           <View className="flex-1 items-center justify-center">
             <ActivityIndicator size={32} color={colors.tint} />
