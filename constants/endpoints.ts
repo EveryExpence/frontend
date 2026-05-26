@@ -16,15 +16,3 @@ export const getAccountsEndpoint = `${base}/accounts/getAll`;
 export const createAccountEndpoint = `${base}/accounts/create`;
 export const updateAccountEndpoint = (id: string) => `${base}/accounts/${id}`;
 export const deleteAccountEndpoint = (id: string) => `${base}/accounts/${id}`;
-
-export const getCategoryEndpoint = `${base}/categories/getAll`
-export const createCategoryEndpoint = `${base}/categories/create`
-export const deleteCategoryEndpoint = (id: string) => `${base}/categories/${id}`
-export const putCategoryEndpoint = (id: string) => `${base}/categories/${id}`
-
-export const getPaymentMethodsEndpoint = `${base}/paymentMethod/getAll`
-export const createPaymentMethodEndpoint = `${base}/paymentMethod/create`
-export const getPaymentMethodEndpoint = (id: string) => `${base}/paymentMethod/${id}`
-export const deletePaymentMethodEndpoint = (id: string) => `${base}/paymentMethod/${id}`
-export const patchPaymentMethodEndpoint = (id: string) => `${base}/paymentMethod/${id}/rename`
-
