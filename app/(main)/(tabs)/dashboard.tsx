@@ -6,7 +6,7 @@ import {
   ActivityIndicator,
   Animated,
   ScrollView,
-  Text 
+  Text,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -19,6 +19,7 @@ import { AccountPage } from "@/components/dashboard/AccountPage";
 import { PaginationDots } from "@/components/dashboard/PaginationDots";
 import { useFocusEffect, useRouter } from "expo-router";
 import { TransactionHistoryWidget } from "@/components/dashboard/widgets/TransactionHistoryWidget";
+import SpendingInsidesWidget from "@/components/dashboard/widgets/SpendingInsidesWidget";
 
 const { width } = Dimensions.get("window");
 
@@ -117,6 +118,8 @@ const Dashboard = () => {
               <TransactionHistoryWidget
                 onSeeAllPress={() => router.push("/records")}
               />
+
+              <SpendingInsidesWidget />
             </ScrollView>
           </View>
         )}
