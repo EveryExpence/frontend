@@ -8,6 +8,7 @@ import { Colors } from '@/constants/theme'
 import { createPaymentMethod, getAllPaymentMethods } from '@/data/paymentMethods'
 import CustomModal from '../Modal'
 import { useColorScheme } from '@/hooks/use-color-scheme'
+import { useFocusEffect } from 'expo-router'
 
 interface Props {
     selectedPaymentMethod: PaymentMethod | null;
@@ -34,9 +35,11 @@ const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMetho
         setNewPaymentMethodName("");
     }
 
-    useEffect(() => {
-        fetchPaymentMethods(db, setPaymentMethods);
-    }, [db]);
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchPaymentMethods(db, setPaymentMethods);
+        }, [db])
+    );
 
     return (
         <View className="mb-8">
