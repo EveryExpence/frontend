@@ -83,7 +83,14 @@ const Dashboard = () => {
             <Text className="text-theme-text">Error: {error}</Text>
           </View>
         ) : (
-          <View style={{ flex: 1 }}>
+          <ScrollView
+            className="flex-1"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingHorizontal: 16,
+              paddingBottom: 24,
+            }}
+          >
             <FlatList
               style={{ flexGrow: 0 }}
               contentContainerStyle={{ flexGrow: 0 }}
@@ -107,21 +114,13 @@ const Dashboard = () => {
               animatedIndex={animatedIndex}
             />
 
-            <ScrollView
-              className="flex-1"
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{
-                paddingHorizontal: 16,
-                paddingBottom: 24,
-              }}
-            >
-              <TransactionHistoryWidget
-                onSeeAllPress={() => router.push("/records")}
-              />
+            <TransactionHistoryWidget
+              onSeeAllPress={() => router.push("/records")}
+            />
 
-              <SpendingInsidesWidget />
-            </ScrollView>
-          </View>
+            <SpendingInsidesWidget />
+            <SpendingInsidesWidget />
+          </ScrollView>
         )}
       </SafeAreaView>
     </LinearGradient>
