@@ -8,7 +8,10 @@ import {
   ScrollView,
   Text,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
@@ -28,6 +31,7 @@ type AccountWithComputed = Account & { computedBalance: number };
 const Dashboard = () => {
   const colorScheme: "light" | "dark" = useColorScheme() ?? "light";
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const { accounts, loading, error, totalsByCurrency, refetch } =
     useAccountsData();
@@ -88,7 +92,8 @@ const Dashboard = () => {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
               paddingHorizontal: 16,
-              paddingBottom: 24,
+              paddingTop: Math.max(insets.top, 8),
+              paddingBottom: 50 + insets.bottom,
             }}
           >
             <FlatList
@@ -118,7 +123,6 @@ const Dashboard = () => {
               onSeeAllPress={() => router.push("/records")}
             />
 
-            <SpendingInsidesWidget />
             <SpendingInsidesWidget />
           </ScrollView>
         )}
