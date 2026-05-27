@@ -26,6 +26,7 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void }> = ({
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const db = useSQLiteContext();
+  const [accounts, setAccounts] = React.useState<Record<string, string>>({});
   const [categories, setCategories] = React.useState<Record<string, string>>(
     {},
   );
@@ -40,6 +41,14 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void }> = ({
           const map: Record<string, string> = {};
           cats.forEach((c) => (map[c.id] = c.name));
           setCategories(map);
+        }
+
+        const { getAllAccounts } = await import("@/data/accounts");
+        const accts = await getAllAccounts(db);
+        if (mounted) {
+          const accMap: Record<string, string> = {};
+          accts.forEach((a) => (accMap[a.id] = a.currency));
+          setAccounts(accMap);
         }
 
         setLoading(true);
@@ -59,47 +68,81 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void }> = ({
   }, [db]);
 
   const totalsByCategory = React.useMemo(() => {
-    const map = new Map<string, number>();
+    const map = new Map<string, { amount: number; currency: string }[]>();
     recordsRaw.forEach((r) => {
       if (r.amount === undefined || r.amount === null) return;
       if (r.amount >= 0) return; // skip incomes
       const cat = r.categoryId ?? "uncategorized";
-      const prev = map.get(cat) ?? 0;
-      map.set(cat, prev + Math.abs(r.amount));
+      const currency = accounts[r.accountId] ?? "PLN";
+      const entry = map.get(cat) ?? [];
+      entry.push({ amount: Math.abs(r.amount), currency });
+      map.set(cat, entry);
     });
     return map;
-  }, [recordsRaw]);
+  }, [recordsRaw, accounts]);
 
   const data = React.useMemo((): {
     label: string;
     value: number;
     color: string;
     categoryId?: string;
+    currency: string;
+    displayAmount: string;
   }[] => {
     const arr: {
       label: string;
       value: number;
       color: string;
       categoryId?: string;
+      currency: string;
+      displayAmount: string;
     }[] = [];
     const entries = Array.from(totalsByCategory.entries());
-    entries.sort((a, b) => b[1] - a[1]);
-    entries.forEach(([catId, value], idx) => {
+    entries.sort((a, b) => {
+      const aTotal = a[1].reduce((s, e) => s + e.amount, 0);
+      const bTotal = b[1].reduce((s, e) => s + e.amount, 0);
+      return bTotal - aTotal;
+    });
+    entries.forEach(([catId, entries], idx) => {
       const label = categories[catId] ?? "Other";
+      const primaryCurrency = entries[0].currency;
+      const amounts: Record<string, number> = {};
+      let chartValue = 0;
+      entries.forEach(({ amount, currency }) => {
+        amounts[currency] = (amounts[currency] ?? 0) + amount;
+        if (currency === primaryCurrency) chartValue += amount;
+        else if (!primaryCurrency) chartValue += amount;
+      });
+      const displayParts = Object.entries(amounts)
+        .sort(([, a], [, b]) => b - a)
+        .map(([curr, amt]) => formatCurrency(amt, curr));
+      const displayAmount = displayParts.join(" | ");
       arr.push({
         label,
-        value,
+        value: chartValue,
         color: DEFAULT_COLORS[idx % DEFAULT_COLORS.length],
         categoryId: catId,
+        currency: primaryCurrency,
+        displayAmount,
       });
     });
     return arr;
   }, [totalsByCategory, categories]);
 
-  const totalValue = React.useMemo(
-    () => data.reduce((s, d) => s + d.value, 0),
-    [data],
-  );
+  const totalsByCurrency = React.useMemo(() => {
+    const map = new Map<string, number>();
+    recordsRaw.forEach((r) => {
+      if (r.amount === undefined || r.amount === null) return;
+      if (r.amount >= 0) return;
+      const currency = accounts[r.accountId] ?? "PLN";
+      const prev = map.get(currency) ?? 0;
+      map.set(currency, prev + Math.abs(r.amount));
+    });
+    return Array.from(map.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([curr, amt]) => formatCurrency(amt, curr))
+      .join(" | ");
+  }, [recordsRaw, accounts]);
 
   return (
     <DashboardWidgetCard
@@ -135,7 +178,7 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void }> = ({
             Total:
           </Text>
           <Text className="text-theme-text text-[18px] font-bold">
-            {formatCurrency(totalValue, "PLN")}
+            {totalsByCurrency || "0"}
           </Text>
 
           <View className="mt-3">
@@ -156,9 +199,7 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void }> = ({
                   <Text className="ml-2 text-theme-text">{d.label}</Text>
                 </View>
 
-                <Text className="text-theme-text">
-                  {formatCurrency(d.value, "PLN")}
-                </Text>
+                <Text className="text-theme-text">{d.displayAmount}</Text>
               </View>
             ))}
           </View>
