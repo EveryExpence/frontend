@@ -123,7 +123,9 @@ const Dashboard = () => {
               onSeeAllPress={() => router.push("/records")}
             />
 
-            <SpendingInsidesWidget />
+            <SpendingInsidesWidget
+              onShowMore={() => router.push("/spending-insights")}
+            />
           </ScrollView>
         )}
       </SafeAreaView>

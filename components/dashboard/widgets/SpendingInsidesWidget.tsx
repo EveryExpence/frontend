@@ -71,7 +71,7 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void }> = ({
     const map = new Map<string, { amount: number; currency: string }[]>();
     recordsRaw.forEach((r) => {
       if (r.amount === undefined || r.amount === null) return;
-      if (r.amount >= 0) return; // skip incomes
+      if (r.amount >= 0) return;
       const cat = r.categoryId ?? "uncategorized";
       const currency = accounts[r.accountId] ?? "PLN";
       const entry = map.get(cat) ?? [];
@@ -147,7 +147,7 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void }> = ({
   return (
     <DashboardWidgetCard
       title="Spending Insights"
-      actionLabel={onShowMore ? "Show More" : undefined}
+      actionLabel={onShowMore ? "See all" : undefined}
       onActionPress={onShowMore}
     >
       <View className="flex-row items-center justify-between">
