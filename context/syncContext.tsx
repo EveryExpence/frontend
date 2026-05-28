@@ -1,32 +1,47 @@
-import { createContext, useEffect, useRef } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useAuth } from "./authContext";
 import { useSQLiteContext } from "expo-sqlite";
-import { syncCategories } from "@/utils/sync";
+import { syncCategories, syncAccounts, syncPaymentMethods, syncExpenseRecords } from "@/utils/sync";
 import NetInfo from '@react-native-community/netinfo';
 
-const SyncContext = createContext(null);
+type SyncContextType = {
+    triggerSync: () => Promise<void>;
+};
 
-const syncInterval = 10 * 1000;
+const SyncContext = createContext<SyncContextType | null>(null);
+
+export const useSync = () => {
+    const context = useContext(SyncContext);
+    if (!context) {
+        throw new Error("useSync must be used within a SyncProvider");
+    }
+    return context;
+};
 
 export const SyncProvider = ({ children }: { children: React.ReactNode }) => {
     const db = useSQLiteContext();
-    const timeoutRef = useRef<number | null>(null);
     const isInternetReachable = useRef(false);
     const { user } = useAuth();
+    const [isSyncing, setIsSyncing] = useState(false);
 
     const syncData = async () => {
-        if (timeoutRef.current !== null) {
-            clearTimeout(timeoutRef.current);
+        if (!isInternetReachable.current || user === null || isSyncing) {
+            return;
         }
+
+        setIsSyncing(true);
+        console.log("SYNCHRONIZING");
 
         const syncRequests = [
             syncCategories(db),
+            syncAccounts(db),
+            syncPaymentMethods(db),
+            syncExpenseRecords(db),
         ];
 
-        console.log("SYNCHRONIZING");
         await Promise.allSettled(syncRequests);
         console.log("SYNCHRONIZED");
-        timeoutRef.current = setTimeout(syncData, syncInterval);
+        setIsSyncing(false);
     };
 
     useEffect(() => {
@@ -37,18 +52,12 @@ export const SyncProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     useEffect(() => {
-        if (!isInternetReachable.current || user === null) {
-            return;
-        }
-
         syncData();
-
-        return () => {
-            if (timeoutRef.current !== null) {
-                clearTimeout(timeoutRef.current);
-            }
-        }
     }, [isInternetReachable.current, user]);
 
-    return <SyncContext.Provider value={null}>{children}</SyncContext.Provider>
+    return (
+        <SyncContext.Provider value={{ triggerSync: syncData }}>
+            {children}
+        </SyncContext.Provider>
+    );
 }
