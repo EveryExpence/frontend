@@ -149,7 +149,7 @@ const SpendingInsightsScreen: React.FC = () => {
           className="flex-row items-stretch mb-6"
           style={{
             backgroundColor: colors.surface,
-            borderRadius: 6,
+            borderRadius: 3,
             overflow: "hidden",
           }}
         >
@@ -158,6 +158,8 @@ const SpendingInsightsScreen: React.FC = () => {
               paddingHorizontal: 10,
               justifyContent: "center",
               alignItems: "center",
+              borderRightWidth: 1,
+              borderRightColor: colors.text,
             }}
           >
             <MaterialCommunityIcons
@@ -174,6 +176,8 @@ const SpendingInsightsScreen: React.FC = () => {
               paddingVertical: 10,
               justifyContent: "center",
               alignItems: "center",
+              borderRightWidth: 1,
+              borderRightColor: colors.text,
             }}
           >
             <Text style={{ color: colors.text, fontSize: 15, fontWeight: "600" }}>
