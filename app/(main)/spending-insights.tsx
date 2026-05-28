@@ -54,7 +54,7 @@ function ExpenseRow({ item }: { item: CategoryExpenseItem }) {
       <View className="flex-row items-center gap-3 flex-1 pr-3">
         <View className="h-10 w-10 items-center justify-center rounded-full bg-theme-tint">
           <MaterialCommunityIcons
-            name="receipt"
+            name="swap-vertical"
             size={20}
             color={colors.textLight}
           />
