@@ -1,4 +1,4 @@
-import { PaymentMethod, PaymentMethodInputDTO } from "@/types/data/paymentMethod";
+import { PaymentMethod, PaymentMethodInputDTO, PaymentMethodResponseDTO } from "@/types/data/paymentMethod";
 import { SQLiteDatabase } from "expo-sqlite"
 import { nanoid } from 'nanoid'
 
@@ -43,6 +43,74 @@ export const deletePaymentMethod = async (db: SQLiteDatabase, id: string) => {
     await db.withExclusiveTransactionAsync(async () => {
         await stmt.executeAsync({
             $id: id,
+        });
+    });
+};
+
+export const getPaymentMethodsWithSyncState = async (db: SQLiteDatabase, syncState: string): Promise<PaymentMethod[]> => {
+    return await db.getAllAsync(
+        "SELECT * FROM payment_methods WHERE syncState = $state",
+        { $state: syncState }
+    );
+};
+
+export const setPaymentMethodBatchSynced = async (db: SQLiteDatabase, ids: string[]) => {
+    if (ids.length === 0) {
+        return;
+    }
+    const stmt = await db.prepareAsync(`
+        UPDATE payment_methods SET syncState = 'synced' WHERE id IN (SELECT value FROM json_each($ids))
+    `);
+    await db.withExclusiveTransactionAsync(async () => {
+        await stmt.executeAsync({
+            $ids: JSON.stringify(ids),
+        });
+    });
+};
+
+export const deletePaymentMethodBatch = async (db: SQLiteDatabase, ids: string[]) => {
+    if (ids.length === 0) {
+        return;
+    }
+    const stmt = await db.prepareAsync(`
+        DELETE FROM payment_methods WHERE id IN (SELECT value FROM json_each($ids))
+    `);
+    await db.withExclusiveTransactionAsync(async () => {
+        await stmt.executeAsync({
+            $ids: JSON.stringify(ids),
+        });
+    });
+};
+
+export const getAllLocalPaymentMethodIds = async (db: SQLiteDatabase): Promise<string[]> => {
+    const result = await db.getAllAsync<{ id: string }>("SELECT id FROM payment_methods");
+    return result.map(row => row.id);
+};
+
+export const insertRemotePaymentMethod = async (db: SQLiteDatabase, paymentMethod: PaymentMethodResponseDTO) => {
+    const stmt = await db.prepareAsync(`
+        INSERT INTO payment_methods (id, name, syncState) 
+        VALUES ($id, $name, 'synced')
+    `);
+    await db.withExclusiveTransactionAsync(async () => {
+        await stmt.executeAsync({
+            $id: paymentMethod.id,
+            $name: paymentMethod.name,
+        });
+    });
+};
+
+export const updateRemotePaymentMethod = async (db: SQLiteDatabase, paymentMethod: PaymentMethodResponseDTO) => {
+    const stmt = await db.prepareAsync(`
+        UPDATE payment_methods SET 
+            name = $name, 
+            syncState = 'synced'
+        WHERE id = $id AND syncState = 'synced'
+    `);
+    await db.withExclusiveTransactionAsync(async () => {
+        await stmt.executeAsync({
+            $id: paymentMethod.id,
+            $name: paymentMethod.name,
         });
     });
 };

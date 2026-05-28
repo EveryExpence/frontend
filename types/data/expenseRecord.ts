@@ -21,3 +21,16 @@ export interface ExpenseRecordInputDTO {
     accountId: string;
     createdAt?: number;
 }
+
+export interface ExpenseRecordResponseDTO {
+    id: string;
+    amount: number;
+    date: string;
+    time: string;
+    location?: string;
+    description: string;
+    accountId: string;
+    paymentMethodId: string;
+    categoryId: string;
+    attachments: string[];
+}
