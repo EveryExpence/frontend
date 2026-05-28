@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, useColorScheme, Pressable } from "react-native";
+import { View, Text, useColorScheme } from "react-native";
 import { DashboardWidgetCard } from "./DashboardWidgetCard";
 import { getAllExpenseRecords } from "@/data/expenseRecords";
 import { useSQLiteContext } from "expo-sqlite";
@@ -7,16 +7,7 @@ import { getAllCategories } from "@/data/categories";
 import { formatCurrency } from "@/utils/formatCurrency";
 
 import { PolarChart, Pie } from "victory-native";
-
-const DEFAULT_COLORS = [
-  "#FF6384",
-  "#36A2EB",
-  "#FFCE56",
-  "#4BC0C0",
-  "#9966FF",
-  "#2DD4BF",
-  "#F472B6",
-];
+import { CATEGORY_COLORS } from "@/constants/categoryColors";
 
 export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void }> = ({
   onShowMore,
@@ -120,7 +111,7 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void }> = ({
       arr.push({
         label,
         value: chartValue,
-        color: DEFAULT_COLORS[idx % DEFAULT_COLORS.length],
+        color: CATEGORY_COLORS[idx % CATEGORY_COLORS.length],
         categoryId: catId,
         currency: primaryCurrency,
         displayAmount,
