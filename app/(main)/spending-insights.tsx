@@ -145,27 +145,52 @@ const SpendingInsightsScreen: React.FC = () => {
           Spending Insights
         </Text>
 
-        <View className="flex-row items-center mb-6">
-          <MaterialCommunityIcons
-            name="calendar-month"
-            size={24}
-            color={colors.icon}
-            style={{ marginRight: 8 }}
-          />
+        <View
+          className="flex-row items-stretch mb-6"
+          style={{
+            backgroundColor: colors.surface,
+            borderRadius: 6,
+            overflow: "hidden",
+          }}
+        >
+          <View
+            style={{
+              paddingHorizontal: 10,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <MaterialCommunityIcons
+              name="calendar-month"
+              size={20}
+              color={colors.icon}
+            />
+          </View>
+
           <TouchableOpacity
             onPress={() => setShowStartPicker(true)}
-            className="bg-theme-surface py-2 px-4 rounded-md mr-3"
+            style={{
+              flex: 1,
+              paddingVertical: 10,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
           >
-            <Text className="text-[15px] text-theme-text font-medium">
+            <Text style={{ color: colors.text, fontSize: 15, fontWeight: "600" }}>
               {formatDateDisplay(startDate)}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => setShowEndPicker(true)}
-            className="bg-theme-surface py-2 px-4 rounded-md"
+            style={{
+              flex: 1,
+              paddingVertical: 10,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
           >
-            <Text className="text-[15px] text-theme-text font-medium">
+            <Text style={{ color: colors.text, fontSize: 15, fontWeight: "600" }}>
               {formatDateDisplay(endDate)}
             </Text>
           </TouchableOpacity>
