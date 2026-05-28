@@ -180,7 +180,9 @@ const SpendingInsightsScreen: React.FC = () => {
               borderRightColor: colors.text,
             }}
           >
-            <Text style={{ color: colors.text, fontSize: 15, fontWeight: "600" }}>
+            <Text
+              style={{ color: colors.text, fontSize: 15, fontWeight: "600" }}
+            >
               {formatDateDisplay(startDate)}
             </Text>
           </TouchableOpacity>
@@ -194,7 +196,9 @@ const SpendingInsightsScreen: React.FC = () => {
               alignItems: "center",
             }}
           >
-            <Text style={{ color: colors.text, fontSize: 15, fontWeight: "600" }}>
+            <Text
+              style={{ color: colors.text, fontSize: 15, fontWeight: "600" }}
+            >
               {formatDateDisplay(endDate)}
             </Text>
           </TouchableOpacity>
@@ -259,7 +263,7 @@ const SpendingInsightsScreen: React.FC = () => {
                     valueKey="value"
                     colorKey="color"
                   >
-                    <Pie.Chart innerRadius="50%" />
+                    <Pie.Chart innerRadius="75%" />
                   </PolarChart>
                 )}
 
