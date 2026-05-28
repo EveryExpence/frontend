@@ -12,8 +12,10 @@ import AccountsSectionTabs from '@/components/accounts/AccountsSectionTabs';
 import PaymentMethodCard, { PaymentMethodCardItem } from '@/components/payments/PaymentMethodCard';
 import PaymentMethodFormModal, { PaymentMethodFormData } from '@/components/payments/PaymentMethodFormModal';
 import DeletePaymentMethodModal from '@/components/payments/DeletePaymentMethodModal';
+import { useSync } from '@/context/syncContext';
 
 export default function PaymentsScreen() {
+	const { triggerSync } = useSync();
 	const db = useSQLiteContext();
 	const scheme = useColorScheme() ?? 'light';
 	const colors = Colors[scheme];
@@ -73,10 +75,11 @@ export default function PaymentsScreen() {
 				Toast.show({ text1: 'Payment method updated', type: 'success' });
 			} else {
 				await createPaymentMethod(db, data);
-				Toast.show({ text1: 'Payment method created', type: 'success' });
+			Toast.show({ text1: 'Payment method created', type: 'success' });
 			}
 			setIsFormOpen(false);
 			await loadPaymentMethods();
+			triggerSync();
 		} catch (e) {
 			Toast.show({ text1: `${e}`, type: 'error' });
 		}
@@ -92,6 +95,7 @@ export default function PaymentsScreen() {
 			setIsDeleteOpen(false);
 			setDeletingPaymentMethod(null);
 			await loadPaymentMethods();
+			triggerSync();
 		} catch (e) {
 			Toast.show({ text1: `${e}`, type: 'error' });
 		} finally {
