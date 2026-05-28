@@ -6,9 +6,12 @@ import {
   ActivityIndicator,
   Animated,
   ScrollView,
-  Text 
+  Text,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
@@ -19,6 +22,7 @@ import { AccountPage } from "@/components/dashboard/AccountPage";
 import { PaginationDots } from "@/components/dashboard/PaginationDots";
 import { useFocusEffect, useRouter } from "expo-router";
 import { TransactionHistoryWidget } from "@/components/dashboard/widgets/TransactionHistoryWidget";
+import SpendingInsidesWidget from "@/components/dashboard/widgets/SpendingInsidesWidget";
 
 const { width } = Dimensions.get("window");
 
@@ -27,6 +31,7 @@ type AccountWithComputed = Account & { computedBalance: number };
 const Dashboard = () => {
   const colorScheme: "light" | "dark" = useColorScheme() ?? "light";
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const { accounts, loading, error, totalsByCurrency, refetch } =
     useAccountsData();
@@ -82,7 +87,15 @@ const Dashboard = () => {
             <Text className="text-theme-text">Error: {error}</Text>
           </View>
         ) : (
-          <View style={{ flex: 1 }}>
+          <ScrollView
+            className="flex-1"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingHorizontal: 16,
+              paddingTop: Math.max(insets.top, 8),
+              paddingBottom: 50 + insets.bottom,
+            }}
+          >
             <FlatList
               style={{ flexGrow: 0 }}
               contentContainerStyle={{ flexGrow: 0 }}
@@ -106,19 +119,14 @@ const Dashboard = () => {
               animatedIndex={animatedIndex}
             />
 
-            <ScrollView
-              className="flex-1"
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{
-                paddingHorizontal: 16,
-                paddingBottom: 24,
-              }}
-            >
-              <TransactionHistoryWidget
-                onSeeAllPress={() => router.push("/records")}
-              />
-            </ScrollView>
-          </View>
+            <TransactionHistoryWidget
+              onSeeAllPress={() => router.push("/records")}
+            />
+
+            <SpendingInsidesWidget
+              onShowMore={() => router.push("/spending-insights")}
+            />
+          </ScrollView>
         )}
       </SafeAreaView>
     </LinearGradient>
