@@ -9,6 +9,7 @@ import { SQLiteProvider } from 'expo-sqlite';
 import { migrateDatabase } from '@/data/init'
 import 'react-native-get-random-values';
 import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { SyncProvider } from '@/context/syncContext'
 
 const RootLayout = () => {
   return (
@@ -21,11 +22,13 @@ const RootLayout = () => {
       >
         <ThemeProvider>
           <AuthProvider>
-            <SQLiteProvider 
+            <SQLiteProvider
               databaseName="app.db"
               onInit={migrateDatabase}
             >
+              <SyncProvider>
                 <Slot />
+              </SyncProvider>
             </SQLiteProvider>
           </AuthProvider>
         </ThemeProvider>

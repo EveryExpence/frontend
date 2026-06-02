@@ -1,4 +1,4 @@
-import { Category, CategoryInputDTO } from "@/types/data/category"
+import { Category, CategoryInputDTO, CategoryResponseDTO } from "@/types/data/category"
 import { SQLiteDatabase } from "expo-sqlite"
 import { nanoid } from 'nanoid'
 
@@ -46,6 +46,77 @@ export const deleteCategory = async (db: SQLiteDatabase, id: string) => {
     await db.withExclusiveTransactionAsync(async () => {
         await stmt.executeAsync({
             $id: id,
+        });
+    });
+};
+
+export const getCategoriesWithSyncState = async (db: SQLiteDatabase, syncState: string): Promise<Category[]> => {
+    return await db.getAllAsync(
+        "SELECT * FROM categories WHERE syncState = $state",
+        { $state: syncState }
+    );
+}
+
+export const setCategoryBatchSynced = async (db: SQLiteDatabase, ids: string[]) => {
+    if (ids.length === 0) {
+        return;
+    }
+    const stmt = await db.prepareAsync(`
+        UPDATE categories SET syncState = 'synced' WHERE id IN (SELECT value FROM json_each($ids))
+    `);
+    await db.withExclusiveTransactionAsync(async () => {
+        await stmt.executeAsync({
+            $ids: JSON.stringify(ids),
+        });
+    })
+}
+
+export const deleteCategoryBatch = async (db: SQLiteDatabase, ids: string[]) => {
+    if (ids.length === 0) {
+        return;
+    }
+    const stmt = await db.prepareAsync(`
+        DELETE FROM categories WHERE id IN (SELECT value FROM json_each($ids))
+    `);
+    await db.withExclusiveTransactionAsync(async () => {
+        await stmt.executeAsync({
+            $ids: JSON.stringify(ids),
+        });
+    })
+}
+
+export const getAllLocalCategoryIds = async (db: SQLiteDatabase): Promise<string[]> => {
+    const result = await db.getAllAsync<{ id: string }>("SELECT id FROM categories");
+    return result.map(row => row.id);
+};
+
+export const insertRemoteCategory = async (db: SQLiteDatabase, category: CategoryResponseDTO) => {
+    const stmt = await db.prepareAsync(`
+        INSERT INTO categories (id, name, type, syncState) 
+        VALUES ($id, $name, $type, 'synced')
+    `);
+    await db.withExclusiveTransactionAsync(async () => {
+        await stmt.executeAsync({
+            $id: category.id,
+            $name: category.name,
+            $type: category.type,
+        });
+    });
+};
+
+export const updateRemoteCategory = async (db: SQLiteDatabase, category: CategoryResponseDTO) => {
+    const stmt = await db.prepareAsync(`
+        UPDATE categories SET 
+            name = $name, 
+            type = $type, 
+            syncState = 'synced'
+        WHERE id = $id AND syncState = 'synced'
+    `);
+    await db.withExclusiveTransactionAsync(async () => {
+        await stmt.executeAsync({
+            $id: category.id,
+            $name: category.name,
+            $type: category.type,
         });
     });
 };

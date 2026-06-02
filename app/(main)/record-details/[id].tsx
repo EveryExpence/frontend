@@ -24,10 +24,12 @@ import DescriptionInput from "@/components/new-expense/DescriptionInput";
 import LocationSelection from "@/components/new-expense/LocationMap";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useSync } from "@/context/syncContext";
 
 import Toast from "react-native-toast-message";
 
 export default function RecordDetailsScreen() {
+  const { triggerSync } = useSync();
   const { id } = useLocalSearchParams<{ id: string }>();
   const db = useSQLiteContext();
   const scheme = useColorScheme() ?? "light";
@@ -124,6 +126,7 @@ export default function RecordDetailsScreen() {
       });
       Toast.show({ text1: "Record updated successfully", type: "success" });
       setIsEditing(false);
+      triggerSync();
     } catch {
       Toast.show({ text1: "Failed to update record", type: "error" });
     }

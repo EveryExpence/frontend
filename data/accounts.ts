@@ -1,4 +1,4 @@
-import { Account, AccountInputDTO } from "@/types/data/account";
+import { Account, AccountInputDTO, AccountResponseDTO } from "@/types/data/account";
 import { SQLiteDatabase } from "expo-sqlite"
 import { nanoid } from 'nanoid'
 
@@ -73,6 +73,80 @@ export const deleteAccount = async (db: SQLiteDatabase, id: string) => {
     await db.withExclusiveTransactionAsync(async () => {
         await stmt.executeAsync({
             $id: id,
+        });
+    });
+};
+
+export const getAccountsWithSyncState = async (db: SQLiteDatabase, syncState: string): Promise<Account[]> => {
+    return await db.getAllAsync(
+        "SELECT * FROM accounts WHERE syncState = $state",
+        { $state: syncState }
+    );
+};
+
+export const setAccountBatchSynced = async (db: SQLiteDatabase, ids: string[]) => {
+    if (ids.length === 0) {
+        return;
+    }
+    const stmt = await db.prepareAsync(`
+        UPDATE accounts SET syncState = 'synced' WHERE id IN (SELECT value FROM json_each($ids))
+    `);
+    await db.withExclusiveTransactionAsync(async () => {
+        await stmt.executeAsync({
+            $ids: JSON.stringify(ids),
+        });
+    });
+};
+
+export const deleteAccountBatch = async (db: SQLiteDatabase, ids: string[]) => {
+    if (ids.length === 0) {
+        return;
+    }
+    const stmt = await db.prepareAsync(`
+        DELETE FROM accounts WHERE id IN (SELECT value FROM json_each($ids))
+    `);
+    await db.withExclusiveTransactionAsync(async () => {
+        await stmt.executeAsync({
+            $ids: JSON.stringify(ids),
+        });
+    });
+};
+
+export const getAllLocalAccountIds = async (db: SQLiteDatabase): Promise<string[]> => {
+    const result = await db.getAllAsync<{ id: string }>("SELECT id FROM accounts");
+    return result.map(row => row.id);
+};
+
+export const insertRemoteAccount = async (db: SQLiteDatabase, account: AccountResponseDTO) => {
+    const stmt = await db.prepareAsync(`
+        INSERT INTO accounts (id, name, currency, balance, syncState) 
+        VALUES ($id, $name, $currency, $balance, 'synced')
+    `);
+    await db.withExclusiveTransactionAsync(async () => {
+        await stmt.executeAsync({
+            $id: account.id,
+            $name: account.name,
+            $currency: account.currency,
+            $balance: account.balance,
+        });
+    });
+};
+
+export const updateRemoteAccount = async (db: SQLiteDatabase, account: AccountResponseDTO) => {
+    const stmt = await db.prepareAsync(`
+        UPDATE accounts SET 
+            name = $name, 
+            currency = $currency, 
+            balance = $balance,
+            syncState = 'synced'
+        WHERE id = $id AND syncState = 'synced'
+    `);
+    await db.withExclusiveTransactionAsync(async () => {
+        await stmt.executeAsync({
+            $id: account.id,
+            $name: account.name,
+            $currency: account.currency,
+            $balance: account.balance,
         });
     });
 };

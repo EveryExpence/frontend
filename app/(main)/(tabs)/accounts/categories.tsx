@@ -12,8 +12,10 @@ import AccountsSectionTabs from '@/components/accounts/AccountsSectionTabs';
 import CategoryCard, { CategoryCardItem } from '@/components/categories/CategoryCard';
 import CategoryFormModal, { CategoryFormData } from '@/components/categories/CategoryFormModal';
 import DeleteCategoryModal from '@/components/categories/DeleteCategoryModal';
+import { useSync } from '@/context/syncContext';
 
 export default function CategoriesScreen() {
+	const { triggerSync } = useSync();
 	const db = useSQLiteContext();
 	const scheme = useColorScheme() ?? 'light';
 	const colors = Colors[scheme];
@@ -78,6 +80,7 @@ export default function CategoriesScreen() {
 			}
 			setIsFormOpen(false);
 			await loadCategories();
+			triggerSync();
 		} catch (e) {
 			Toast.show({ text1: `${e}`, type: 'error' });
 		}
@@ -93,6 +96,7 @@ export default function CategoriesScreen() {
 			setIsDeleteOpen(false);
 			setDeletingCategory(null);
 			await loadCategories();
+			triggerSync();
 		} catch (e) {
 			Toast.show({ text1: `${e}`, type: 'error' });
 		} finally {

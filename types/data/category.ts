@@ -10,6 +10,12 @@ export interface Category {
     syncState: SyncState;
 }
 
+export interface CategoryResponseDTO {
+    id: string;
+    name: string;
+    type: CategoryType;
+}
+
 export interface CategoryInputDTO {
     name: string;
     type: CategoryType;

@@ -19,8 +19,10 @@ import Toast from 'react-native-toast-message';
 import LocationSelection from '@/components/new-expense/LocationMap';
 import { Coordinates } from '@/types/data/location';
 import Topbar from '@/components/Topbar';
+import { useSync } from '@/context/syncContext';
 
 export default function NewExpense() {
+  const { triggerSync } = useSync();
   const db = useSQLiteContext();
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
@@ -69,6 +71,7 @@ export default function NewExpense() {
       setDescription("");
       setImages([]);
       setLocation(null);
+      triggerSync();
     } catch {
       Toast.show({ text1: "Failed to add a new record", type: "error" });
     }

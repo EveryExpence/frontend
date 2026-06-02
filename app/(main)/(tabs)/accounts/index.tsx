@@ -18,8 +18,10 @@ import AccountsSectionTabs from '@/components/accounts/AccountsSectionTabs';
 import { formatBalance } from '@/utils/balance';
 import Topbar from '@/components/Topbar';
 import { useFocusEffect } from 'expo-router';
+import { useSync } from '@/context/syncContext';
 
 export default function AccountsScreen() {
+  const { triggerSync } = useSync();
   const db = useSQLiteContext();
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
@@ -86,6 +88,7 @@ export default function AccountsScreen() {
       }
       setIsFormOpen(false);
       await loadAccounts();
+      triggerSync();
     } catch (e) {
       Toast.show({ text1: `${e}`, type: 'error' });
     }
@@ -101,6 +104,7 @@ export default function AccountsScreen() {
       setIsDeleteOpen(false);
       setDeletingAccount(null);
       await loadAccounts();
+      triggerSync();
     } catch (e) {
       Toast.show({ text1: `${e}`, type: 'error' });
     } finally {
