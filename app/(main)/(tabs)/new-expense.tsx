@@ -78,6 +78,9 @@ export default function NewExpense() {
       });
 
       if (!response.ok) {
+        if (response.status === 413) {
+          throw new Error("SIZE_LIMIT");
+        }
         throw new Error("Failed to analyze receipt");
       }
 
@@ -122,7 +125,11 @@ export default function NewExpense() {
       Toast.show({ text1: "Receipt analysis completed!" });
     } catch (error: any) {
       console.error(error);
-      Toast.show({ text1: "Failed to analyze receipt", text2: error.message, type: "error" });
+      if (error.message === "SIZE_LIMIT") {
+        Toast.show({ text1: "Cannot analyze: exceeds 15MB", type: "error" });
+      } else {
+        Toast.show({ text1: "Failed to analyze receipt", text2: error.message, type: "error" });
+      }
     } finally {
       setIsAnalyzing(false);
     }
