@@ -58,13 +58,13 @@ export default function NewExpense() {
       const localCats = await getAllCategories(db);
       const localPMs = await getAllPaymentMethods(db);
 
-      const imageUri = images[0];
-      const filename = imageUri.split('/').pop() || 'receipt.jpg';
-      const match = /\.(\w+)$/.exec(filename);
-      const type = match ? `image/${match[1]}` : `image/jpeg`;
-
       const formData = new FormData();
-      formData.append('image', { uri: imageUri, name: filename, type } as any);
+      images.forEach((imageUri) => {
+        const filename = imageUri.split('/').pop() || 'receipt.jpg';
+        const match = /\.(\w+)$/.exec(filename);
+        const type = match ? `image/${match[1]}` : `image/jpeg`;
+        formData.append('images', { uri: imageUri, name: filename, type } as any);
+      });
 
       localCats.forEach(c => formData.append('categories', c.name));
       localPMs.forEach(pm => formData.append('paymentMethods', pm.name));
@@ -90,7 +90,7 @@ export default function NewExpense() {
       let desc = data.store_name || "";
       if (data.products && data.products.length > 0) {
         const productLines = data.products
-          .map((p: any) => `- ${p.name}: $${p.price}`)
+          .map((p: any) => `- ${p.name}: ${p.price}`)
           .join('\n');
         desc = desc ? `${desc}\n\nProducts:\n${productLines}` : productLines;
       }
