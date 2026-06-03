@@ -55,17 +55,19 @@ export default function NewExpense() {
     }
     setIsAnalyzing(true);
     try {
+      const localCats = await getAllCategories(db);
+      const localPMs = await getAllPaymentMethods(db);
+
       const imageUri = images[0];
       const filename = imageUri.split('/').pop() || 'receipt.jpg';
       const match = /\.(\w+)$/.exec(filename);
       const type = match ? `image/${match[1]}` : `image/jpeg`;
 
       const formData = new FormData();
-      formData.append('image', {
-        uri: imageUri,
-        name: filename,
-        type: type,
-      } as any);
+      formData.append('image', { uri: imageUri, name: filename, type } as any);
+
+      localCats.forEach(c => formData.append('categories', c.name));
+      localPMs.forEach(pm => formData.append('paymentMethods', pm.name));
 
       const response = await apiFetch(analyzeReceiptEndpoint, {
         method: 'POST',
@@ -97,20 +99,14 @@ export default function NewExpense() {
       }
 
       if (data.category) {
-        const localCats = await getAllCategories(db);
-        const matchedCat = localCats.find(
-          c => c.name.toLowerCase() === data.category.toLowerCase()
-        );
+        const matchedCat = localCats.find(c => c.name === data.category);
         if (matchedCat) {
           setSelectedCategory(matchedCat);
         }
       }
 
       if (data.payment_method) {
-        const localPMs = await getAllPaymentMethods(db);
-        const matchedPM = localPMs.find(
-          pm => pm.name.toLowerCase() === data.payment_method.toLowerCase()
-        );
+        const matchedPM = localPMs.find(pm => pm.name === data.payment_method);
         if (matchedPM) {
           setSelectedPaymentMethod(matchedPM);
         }
