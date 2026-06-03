@@ -185,6 +185,8 @@ export default function NewExpense() {
 
         <DescriptionInput description={description} setDescription={setDescription} />
 
+        <LocationSelection location={location} setLocation={setLocation} setScrollEnabled={setScrollEnabled} />
+
         <ImageAttachmentSelection images={images} setImages={setImages} />
 
         {user !== null && images.length > 0 && (
@@ -205,7 +207,6 @@ export default function NewExpense() {
           </TouchableOpacity>
         )}
 
-        <LocationSelection location={location} setLocation={setLocation} setScrollEnabled={setScrollEnabled} />
 
         <TouchableOpacity onPress={saveRecord} className="w-full bg-theme-tint py-4 rounded-md">
           <Text className="text-xl text-theme-textLight text-center font-bold">Save a new record</Text>
