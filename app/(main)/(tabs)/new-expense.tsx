@@ -1,4 +1,4 @@
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { ScrollView, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Account } from '@/types/data/account';
@@ -20,10 +20,21 @@ import LocationSelection from '@/components/new-expense/LocationMap';
 import { Coordinates } from '@/types/data/location';
 import Topbar from '@/components/Topbar';
 import { useSync } from '@/context/syncContext';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors } from '@/constants/theme';
+import { apiFetch } from '@/utils/apiFetch';
+import { analyzeReceiptEndpoint } from '@/constants/endpoints';
+import { getAllCategories } from '@/data/categories';
+import { getAllPaymentMethods } from '@/data/paymentMethods';
+import { useAuth } from '@/context/authContext';
 
 export default function NewExpense() {
+  const scheme = useColorScheme() ?? 'light';
+  const colors = Colors[scheme];
   const { triggerSync } = useSync();
   const db = useSQLiteContext();
+  const { user } = useAuth();
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
@@ -35,6 +46,91 @@ export default function NewExpense() {
   const [images, setImages] = useState<string[]>([]);
   const [location, setLocation] = useState<Coordinates | null>(null);
   const [scrollEnabled, setScrollEnabled] = useState(true);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const analyzeReceipt = async () => {
+    if (images.length === 0) {
+      Toast.show({ text1: "Please select an image first", type: "error" });
+      return;
+    }
+    setIsAnalyzing(true);
+    try {
+      const imageUri = images[0];
+      const filename = imageUri.split('/').pop() || 'receipt.jpg';
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : `image/jpeg`;
+
+      const formData = new FormData();
+      formData.append('image', {
+        uri: imageUri,
+        name: filename,
+        type: type,
+      } as any);
+
+      const response = await apiFetch(analyzeReceiptEndpoint, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to analyze receipt");
+      }
+
+      const data = await response.json();
+
+      if (data.amount) {
+        setAmount(data.amount.toString());
+      }
+
+      let desc = data.store_name || "";
+      if (data.products && data.products.length > 0) {
+        const productLines = data.products
+          .map((p: any) => `- ${p.name}: $${p.price}`)
+          .join('\n');
+        desc = desc ? `${desc}\n\nProducts:\n${productLines}` : productLines;
+      }
+      if (desc) {
+        setDescription(desc);
+      }
+
+      if (data.category) {
+        const localCats = await getAllCategories(db);
+        const matchedCat = localCats.find(
+          c => c.name.toLowerCase() === data.category.toLowerCase()
+        );
+        if (matchedCat) {
+          setSelectedCategory(matchedCat);
+        }
+      }
+
+      if (data.payment_method) {
+        const localPMs = await getAllPaymentMethods(db);
+        const matchedPM = localPMs.find(
+          pm => pm.name.toLowerCase() === data.payment_method.toLowerCase()
+        );
+        if (matchedPM) {
+          setSelectedPaymentMethod(matchedPM);
+        }
+      }
+
+      if (data.location && data.location.lat && data.location.lng) {
+        setLocation({
+          latitude: data.location.lat,
+          longitude: data.location.lng,
+        });
+      }
+
+      Toast.show({ text1: "Receipt analysis completed!" });
+    } catch (error: any) {
+      console.error(error);
+      Toast.show({ text1: "Failed to analyze receipt", text2: error.message, type: "error" });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   const saveRecord = async () => {
     if (selectedAccount === null || selectedCategory === null || selectedPaymentMethod === null || !isAmountValid) {
@@ -94,6 +190,24 @@ export default function NewExpense() {
         <DescriptionInput description={description} setDescription={setDescription} />
 
         <ImageAttachmentSelection images={images} setImages={setImages} />
+
+        {user !== null && images.length > 0 && (
+          <TouchableOpacity
+            onPress={analyzeReceipt}
+            disabled={isAnalyzing}
+            className="w-full bg-theme-surface py-3.5 rounded-md mb-8 flex-row justify-center items-center gap-2 border border-theme-tint"
+            style={{ opacity: isAnalyzing ? 0.7 : 1 }}
+          >
+            {isAnalyzing ? (
+              <ActivityIndicator color={colors.tint} />
+            ) : (
+              <MaterialCommunityIcons name="image-search-outline" size={20} color={colors.tint} />
+            )}
+            <Text className="text-lg text-theme-tint font-bold">
+              {isAnalyzing ? "Analyzing receipt..." : "Analyze receipt with AI"}
+            </Text>
+          </TouchableOpacity>
+        )}
 
         <LocationSelection location={location} setLocation={setLocation} setScrollEnabled={setScrollEnabled} />
 
