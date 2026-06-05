@@ -31,3 +31,6 @@ export const getExpenseRecordsEndpoint = `${base}/expenseRecord/getAll`;
 export const createExpenseRecordEndpoint = `${base}/expenseRecord/create`;
 export const updateExpenseRecordEndpoint = (id: string) => `${base}/expenseRecord/${id}`;
 export const deleteExpenseRecordEndpoint = (id: string) => `${base}/expenseRecord/${id}`;
+
+export const analyzeReceiptEndpoint = `${base}/receipts/analyze`;
+
