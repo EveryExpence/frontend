@@ -48,12 +48,16 @@ export function useExpenseRecords(accountId?: string) {
         try {
             setLoading(true);
             setError(null);
-            const [local, accounts, categories, paymentMethods] = await Promise.all([
+            let [local, accounts, categories, paymentMethods] = await Promise.all([
                 getAllExpenseRecords(db),
                 getAllAccounts(db),
                 getAllCategories(db),
                 getAllPaymentMethods(db)
             ]);
+
+            if (accountId) {
+                local = local.filter(r => r.accountId === accountId);
+            }
 
             const accountMap: Record<string, string> = {};
             accounts.forEach((a) => (accountMap[a.id] = a.currency));

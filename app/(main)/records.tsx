@@ -2,7 +2,7 @@ import React from "react";
 import { ScrollView, Text, View, useColorScheme, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Colors } from "@/constants/theme";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -73,7 +73,8 @@ function TransactionSectionCard({ section }: { section: TransactionSection }) {
 }
 
 export default function RecordsScreen() {
-  const { sections, loading, error } = useExpenseRecords();
+  const { accountId } = useLocalSearchParams<{ accountId?: string }>();
+  const { sections, loading, error } = useExpenseRecords(accountId);
   const [searchQuery, setSearchQuery] = React.useState("");
 
   const filteredSections = React.useMemo(() => {

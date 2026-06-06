@@ -26,7 +26,7 @@ export interface CategoryGroup {
     items: CategoryExpenseItem[];
 }
 
-export function useSpendingInsights(startDate: Date, endDate: Date) {
+export function useSpendingInsights(startDate: Date, endDate: Date, accountId?: string) {
     const db = useSQLiteContext();
     const [categoryGroups, setCategoryGroups] = React.useState<CategoryGroup[]>(
         [],
@@ -59,6 +59,7 @@ export function useSpendingInsights(startDate: Date, endDate: Date) {
             const endTs = endDate.getTime();
 
             const filtered = allRecords.filter((r) => {
+                if (accountId && r.accountId !== accountId) return false;
                 if (r.amount >= 0) return false;
                 if (!r.createdAt) return false;
                 const ts =
@@ -130,7 +131,7 @@ export function useSpendingInsights(startDate: Date, endDate: Date) {
         } finally {
             setLoading(false);
         }
-    }, [db, startDate.getTime(), endDate.getTime()]);
+    }, [db, startDate.getTime(), endDate.getTime(), accountId]);
 
     React.useEffect(() => {
         fetch();
