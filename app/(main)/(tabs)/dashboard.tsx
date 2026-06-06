@@ -122,17 +122,26 @@ const Dashboard = () => {
 
             <TransactionHistoryWidget
               accountId={pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
-              onSeeAllPress={() => router.push("/records")}
+              onSeeAllPress={() => {
+                const id = pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
+                router.push(id ? { pathname: "/records", params: { accountId: id } } : "/records");
+              }}
             />
 
             <SpendingInsidesWidget
               accountId={pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
-              onShowMore={() => router.push("/spending-insights")}
+              onShowMore={() => {
+                const id = pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
+                router.push(id ? { pathname: "/spending-insights", params: { accountId: id } } : "/spending-insights");
+              }}
             />
 
             <BalanceTrendWidget 
               accountId={pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
-              onShowMore={() => {}} 
+              onShowMore={() => {
+                const id = pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
+                router.push(id ? { pathname: "/balance-trend", params: { accountId: id } } : "/balance-trend");
+              }}
             />
           </ScrollView>
         )}
