@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useExpenseRecords, TransactionRecord, TransactionSection } from "@/hooks/use-expense-records";
+import { getCategoryIcon } from "@/types/data/category";
 
 function TransactionRow({ item }: { item: TransactionRecord }) {
   const scheme = useColorScheme() ?? "light";
@@ -22,7 +23,7 @@ function TransactionRow({ item }: { item: TransactionRecord }) {
       <View className="flex-row items-center gap-3 flex-1 pr-3">
         <View className="h-10 w-10 items-center justify-center rounded-full bg-theme-tint">
           <MaterialCommunityIcons
-            name="swap-vertical"
+            name={getCategoryIcon(item.categoryName)}
             size={20}
             color={colors.textLight}
           />

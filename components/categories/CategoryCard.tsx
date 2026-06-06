@@ -2,6 +2,7 @@ import React from 'react';
 import { Text, TouchableOpacity, View, useColorScheme } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
+import { getCategoryIcon } from '@/types/data/category';
 
 export type CategoryCardItem = {
   id: string;
@@ -15,12 +16,6 @@ type CategoryCardProps = {
   onDelete?: () => void;
 };
 
-const typeIconMap: Record<CategoryCardItem['type'], keyof typeof MaterialCommunityIcons.glyphMap> = {
-  expense: 'trending-down',
-  income: 'trending-up',
-  varies: 'swap-horizontal',
-};
-
 export default function CategoryCard({ item, onEdit, onDelete }: CategoryCardProps) {
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
@@ -32,7 +27,7 @@ export default function CategoryCard({ item, onEdit, onDelete }: CategoryCardPro
     >
       <View className="flex-row items-center self-stretch min-w-0 flex-1">
         <MaterialCommunityIcons
-          name={typeIconMap[item.type]}
+          name={getCategoryIcon(item.name)}
           size={48}
           color={colors.text}
           style={{ marginRight: 12 }}

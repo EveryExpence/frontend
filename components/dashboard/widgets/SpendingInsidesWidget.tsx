@@ -5,6 +5,8 @@ import { getAllExpenseRecords } from "@/data/expenseRecords";
 import { useSQLiteContext } from "expo-sqlite";
 import { getAllCategories } from "@/data/categories";
 import { formatCurrency } from "@/utils/formatCurrency";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { getCategoryIcon } from "@/types/data/category";
 
 import { PolarChart, Pie } from "victory-native";
 import { CATEGORY_COLORS } from "@/constants/categoryColors";
@@ -179,15 +181,14 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void }> = ({
                 className="flex-row items-center justify-between py-1"
               >
                 <View className="flex-row items-center">
-                  <View
-                    style={{
-                      width: 12,
-                      height: 12,
-                      borderRadius: 6,
-                      backgroundColor: d.color,
-                    }}
+                  <MaterialCommunityIcons
+                    name={getCategoryIcon(d.label)}
+                    size={16}
+                    color={d.color}
                   />
-                  <Text className="ml-2 text-theme-text">{d.label}</Text>
+                  <Text className="ml-2 text-theme-text flex-1" numberOfLines={1}>
+                    {d.label}
+                  </Text>
                 </View>
 
                 <Text className="text-theme-text">{d.displayAmount}</Text>
