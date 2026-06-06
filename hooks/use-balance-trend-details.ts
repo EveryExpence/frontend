@@ -19,11 +19,20 @@ export interface IncomeSource {
     currency: string;
 }
 
+export interface SpendingSource {
+    categoryId: string;
+    categoryName: string;
+    amount: number;
+    displayAmount: string;
+    currency: string;
+}
+
 export const useBalanceTrendDetails = (startDate: Date, endDate: Date) => {
     const db = useSQLiteContext();
     const [data, setData] = React.useState<BalanceDataPoint[]>([]);
     const [percentageChange, setPercentageChange] = React.useState<number>(0);
     const [incomeSources, setIncomeSources] = React.useState<IncomeSource[]>([]);
+    const [spendingSources, setSpendingSources] = React.useState<SpendingSource[]>([]);
     const [currency, setCurrency] = React.useState<string>("PLN");
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
@@ -37,7 +46,7 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date) => {
                 getAllExpenseRecords(db),
                 getAllCategories(db)
             ]);
-            
+
             if (accounts.length > 0) {
                 setCurrency(accounts[0].currency);
             }
@@ -79,11 +88,33 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date) => {
                 }));
             setIncomeSources(sources);
 
-            // 2. Calculate Trend Points
-            // We need to know the balance at the end of the selected period (endDate)
-            // and then work backwards to startDate.
-            
-            // First, find current balance
+            const spendingRecords = records.filter(r => {
+                if (r.amount >= 0 || r.syncState === 'deleted') return false;
+                const ts = typeof r.createdAt === 'number' ? r.createdAt : new Date(r.createdAt ?? 0).getTime();
+                return ts >= startTs && ts <= endTs;
+            });
+
+            const spendingGroupMap = new Map<string, { totalAbs: number, currency: string }>();
+            spendingRecords.forEach(r => {
+                const catId = r.categoryId ?? "uncategorized";
+                const curr = accountCurrencyMap[r.accountId] ?? "PLN";
+                const existing = spendingGroupMap.get(catId) ?? { totalAbs: 0, currency: curr };
+                existing.totalAbs += Math.abs(r.amount);
+                spendingGroupMap.set(catId, existing);
+            });
+
+            const sSources: SpendingSource[] = Array.from(spendingGroupMap.entries())
+                .sort((a, b) => b[1].totalAbs - a[1].totalAbs)
+                .slice(0, 3)
+                .map(([catId, d]) => ({
+                    categoryId: catId,
+                    categoryName: categoryMap[catId] ?? "Other",
+                    amount: d.totalAbs,
+                    displayAmount: formatCurrency(d.totalAbs, d.currency),
+                    currency: d.currency
+                }));
+            setSpendingSources(sSources);
+
             let currentBalance = 0;
             for (const acc of accounts) {
                 const bal = await getAccountBalance(db, acc.id);
@@ -101,8 +132,7 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date) => {
             let tempBalance = currentBalance;
             let recordIdx = 0;
             const now = new Date();
-            
-            // Move backwards from now to endDate
+
             const endOfPeriod = new Date(endDate);
             while (recordIdx < sortedRecords.length) {
                 const createdAt = sortedRecords[recordIdx].createdAt;
@@ -118,16 +148,13 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date) => {
             const points: BalanceDataPoint[] = [];
             const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            
-            // Limit points to avoid performance issues if range is huge
             const step = Math.max(1, Math.ceil(diffDays / 30));
 
             for (let i = 0; i <= diffDays; i += step) {
                 const d = new Date(endDate);
                 d.setDate(d.getDate() - i);
                 if (d < startDate && i !== 0) break;
-                
-                // Adjust for startDate precisely at the end
+
                 const targetDate = d < startDate ? startDate : d;
 
                 while (recordIdx < sortedRecords.length) {
@@ -141,9 +168,9 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date) => {
                     }
                 }
 
-                points.push({ 
-                    day: targetDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' }), 
-                    balance: tempBalance 
+                points.push({
+                    day: targetDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' }),
+                    balance: tempBalance
                 });
                 if (targetDate === startDate) break;
             }
@@ -154,7 +181,7 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date) => {
             if (reversedPoints.length > 0) {
                 const initialBalance = reversedPoints[0].balance;
                 const finalBalance = reversedPoints[reversedPoints.length - 1].balance;
-                
+
                 if (initialBalance !== 0) {
                     setPercentageChange(((finalBalance - initialBalance) / Math.abs(initialBalance)) * 100);
                 } else if (finalBalance !== 0) {
@@ -177,5 +204,5 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date) => {
         fetchData();
     }, [fetchData]);
 
-    return { data, percentageChange, incomeSources, currency, loading, error, refetch: fetchData };
+    return { data, percentageChange, incomeSources, spendingSources, currency, loading, error, refetch: fetchData };
 };
