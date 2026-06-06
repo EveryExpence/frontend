@@ -33,7 +33,7 @@ function formatDateLabel(ts?: number) {
     return d.toLocaleDateString();
 }
 
-export function useExpenseRecords() {
+export function useExpenseRecords(accountId?: string) {
     const db = useSQLiteContext();
     const [records, setRecords] = React.useState<TransactionRecord[]>([]);
     const [loading, setLoading] = React.useState(false);
@@ -44,7 +44,10 @@ export function useExpenseRecords() {
         try {
             setLoading(true);
             setError(null);
-            const local = await getAllExpenseRecords(db);
+            let local = await getAllExpenseRecords(db);
+            if (accountId) {
+                local = local.filter(r => r.accountId === accountId);
+            }
             const accounts = await getAllAccounts(db);
             const accountMap: Record<string, string> = {};
             accounts.forEach((a) => (accountMap[a.id] = a.currency));
@@ -67,7 +70,7 @@ export function useExpenseRecords() {
         } finally {
             setLoading(false);
         }
-    }, [db]);
+    }, [db, accountId]);
 
     React.useEffect(() => {
         fetch();
