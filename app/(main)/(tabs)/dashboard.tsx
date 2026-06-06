@@ -98,7 +98,7 @@ const Dashboard = () => {
             }}
           >
             <FlatList
-              style={{ flexGrow: 0 }}
+              style={{ flexGrow: 0, marginHorizontal: -16 }}
               contentContainerStyle={{ flexGrow: 0 }}
               data={pages}
               keyExtractor={(i) => ("type" in i ? "total" : i.id)}
