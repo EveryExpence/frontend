@@ -1,5 +1,5 @@
 import React from "react";
-import { ScrollView, Text, View, useColorScheme, Pressable } from "react-native";
+import { ScrollView, Text, View, useColorScheme, Pressable, Alert, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -9,18 +9,22 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useExpenseRecords, TransactionRecord, TransactionSection } from "@/hooks/use-expense-records";
 import { getCategoryIcon } from "@/types/data/category";
+import { useSQLiteContext } from "expo-sqlite";
+import { deleteExpenseRecord } from "@/data/expenseRecords";
+import Toast from "react-native-toast-message";
+import { useSync } from "@/context/syncContext";
 
-function TransactionRow({ item }: { item: TransactionRecord }) {
+function TransactionRow({ item, onDelete }: { item: TransactionRecord; onDelete: (id: string) => void }) {
   const scheme = useColorScheme() ?? "light";
   const colors = Colors[scheme];
   const router = useRouter();
 
   return (
-    <Pressable
-      onPress={() => router.push(`/record-details/${item.id}`)}
-      className="flex-row items-center justify-between py-1.5 active:opacity-70"
-    >
-      <View className="flex-row items-center gap-3 flex-1 pr-3">
+    <View className="flex-row items-center justify-between py-1.5">
+      <Pressable
+        onPress={() => router.push(`/record-details/${item.id}`)}
+        className="flex-row items-center gap-3 flex-1 pr-3 active:opacity-70"
+      >
         <View className="h-10 w-10 items-center justify-center rounded-full bg-theme-tint">
           <MaterialCommunityIcons
             name={getCategoryIcon(item.categoryName)}
@@ -37,20 +41,38 @@ function TransactionRow({ item }: { item: TransactionRecord }) {
             {item.categoryName} • {item.paymentMethodName}
           </Text>
         </View>
-      </View>
 
-      <Text
-        className={`text-[18px] ${item.kind === "income" ? "text-theme-success" : "text-theme-text"}`}
+        <Text
+          className={`text-[18px] ${item.kind === "income" ? "text-theme-success" : "text-theme-text"}`}
+        >
+          {item.kind === "income"
+            ? `+${item.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${item.currency}`
+            : `${item.amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${item.currency}`}
+        </Text>
+      </Pressable>
+
+      <TouchableOpacity
+        onPress={() => onDelete(item.id)}
+        className="pl-3 py-2"
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        {item.kind === "income"
-          ? `+${item.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${item.currency}`
-          : `${item.amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${item.currency}`}
-      </Text>
-    </Pressable>
+        <MaterialCommunityIcons
+          name="delete-outline"
+          size={22}
+          color={colors.error}
+        />
+      </TouchableOpacity>
+    </View>
   );
 }
 
-function TransactionSectionCard({ section }: { section: TransactionSection }) {
+function TransactionSectionCard({
+  section,
+  onDelete,
+}: {
+  section: TransactionSection;
+  onDelete: (id: string) => void;
+}) {
   return (
     <View className="gap-3">
       <View className="flex-row items-end justify-between px-1">
@@ -62,7 +84,7 @@ function TransactionSectionCard({ section }: { section: TransactionSection }) {
         <CardContent className="px-4 py-3">
           {section.items.map((item: TransactionRecord, index: number) => (
             <View key={item.id}>
-              <TransactionRow item={item} />
+              <TransactionRow item={item} onDelete={onDelete} />
               {index < section.items.length - 1 ? <Separator className="my-1" /> : null}
             </View>
           ))}
@@ -74,8 +96,34 @@ function TransactionSectionCard({ section }: { section: TransactionSection }) {
 
 export default function RecordsScreen() {
   const { accountId } = useLocalSearchParams<{ accountId?: string }>();
-  const { sections, loading, error } = useExpenseRecords(accountId);
+  const db = useSQLiteContext();
+  const { triggerSync } = useSync();
+  const { sections, loading, error, refetch } = useExpenseRecords(accountId);
   const [searchQuery, setSearchQuery] = React.useState("");
+
+  const handleDelete = (id: string) => {
+    Alert.alert(
+      "Delete Transaction",
+      "Are you sure you want to delete this transaction?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteExpenseRecord(db, id);
+              Toast.show({ text1: "Transaction deleted", type: "success" });
+              refetch();
+              triggerSync();
+            } catch (e) {
+              Toast.show({ text1: "Failed to delete transaction", type: "error" });
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const filteredSections = React.useMemo(() => {
     if (!searchQuery.trim()) return sections;
@@ -130,7 +178,7 @@ export default function RecordsScreen() {
             </Text>
           )}
           {filteredSections.map((section: TransactionSection) => (
-            <TransactionSectionCard key={section.id} section={section} />
+            <TransactionSectionCard key={section.id} section={section} onDelete={handleDelete} />
           ))}
         </View>
       </ScrollView>
