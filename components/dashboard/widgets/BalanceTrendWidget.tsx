@@ -7,10 +7,12 @@ import { Colors } from "@/constants/theme";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { matchFont, DashPathEffect } from "@shopify/react-native-skia";
+import { useRouter } from "expo-router";
 
 export const BalanceTrendWidget: React.FC<{ onShowMore?: () => void }> = ({
   onShowMore,
 }) => {
+  const router = useRouter();
   const { data, percentageChange, currency, loading, error } = useBalanceTrend();
   const scheme = useColorScheme() ?? "light";
   const colors = Colors[scheme];
@@ -27,7 +29,7 @@ export const BalanceTrendWidget: React.FC<{ onShowMore?: () => void }> = ({
     <DashboardWidgetCard
       title="Balance Trend"
       actionLabel="Show More"
-      onActionPress={onShowMore}
+      onActionPress={() => router.push("/balance-trend")}
     >
       <View className="flex-row items-center">
         <Text
