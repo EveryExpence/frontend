@@ -9,6 +9,7 @@ import { createPaymentMethod, getAllPaymentMethods } from '@/data/paymentMethods
 import CustomModal from '../Modal'
 import { useColorScheme } from '@/hooks/use-color-scheme'
 import { useFocusEffect } from 'expo-router'
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     selectedPaymentMethod: PaymentMethod | null;
@@ -21,6 +22,7 @@ const fetchPaymentMethods = async (db: SQLiteDatabase, callback: Dispatch<SetSta
 }
 
 const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMethod, disabled }: Props) => {
+    const { t } = useTranslation();
     const scheme = useColorScheme() ?? 'light';
     const colors = Colors[scheme];
     const db = useSQLiteContext();
@@ -43,7 +45,7 @@ const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMetho
 
     return (
         <View className="mb-8">
-            <Text className="text-2xl text-theme-text font-bold">Payment method</Text>
+            <Text className="text-2xl text-theme-text font-bold">{t("new_expense.payment_method")}</Text>
 
             <View className="flex-row justify-between items-center gap-2">
                 <Dropdown
@@ -77,9 +79,9 @@ const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMetho
                     maxHeight={300}
                     labelField="name"
                     valueField="id"
-                    placeholder="Select payment method"
+                    placeholder={t("new_expense.select_payment_method")}
                     disable={disabled}
-                    searchPlaceholder="Search payment method..."
+                    searchPlaceholder={t("new_expense.search_payment_method")}
                     value={selectedPaymentMethod?.id ?? undefined}
                     onChange={item => setSelectedPaymentMethod(item)}
                     renderLeftIcon={() => (
@@ -109,10 +111,10 @@ const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMetho
             <CustomModal
                 isVisible={isModalVisible}
                 setIsVisible={setIsModalVisible}
-                title="Create a new payment method"
+                title={t("new_expense.create_payment_method")}
                 cancelAction={
                     <TouchableOpacity onPress={() => setIsModalVisible(false)}>
-                        <Text className="text-xl text-theme-text">Cancel</Text>
+                        <Text className="text-xl text-theme-text">{t("common.cancel")}</Text>
                     </TouchableOpacity>
                 }
                 confirmAction={
@@ -120,12 +122,12 @@ const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMetho
                         onPress={saveNewPaymentMethod}
                         className="bg-theme-tint rounded-md px-5 py-3"
                     >
-                        <Text className="text-xl text-theme-text">Save</Text>
+                        <Text className="text-xl text-theme-text">{t("common.save")}</Text>
                     </TouchableOpacity>
                 }
             >
                 <View className="w-full mb-4">
-                    <Text className="text-xl text-theme-text opacity-85">Payment method name</Text>
+                    <Text className="text-xl text-theme-text opacity-85">{t("new_expense.payment_method_name")}</Text>
 
                     <View className="w-full flex-row items-center">
                         <MaterialCommunityIcons
@@ -136,7 +138,7 @@ const PaymentMethodSelection = ({ selectedPaymentMethod, setSelectedPaymentMetho
                         />
 
                         <TextInput
-                            placeholder='Enter name'
+                            placeholder={t("new_expense.enter_name")}
                             placeholderClassName="text-theme-text opacity-35"
                             value={newPaymentMethodName}
                             onChangeText={setNewPaymentMethodName}

@@ -7,6 +7,7 @@ import { getAllCategories } from "@/data/categories";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { getCategoryIcon } from "@/types/data/category";
+import { useTranslation } from "react-i18next";
 
 import { PolarChart, Pie } from "victory-native";
 import { CATEGORY_COLORS } from "@/constants/categoryColors";
@@ -15,6 +16,7 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void; accountI
   onShowMore, accountId
 }) => {
   const scheme = useColorScheme() ?? "light";
+  const { t } = useTranslation();
   const [recordsRaw, setRecordsRaw] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -143,15 +145,15 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void; accountI
 
   return (
     <DashboardWidgetCard
-      title="Spending Insights"
-      actionLabel={onShowMore ? "See all" : undefined}
+      title={t("dashboard.spending_insights")}
+      actionLabel={onShowMore ? t("common.see_all") : undefined}
       onActionPress={onShowMore}
     >
       <View className="flex-row items-center">
         <View style={{ width: 120, height: 120 }}>
           {data.length === 0 ? (
             <View className="flex-1 items-center justify-center">
-              <Text className="text-theme-text text-xs">No expenses</Text>
+              <Text className="text-theme-text text-xs">{t("dashboard.no_expenses")}</Text>
             </View>
           ) : (
             <PolarChart<
@@ -172,7 +174,7 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void; accountI
 
         <View className="ml-4 flex-1">
           <Text className="text-theme-text text-[14px] font-semibold">
-            Total:
+            {t("common.total")}:
           </Text>
           <Text className="text-theme-text text-[16px] font-bold" numberOfLines={1}>
             {totalsByCurrency || "0"}
@@ -203,7 +205,7 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void; accountI
       </View>
 
       {loading ? (
-        <Text className="text-theme-text mt-2">Loading...</Text>
+        <Text className="text-theme-text mt-2">{t("common.loading")}</Text>
       ) : null}
       {error ? <Text className="text-theme-text mt-2">{error}</Text> : null}
     </DashboardWidgetCard>

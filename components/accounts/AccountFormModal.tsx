@@ -7,6 +7,7 @@ import CustomModal from '@/components/Modal';
 import { AccountCardItem } from '@/components/accounts/AccountCard';
 import { isValidBalanceInput, normalizeNumberInput, parseBalanceInput } from '@/utils/balance';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTranslation } from 'react-i18next';
 
 const CURRENCIES = ['USD', 'EUR', 'PLN', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD'];
 const DEFAULT_CURRENCY = CURRENCIES[0];
@@ -25,6 +26,7 @@ type Props = {
 };
 
 export default function AccountFormModal({ visible, editingAccount, onClose, onSave }: Props) {
+  const { t } = useTranslation();
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
 
@@ -76,10 +78,10 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
       setIsVisible={(next) => {
         if (!next) onClose();
       }}
-      title={isEditing ? 'Edit account' : 'Add account'}
+      title={isEditing ? t("accounts.edit_account") : t("accounts.add_account")}
       cancelAction={
         <TouchableOpacity onPress={onClose} style={{ padding: 10 }}>
-          <Text className="text-2xl text-theme-icon">Cancel</Text>
+          <Text className="text-2xl text-theme-icon">{t("common.cancel")}</Text>
         </TouchableOpacity>
       }
       confirmAction={
@@ -95,18 +97,18 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
           }}
         >
           <Text className="text-2xl" style={{ color: colors.textLight }}>
-            {isSaving ? 'Saving...' : 'Save'}
+            {isSaving ? t("common.loading") : t("common.save")}
           </Text>
         </TouchableOpacity>
       }
     >
       <ScrollView keyboardShouldPersistTaps="handled">
-        <Text className="text-2xl text-theme-icon" style={{ marginBottom: 6 }}>Name</Text>
+        <Text className="text-2xl text-theme-icon" style={{ marginBottom: 6 }}>{t("accounts.name")}</Text>
         <TextInput
           className="text-2xl text-theme-text"
           value={name}
           onChangeText={setName}
-          placeholder="My wallet"
+          placeholder={t("accounts.enter_name_placeholder")}
           placeholderTextColor={colors.icon}
           style={{
             backgroundColor: colors.background,
@@ -116,7 +118,7 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
           }}
         />
 
-        <Text className="text-2xl text-theme-icon" style={{ marginBottom: 6 }}>Balance</Text>
+        <Text className="text-2xl text-theme-icon" style={{ marginBottom: 6 }}>{t("accounts.balance")}</Text>
         <TextInput
           className="text-2xl text-theme-text"
           value={balanceField}
@@ -134,11 +136,11 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
         />
         {balanceField && !isBalanceValid && (
           <Text style={{ color: colors.error, fontSize: 12, marginBottom: 8 }}>
-            Balance must be a valid positive number
+            {t("accounts.error_balance_positive")}
           </Text>
         )}
 
-        <Text className="text-2xl text-theme-icon">Currency</Text>
+        <Text className="text-2xl text-theme-icon">{t("accounts.currency")}</Text>
         <Dropdown
           style={{
             backgroundColor: colors.background,
@@ -171,8 +173,8 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
           maxHeight={300}
           labelField="label"
           valueField="value"
-          placeholder="Select currency"
-          searchPlaceholder="Search currency..."
+          placeholder={t("accounts.select_currency")}
+          searchPlaceholder={t("accounts.search_currency")}
           value={currency}
           onChange={(item) => setCurrency(item.value)}
           dropdownPosition="bottom"

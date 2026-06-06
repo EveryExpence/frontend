@@ -16,6 +16,7 @@ import { DateRangePicker } from "@/components/spending-insights/DateRangePicker"
 import { matchFont, DashPathEffect } from "@shopify/react-native-skia";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { getCategoryIcon } from "@/types/data/category";
+import { useTranslation } from "react-i18next";
 
 function getDefaultDateRange(): { start: Date; end: Date } {
   const now = new Date();
@@ -36,6 +37,7 @@ const BalanceTrendDetailsScreen: React.FC = () => {
   const scheme = useColorScheme() ?? "light";
   const colors = Colors[scheme];
   const defaults = getDefaultDateRange();
+  const { t } = useTranslation();
 
   const [startDate, setStartDate] = useState<Date>(defaults.start);
   const [endDate, setEndDate] = useState<Date>(defaults.end);
@@ -75,7 +77,7 @@ const BalanceTrendDetailsScreen: React.FC = () => {
         }}
       >
         <Text className="text-[32px] font-bold text-theme-text mb-4">
-          Spending Insights
+          {t("balance_trend.title")}
         </Text>
 
         <DateRangePicker
@@ -106,7 +108,7 @@ const BalanceTrendDetailsScreen: React.FC = () => {
                 {Math.abs(percentageChange).toFixed(0)}%
               </Text>
               <Text className="ml-3 text-[24px] text-theme-text opacity-80">
-                vs previous period
+                {t("common.vs_previous")}
               </Text>
             </View>
 
@@ -151,20 +153,21 @@ const BalanceTrendDetailsScreen: React.FC = () => {
               ) : (
                 <View className="flex-1 items-center justify-center bg-theme-surface rounded-xl">
                   <Text className="text-theme-text opacity-60">
-                    No data for this period
+                    {t("balance_trend.no_data_period")}
                   </Text>
                 </View>
               )}
+
             </View>
 
             <View className="bg-theme-surface rounded-xl p-4">
               <Text className="text-[24px] font-bold text-theme-text mb-4">
-                Major sources of income
+                {t("balance_trend.income_sources")}
               </Text>
 
               {incomeSources.length === 0 ? (
                 <Text className="text-theme-text opacity-60 italic">
-                  No income records found for this period.
+                  {t("balance_trend.no_income")}
                 </Text>
               ) : (
                 incomeSources.map((source, index) => (
@@ -197,12 +200,12 @@ const BalanceTrendDetailsScreen: React.FC = () => {
 
             <View className="bg-theme-surface rounded-xl p-4 mt-6">
               <Text className="text-[24px] font-bold text-theme-text mb-4">
-                Major sources of spending
+                {t("balance_trend.spending_sources")}
               </Text>
 
               {spendingSources.length === 0 ? (
                 <Text className="text-theme-text opacity-60 italic">
-                  No spending records found for this period.
+                  {t("balance_trend.no_spending")}
                 </Text>
               ) : (
                 spendingSources.map((source, index) => (

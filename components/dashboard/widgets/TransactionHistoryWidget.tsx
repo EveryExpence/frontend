@@ -6,6 +6,7 @@ import { Colors } from "@/constants/theme";
 import { DashboardWidgetCard } from "./DashboardWidgetCard";
 import { useExpenseRecords, TransactionRecord } from "@/hooks/use-expense-records";
 import { getCategoryIcon } from "@/types/data/category";
+import { useTranslation } from "react-i18next";
 
 interface TransactionHistoryWidgetProps {
   records?: TransactionRecord[];
@@ -53,13 +54,14 @@ export const TransactionHistoryRow = ({
 
 export const TransactionHistoryWidget: React.FC<TransactionHistoryWidgetProps> = ({ records: propRecords, onSeeAllPress, accountId }) => {
   const { records: localRecords, loading, error } = useExpenseRecords(accountId);
+  const { t } = useTranslation();
 
   const toShow = propRecords && propRecords.length > 0 ? propRecords : (localRecords ?? []).slice(0, 3);
 
   return (
-    <DashboardWidgetCard title="Transaction History" actionLabel="See all" onActionPress={onSeeAllPress}>
+    <DashboardWidgetCard title={t("dashboard.transaction_history")} actionLabel={t("common.see_all")} onActionPress={onSeeAllPress}>
       <View>
-        {loading ? <Text className="text-theme-text">Loading...</Text> : null}
+        {loading ? <Text className="text-theme-text">{t("common.loading")}</Text> : null}
         {error ? <Text className="text-theme-text">{error}</Text> : null}
         {toShow.map((record, index) => (
           <View key={record.id}>

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useExpenseRecords, TransactionRecord, TransactionSection } from "@/hooks/use-expense-records";
 import { getCategoryIcon } from "@/types/data/category";
+import { useTranslation } from "react-i18next";
 
 function TransactionRow({ item }: { item: TransactionRecord }) {
   const scheme = useColorScheme() ?? "light";
@@ -74,6 +75,7 @@ function TransactionSectionCard({ section }: { section: TransactionSection }) {
 
 export default function RecordsScreen() {
   const { sections, loading, error } = useExpenseRecords();
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = React.useState("");
 
   const filteredSections = React.useMemo(() => {
@@ -100,7 +102,7 @@ export default function RecordsScreen() {
         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 20, paddingBottom: 28 }}
       >
         <Text className="text-[36px] font-semibold leading-tight text-theme-text">
-          Transaction History
+          {t("records.title")}
         </Text>
 
         <View className="mt-5">
@@ -113,7 +115,7 @@ export default function RecordsScreen() {
             <Input
               value={searchQuery}
               onChangeText={setSearchQuery}
-              placeholder="Search by name, category or amount"
+              placeholder={t("records.search_placeholder")}
               editable={true}
               className="pl-11"
             />
@@ -121,11 +123,11 @@ export default function RecordsScreen() {
         </View>
 
         <View className="mt-8 gap-6">
-          {loading && <Text className="text-theme-text text-center">Loading...</Text>}
+          {loading && <Text className="text-theme-text text-center">{t("common.loading")}</Text>}
           {error && <Text className="text-theme-error text-center">{error}</Text>}
           {!loading && filteredSections.length === 0 && (
             <Text className="text-theme-text text-center opacity-60">
-              {searchQuery ? "No transactions found" : "No transactions yet"}
+              {searchQuery ? t("records.no_results") : t("records.no_transactions")}
             </Text>
           )}
           {filteredSections.map((section: TransactionSection) => (

@@ -13,8 +13,10 @@ import ProfileFormSection from "@/components/settings/ProfileFormSection";
 import ProfileActionButton from "@/components/settings/ProfileActionButton";
 import AvatarUrlModal from "@/components/settings/AvatarUrlModal";
 import type { ProfileForm } from "@/types/profile";
+import { useTranslation } from "react-i18next";
 
 const ProfileScreen = () => {
+  const { t } = useTranslation();
   const router = useRouter();
   const { user, refreshUser } = useAuth()
   const { control, handleSubmit, reset, setValue, getValues, formState: { isValid } } = useForm<ProfileForm>({
@@ -121,7 +123,7 @@ const ProfileScreen = () => {
         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 40, paddingBottom: 24 }}
       >
         <Topbar
-          title="Profile"
+          title={t("settings.profile")}
           onBack={() => router.back()}
         />
 
@@ -156,7 +158,7 @@ const ProfileScreen = () => {
                     setIsEditing(false)
 
                     setTimeout(() => {
-                        Toast.show({ text1: "Changed profile successfully" });
+                        Toast.show({ text1: t("settings.profile_update_success") });
                     }, 100);
                   }
                 } else {

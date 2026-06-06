@@ -8,6 +8,7 @@ import { Colors } from '@/constants/theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     selectedAccount: Account | null;
@@ -16,6 +17,7 @@ interface Props {
 }
 
 const AccountSelection = ({ selectedAccount, setSelectedAccount, disabled }: Props) => {
+    const { t } = useTranslation();
     const scheme = useColorScheme() ?? 'light';
     const colors = Colors[scheme];
     const db = useSQLiteContext();
@@ -31,7 +33,7 @@ const AccountSelection = ({ selectedAccount, setSelectedAccount, disabled }: Pro
 
     return (
         <View className="mb-8">
-            <Text className="text-2xl text-theme-text font-bold">Account</Text>
+            <Text className="text-2xl text-theme-text font-bold">{t("new_expense.account")}</Text>
 
             <Dropdown
                 style={{
@@ -64,8 +66,8 @@ const AccountSelection = ({ selectedAccount, setSelectedAccount, disabled }: Pro
                 maxHeight={300}
                 labelField="name"
                 valueField="id"
-                placeholder="Select account"
-                searchPlaceholder="Search account..."
+                placeholder={t("new_expense.select_account")}
+                searchPlaceholder={t("new_expense.search_account")}
                 disable={disabled}
                 value={selectedAccount?.id ?? undefined}
                 onChange={item => setSelectedAccount(item)}

@@ -2,8 +2,10 @@ import { View, Text } from 'react-native'
 import React from 'react'
 import { Slot } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useTranslation } from 'react-i18next'
 
 const _layout = () => {
+    const { t } = useTranslation();
     return (
         <SafeAreaView className="flex-1">
             <View
@@ -27,7 +29,9 @@ const _layout = () => {
                     className="text-6xl font-bold text-theme-textLight text-right leading-tight"
                 >EveryExpense</Text>
                 
-                <Text className="text-2xl text-right text-theme-textLight leading-tight">Be aware of your expenses</Text>
+                <Text className="text-2xl text-right text-theme-textLight leading-tight">
+                    {t("auth.subtitle")}
+                </Text>
             </View>
 
             <View

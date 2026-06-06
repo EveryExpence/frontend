@@ -7,6 +7,7 @@ import { useFocusEffect } from "expo-router";
 import { PolarChart, Pie } from "victory-native";
 import { DateRangePicker } from "@/components/spending-insights/DateRangePicker";
 import { CategorySection } from "@/components/spending-insights/CategorySection";
+import { useTranslation } from "react-i18next";
 
 function getDefaultDateRange(): { start: Date; end: Date } {
   const now = new Date();
@@ -24,6 +25,7 @@ function getDefaultDateRange(): { start: Date; end: Date } {
 }
 
 const SpendingInsightsScreen: React.FC = () => {
+  const { t } = useTranslation();
   const scheme = useColorScheme() ?? "light";
   const colors = Colors[scheme];
   const defaults = getDefaultDateRange();
@@ -51,7 +53,7 @@ const SpendingInsightsScreen: React.FC = () => {
         }}
       >
         <Text className="text-[32px] font-bold text-theme-text mb-4">
-          Spending Insights
+          {t("dashboard.spending_insights")}
         </Text>
 
         <DateRangePicker
@@ -79,7 +81,7 @@ const SpendingInsightsScreen: React.FC = () => {
                 {chartData.length === 0 ? (
                   <View className="flex-1 items-center justify-center">
                     <Text className="text-theme-text text-[16px]">
-                      No expenses
+                      {t("dashboard.no_expenses")}
                     </Text>
                   </View>
                 ) : (
@@ -112,7 +114,7 @@ const SpendingInsightsScreen: React.FC = () => {
                     pointerEvents="none"
                   >
                     <Text className="text-theme-text text-[11px] mb-0.5">
-                      Total:
+                      {t("common.total")}:
                     </Text>
                     {totalDisplayLines.map((line) => (
                       <Text
@@ -134,7 +136,7 @@ const SpendingInsightsScreen: React.FC = () => {
             {categoryGroups.length === 0 && !loading && (
               <View className="items-center py-10">
                 <Text className="text-theme-text text-[16px]">
-                  No expenses for selected period
+                  {t("balance_trend.no_spending")}
                 </Text>
               </View>
             )}
