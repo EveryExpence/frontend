@@ -147,11 +147,11 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void; accountI
       actionLabel={onShowMore ? "See all" : undefined}
       onActionPress={onShowMore}
     >
-      <View className="flex-row items-center justify-between">
-        <View style={{ width: 160, height: 160 }}>
+      <View className="flex-row items-center">
+        <View style={{ width: 120, height: 120 }}>
           {data.length === 0 ? (
-            <View className="items-center justify-center">
-              <Text className="text-theme-text">No expenses yet</Text>
+            <View className="flex-1 items-center justify-center">
+              <Text className="text-theme-text text-xs">No expenses</Text>
             </View>
           ) : (
             <PolarChart<
@@ -165,37 +165,37 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void; accountI
               valueKey={"value"}
               colorKey={"color"}
             >
-              <Pie.Chart />
+              <Pie.Chart innerRadius="70%" />
             </PolarChart>
           )}
         </View>
 
         <View className="ml-4 flex-1">
-          <Text className="text-theme-text text-[16px] font-semibold">
+          <Text className="text-theme-text text-[14px] font-semibold">
             Total:
           </Text>
-          <Text className="text-theme-text text-[18px] font-bold">
+          <Text className="text-theme-text text-[16px] font-bold" numberOfLines={1}>
             {totalsByCurrency || "0"}
           </Text>
 
-          <View className="mt-3">
-            {data.map((d) => (
+          <View className="mt-2">
+            {data.slice(0, 3).map((d) => (
               <View
                 key={d.label}
-                className="flex-row items-center justify-between py-1"
+                className="flex-row items-center py-0.5"
               >
-                <View className="flex-row items-center">
+                <View className="flex-row items-center flex-1 mr-2">
                   <MaterialCommunityIcons
                     name={getCategoryIcon(d.label)}
-                    size={16}
+                    size={14}
                     color={d.color}
                   />
-                  <Text className="ml-2 text-theme-text flex-1" numberOfLines={1}>
+                  <Text className="ml-1.5 text-theme-text text-sm flex-1" numberOfLines={1}>
                     {d.label}
                   </Text>
                 </View>
 
-                <Text className="text-theme-text">{d.displayAmount}</Text>
+                <Text className="text-theme-text text-sm font-medium">{d.displayAmount}</Text>
               </View>
             ))}
           </View>
