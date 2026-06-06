@@ -22,7 +22,7 @@ export interface SpendingSource {
     currency: string;
 }
 
-export const useBalanceTrendDetails = (startDate: Date, endDate: Date) => {
+export const useBalanceTrendDetails = (startDate: Date, endDate: Date, accountId?: string) => {
     const db = useSQLiteContext();
     const [data, setData] = React.useState<BalanceDataPoint[]>([]);
     const [percentageChange, setPercentageChange] = React.useState<number>(0);
@@ -37,16 +37,18 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date) => {
         try {
             setLoading(true);
 
-            const trendResult = await calculateBalanceTrend(db, startDate, endDate);
+            const trendResult = await calculateBalanceTrend(db, startDate, endDate, accountId);
             setData(trendResult.points);
             setPercentageChange(trendResult.percentageChange);
             setCurrency(trendResult.primaryCurrency);
 
-            const [categories, records, accounts] = await Promise.all([
+            const [categories, allRecords, accounts] = await Promise.all([
                 getAllCategories(db),
                 getAllExpenseRecords(db),
                 getAllAccounts(db)
             ]);
+            
+            const records = accountId ? allRecords.filter(r => r.accountId === accountId) : allRecords;
 
             const categoryMap: Record<string, string> = {};
             categories.forEach(c => categoryMap[c.id] = c.name);
@@ -116,7 +118,7 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date) => {
         } finally {
             setLoading(false);
         }
-    }, [db, startDate.getTime(), endDate.getTime()]);
+    }, [db, startDate.getTime(), endDate.getTime(), accountId]);
 
     React.useEffect(() => {
         fetchData();

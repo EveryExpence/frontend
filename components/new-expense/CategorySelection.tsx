@@ -16,6 +16,7 @@ interface Props {
     selectedCategory: Category | null;
     setSelectedCategory: Dispatch<SetStateAction<Category | null>>;
     disabled?: boolean;
+    typeFilter?: "expense" | "income";
 }
 
 const fetchCategories = async (db: SQLiteDatabase, callback: Dispatch<SetStateAction<Category[]>>) => {
@@ -24,6 +25,7 @@ const fetchCategories = async (db: SQLiteDatabase, callback: Dispatch<SetStateAc
 
 const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled }: Props) => {
     const { t } = useTranslation();
+const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled, typeFilter }: Props) => {
     const scheme = useColorScheme() ?? 'light';
     const colors = Colors[scheme];
     const db = useSQLiteContext();
@@ -32,12 +34,30 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled }: 
     const [newCategoryName, setNewCategoryName] = useState("");
     const [newCategoryTypeIndex, setNewCategoryTypeIndex] = useState(2);
 
+    useEffect(() => {
+        if (isModalVisible) {
+            if (typeFilter === "expense") {
+                setNewCategoryTypeIndex(0);
+            } else if (typeFilter === "income") {
+                setNewCategoryTypeIndex(1);
+            } else {
+                setNewCategoryTypeIndex(2);
+            }
+        }
+    }, [isModalVisible, typeFilter]);
+
     const saveNewCategory = async () => {
         await createCategory(db, { name: newCategoryName, type: categoryTypes[newCategoryTypeIndex] });
         await fetchCategories(db, setCategories);
         setIsModalVisible(false);
         setNewCategoryName("");
-        setNewCategoryTypeIndex(2);
+        if (typeFilter === "expense") {
+            setNewCategoryTypeIndex(0);
+        } else if (typeFilter === "income") {
+            setNewCategoryTypeIndex(1);
+        } else {
+            setNewCategoryTypeIndex(2);
+        }
     }
 
     useFocusEffect(
@@ -77,7 +97,7 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled }: 
                         fontSize: 17,
                         color: colors.text,
                     }}
-                    data={categories}
+                    data={typeFilter ? categories.filter(c => c.type?.toLowerCase() === typeFilter.toLowerCase() || c.type?.toLowerCase() === "varies") : categories}
                     search
                     maxHeight={300}
                     labelField="name"

@@ -50,5 +50,26 @@ export const migrateDatabase = async (db: SQLiteDatabase) => {
             content BLOB NOT NULL,
             FOREIGN KEY(expense_record_id) REFERENCES expense_records(id)
         );
+
+        INSERT OR IGNORE INTO payment_methods (id, name, syncState) VALUES 
+        ('pm_cash', 'Cash', 'synced'),
+        ('pm_credit_card', 'Credit Card', 'synced'),
+        ('pm_debit_card', 'Debit Card', 'synced'),
+        ('pm_bank_transfer', 'Bank Transfer', 'synced'),
+        ('pm_check', 'Check', 'synced');
+
+        INSERT OR IGNORE INTO categories (id, name, type, syncState) VALUES
+        ('cat_food', 'Food', 'EXPENSE', 'synced'),
+        ('cat_transport', 'Transport', 'EXPENSE', 'synced'),
+        ('cat_housing', 'Housing', 'EXPENSE', 'synced'),
+        ('cat_utilities', 'Utilities', 'EXPENSE', 'synced'),
+        ('cat_shopping', 'Shopping', 'EXPENSE', 'synced'),
+        ('cat_entertainment', 'Entertainment', 'EXPENSE', 'synced'),
+        ('cat_others_expense', 'Others', 'EXPENSE', 'synced'),
+        ('cat_salary', 'Salary', 'INCOME', 'synced'),
+        ('cat_business', 'Business', 'INCOME', 'synced'),
+        ('cat_investment', 'Investment', 'INCOME', 'synced'),
+        ('cat_gifts', 'Gifts', 'INCOME', 'synced'),
+        ('cat_others_income', 'Others', 'INCOME', 'synced');
     `);
 }

@@ -1,5 +1,5 @@
 import { ScrollView, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Account } from '@/types/data/account';
 import { Category } from '@/types/data/category';
@@ -49,6 +49,26 @@ export default function NewExpense() {
   const [location, setLocation] = useState<Coordinates | null>(null);
   const [scrollEnabled, setScrollEnabled] = useState(true);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [recordType, setRecordType] = useState<"expense" | "income">("expense");
+
+  useEffect(() => {
+    if (selectedCategory) {
+      const typeLower = selectedCategory.type?.toLowerCase();
+      if (typeLower === "expense" || typeLower === "income") {
+        setRecordType(typeLower);
+      }
+    }
+  }, [selectedCategory]);
+
+  const changeRecordType = (type: "expense" | "income") => {
+    setRecordType(type);
+    if (selectedCategory) {
+      const typeLower = selectedCategory.type?.toLowerCase();
+      if (typeLower !== "varies" && typeLower !== type) {
+        setSelectedCategory(null);
+      }
+    }
+  };
 
   const analyzeReceipt = async () => {
     if (images.length === 0) {
@@ -142,7 +162,7 @@ export default function NewExpense() {
       Toast.show({ text1: t("new_expense.error_required"), type: "error" });
       return;
     }
-    const amountNumber = Number(amount);
+    const amountNumber = recordType === "expense" ? -Math.abs(Number(amount)) : Math.abs(Number(amount));
     if (amountNumber === 0) {
       Toast.show({ text1: t("new_expense.error_zero_amount"), type: "error" });
       return;
@@ -172,6 +192,7 @@ export default function NewExpense() {
       setDescription("");
       setImages([]);
       setLocation(null);
+      setRecordType("expense");
       triggerSync();
     } catch {
       Toast.show({ text1: t("new_expense.error_failed_add"), type: "error" });
@@ -182,11 +203,46 @@ export default function NewExpense() {
     <SafeAreaView>
       <Topbar title={t("new_expense.title")} />
       <ScrollView className="px-4" scrollEnabled={scrollEnabled}>
+        <View className="flex-row bg-theme-surface p-1.5 rounded-lg mb-6 mt-4">
+          <TouchableOpacity
+            className={`flex-1 py-3 rounded-md items-center justify-center ${
+              recordType === "expense" ? "bg-theme-tint" : ""
+            }`}
+            activeOpacity={0.8}
+            onPress={() => changeRecordType("expense")}
+          >
+            <Text
+              className={`text-lg font-bold ${
+                recordType === "expense" ? "text-theme-textLight" : "text-theme-text"
+              }`}
+              style={recordType !== "expense" ? { opacity: 0.6 } : {}}
+            >
+              Expense
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            className={`flex-1 py-3 rounded-md items-center justify-center ${
+              recordType === "income" ? "bg-theme-tint" : ""
+            }`}
+            activeOpacity={0.8}
+            onPress={() => changeRecordType("income")}
+          >
+            <Text
+              className={`text-lg font-bold ${
+                recordType === "income" ? "text-theme-textLight" : "text-theme-text"
+              }`}
+              style={recordType !== "income" ? { opacity: 0.6 } : {}}
+            >
+              Income
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         <AccountSelection selectedAccount={selectedAccount} setSelectedAccount={setSelectedAccount} />
 
         <AmountInput selectedAccount={selectedAccount} amount={amount} setAmount={setAmount} isValid={isAmountValid} />
 
-        <CategorySelection selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
+        <CategorySelection selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} typeFilter={recordType} />
 
         <PaymentMethodSelection selectedPaymentMethod={selectedPaymentMethod} setSelectedPaymentMethod={setSelectedPaymentMethod} />
 

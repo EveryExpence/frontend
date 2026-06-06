@@ -3,7 +3,7 @@ import { View, Text, ScrollView, useColorScheme, ActivityIndicator } from "react
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/theme";
 import { useSpendingInsights } from "@/hooks/use-spending-insights";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { PolarChart, Pie } from "victory-native";
 import { DateRangePicker } from "@/components/spending-insights/DateRangePicker";
 import { CategorySection } from "@/components/spending-insights/CategorySection";
@@ -33,8 +33,10 @@ const SpendingInsightsScreen: React.FC = () => {
   const [startDate, setStartDate] = useState<Date>(defaults.start);
   const [endDate, setEndDate] = useState<Date>(defaults.end);
 
+  const { accountId } = useLocalSearchParams<{ accountId?: string }>();
+
   const { categoryGroups, chartData, totalDisplayLines, loading, error, refetch } =
-    useSpendingInsights(startDate, endDate);
+    useSpendingInsights(startDate, endDate, accountId);
 
   useFocusEffect(
     useCallback(() => {

@@ -108,7 +108,7 @@ export default function RecordDetailsScreen() {
 
     try {
       const amountValue =
-        selectedCategory.type === "income"
+        selectedCategory.type?.toLowerCase() === "income"
           ? Math.abs(parseFloat(amount))
           : -Math.abs(parseFloat(amount));
 

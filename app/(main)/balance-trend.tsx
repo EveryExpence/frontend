@@ -10,7 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/theme";
 import { useBalanceTrendDetails } from "@/hooks/use-balance-trend-details";
 import { BalanceDataPoint } from "@/utils/trendCalculations";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { CartesianChart, Line, Area } from "victory-native";
 import { DateRangePicker } from "@/components/spending-insights/DateRangePicker";
 import { matchFont, DashPathEffect } from "@shopify/react-native-skia";
@@ -42,6 +42,8 @@ const BalanceTrendDetailsScreen: React.FC = () => {
   const [startDate, setStartDate] = useState<Date>(defaults.start);
   const [endDate, setEndDate] = useState<Date>(defaults.end);
 
+  const { accountId } = useLocalSearchParams<{ accountId?: string }>();
+
   const {
     data,
     percentageChange,
@@ -50,7 +52,7 @@ const BalanceTrendDetailsScreen: React.FC = () => {
     loading,
     error,
     refetch,
-  } = useBalanceTrendDetails(startDate, endDate);
+  } = useBalanceTrendDetails(startDate, endDate, accountId);
 
   useFocusEffect(
     useCallback(() => {
