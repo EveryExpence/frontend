@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -9,6 +9,7 @@ import SettingsToggleRow from "@/components/settings/SettingsToggleRow";
 import SettingsActionRow from "@/components/settings/SettingsActionRow";
 import Topbar from "@/components/Topbar";
 import { useTheme } from "@/context/themeContext";
+import { scheduleDailyReminder, cancelDailyReminder, checkNotificationStatus } from "@/utils/notifications";
 
 type Language = "eng" | "pl";
 
@@ -20,7 +21,14 @@ const SettingsScreen = () => {
   const { theme, toggleTheme } = useTheme();
 
   const [currentLanguage, setLanguage] = useState<Language>("eng");
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const isEnabled = await checkNotificationStatus();
+      setNotificationsEnabled(isEnabled);
+    })();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -77,7 +85,15 @@ const SettingsScreen = () => {
             title="Push Notifications"
             iconName="notifications-outline"
             isEnabled={notificationsEnabled}
-            onToggle={() => setNotificationsEnabled((prev) => !prev)}
+            onToggle={async () => {
+              if (notificationsEnabled) {
+                await cancelDailyReminder();
+                setNotificationsEnabled(false);
+              } else {
+                const success = await scheduleDailyReminder();
+                setNotificationsEnabled(success);
+              }
+            }}
           />
         </View>
 

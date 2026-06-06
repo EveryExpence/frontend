@@ -10,6 +10,17 @@ import { migrateDatabase } from '@/data/init'
 import 'react-native-get-random-values';
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { SyncProvider } from '@/context/syncContext'
+import * as Notifications from 'expo-notifications';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 const RootLayout = () => {
   return (
