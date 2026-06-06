@@ -1,26 +1,14 @@
-import {
-  View,
-  Text,
-  useColorScheme,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
-import React, {
-  Dispatch,
-  SetStateAction,
-  useState,
-  useRef,
-  useEffect,
-} from "react";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Colors } from "@/constants/theme";
-import * as Location from "expo-location";
-import { Coordinates } from "@/types/data/location";
+import { View, Text, useColorScheme, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { Dispatch, SetStateAction, useState, useRef, useEffect } from 'react';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Colors } from '@/constants/theme';
+import * as Location from 'expo-location';
+import { Coordinates } from '@/types/data/location';
 
 let WebView: any = null;
 
 try {
-  ({ WebView } = require("react-native-webview"));
+  ({ WebView } = require('react-native-webview'));
 } catch {
   WebView = null;
 }
@@ -32,13 +20,8 @@ interface Props {
   disabled?: boolean;
 }
 
-const LocationSelection = ({
-  location,
-  setLocation,
-  setScrollEnabled,
-  disabled,
-}: Props) => {
-  const scheme = useColorScheme() ?? "light";
+const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }: Props) => {
+  const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
   const webViewRef = useRef<WebView>(null);
   const [isFetching, setIsFetching] = useState(false);
@@ -50,19 +33,17 @@ const LocationSelection = ({
     setErrorMsg(null);
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setErrorMsg("Permission denied");
+      if (status !== 'granted') {
+        setErrorMsg('Permission denied');
         return;
       }
 
       const { coords } = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
+        accuracy: Location.Accuracy.Balanced
       });
 
       if (isMapLoadedRef.current) {
-        webViewRef.current?.injectJavaScript(
-          `window.updateMapLocation(${coords.latitude}, ${coords.longitude}); true;`,
-        );
+        webViewRef.current?.injectJavaScript(`window.updateMapLocation(${coords.latitude}, ${coords.longitude}); true;`);
       }
 
       if (location !== null) {
@@ -71,7 +52,7 @@ const LocationSelection = ({
 
       setLocation({ latitude: coords.latitude, longitude: coords.longitude });
     } catch {
-      setErrorMsg("Failed to fetch location");
+      setErrorMsg('Failed to fetch location');
     } finally {
       setIsFetching(false);
     }
@@ -84,138 +65,116 @@ const LocationSelection = ({
   }, [disabled, getCurrentLocation]);
 
   const mapHtml = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-            <style>body { padding: 0; margin: 0; } html, body, #map { height: 100%; width: 100%; }</style>
-        </head>
-        <body>
-            <div id="map"></div>
-            <script>
-                document.addEventListener('touchstart', () => window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'touchstart' })));
-                document.addEventListener('touchend', () => window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'touchend' })));
-                document.addEventListener('touchcancel', () => window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'touchend' })));
+  <!DOCTYPE html>
+  <html>
+  <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>body { padding: 0; margin: 0; } html, body, #map { height: 100%; width: 100%; }</style>
+  </head>
+  <body>
+  <div id="map"></div>
+  <script>
+  document.addEventListener('touchstart', () => window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'touchstart' })));
+  document.addEventListener('touchend', () => window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'touchend' })));
+  document.addEventListener('touchcancel', () => window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'touchend' })));
 
-                const map = L.map('map', { dragging: true }).setView([51.7592, 19.4559], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+  const map = L.map('map', { dragging: true }).setView([51.7592, 19.4559], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
-                let marker;
-                window.setMarker = (lat, lng) => {
-                    if (marker) map.removeLayer(marker);
-                    marker = L.marker([lat, lng]).addTo(map);
-                }
+  let marker;
+  window.setMarker = (lat, lng) => {
+    if (marker) map.removeLayer(marker);
+    marker = L.marker([lat, lng]).addTo(map);
+  }
 
-                map.on('click', (e) => {
-                    if (window.disabledMode) return;
-                    window.setMarker(e.latlng.lat, e.latlng.lng);
-                    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'coords', latitude: e.latlng.lat, longitude: e.latlng.lng }));
-                });
+  map.on('click', (e) => {
+    if (window.disabledMode) return;
+    window.setMarker(e.latlng.lat, e.latlng.lng);
+    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'coords', latitude: e.latlng.lat, longitude: e.latlng.lng }));
+  });
 
-                window.updateMapLocation = (lat, lng) => {
-                    map.setView([lat, lng], 15);
-                }
-            </script>
-        </body>
-        </html>
-    `;
+  window.updateMapLocation = (lat, lng) => {
+    map.setView([lat, lng], 15);
+  }
+  </script>
+  </body>
+  </html>
+  `;
 
   const onMessage = (event: any) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
-      if (data.type === "touchstart") setScrollEnabled(false);
-      if (data.type === "touchend") setScrollEnabled(true);
-      if (
-        !disabled &&
-        data.type === "coords" &&
-        data.latitude &&
-        data.longitude
-      ) {
+      if (data.type === 'touchstart') setScrollEnabled(false);
+      if (data.type === 'touchend') setScrollEnabled(true);
+      if (!disabled && data.type === 'coords' && data.latitude && data.longitude) {
         setLocation({ latitude: data.latitude, longitude: data.longitude });
         setErrorMsg(null);
       }
-    } catch {}
+    } catch { }
   };
 
   const handleLoadEnd = () => {
     isMapLoadedRef.current = true;
-    webViewRef.current?.injectJavaScript(
-      `window.disabledMode = ${disabled ? "true" : "false"}; true;`,
-    );
+    webViewRef.current?.injectJavaScript(`window.disabledMode = ${disabled ? 'true' : 'false'}; true;`);
     if (location !== null) {
-      webViewRef.current?.injectJavaScript(
-        `window.updateMapLocation(${location.latitude}, ${location.longitude}); true;`,
-      );
-      webViewRef.current?.injectJavaScript(
-        `window.setMarker(${location.latitude}, ${location.longitude}); true;`,
-      );
+      webViewRef.current?.injectJavaScript(`window.updateMapLocation(${location.latitude}, ${location.longitude}); true;`);
+      webViewRef.current?.injectJavaScript(`window.setMarker(${location.latitude}, ${location.longitude}); true;`);
     }
   };
 
   return (
     <View className="w-full mb-8">
-      <View className="flex-row justify-between items-center mb-2">
-        <Text className="text-2xl text-theme-text font-bold">Location</Text>
+    <View className="flex-row justify-between items-center mb-2">
+    <Text className="text-2xl text-theme-text font-bold">Location</Text>
 
-        {!disabled && (
-          <TouchableOpacity
-            onPress={getCurrentLocation}
-            className="flex-row items-center bg-theme-surface px-3 py-2 rounded-md"
-            disabled={isFetching}
-          >
-            {isFetching ? (
-              <ActivityIndicator size="small" color={colors.text} />
-            ) : (
-              <>
-                <MaterialCommunityIcons
-                  name="crosshairs-gps"
-                  size={18}
-                  color={colors.text}
-                />
-                <Text className="text-theme-text ml-2">Get Current</Text>
-              </>
-            )}
-          </TouchableOpacity>
-        )}
-      </View>
+    {!disabled && (
+      <TouchableOpacity
+      onPress={getCurrentLocation}
+      className="flex-row items-center bg-theme-surface px-3 py-2 rounded-md"
+      disabled={isFetching}
+      >
+      {isFetching ? (
+        <ActivityIndicator size="small" color={colors.text} />
+      ) : (
+        <>
+        <MaterialCommunityIcons name="crosshairs-gps" size={18} color={colors.text} />
+        <Text className="text-theme-text ml-2">Get Current</Text>
+        </>
+      )}
+      </TouchableOpacity>
+    )}
+    </View>
 
-      <View className="w-full h-[400px] rounded-md overflow-hidden bg-theme-surface border border-transparent items-center justify-center px-4">
-        {WebView ? (
-          <WebView
-            ref={webViewRef}
-            originWhitelist={["*"]}
-            source={{ html: mapHtml }}
-            onMessage={onMessage}
-            onLoadEnd={handleLoadEnd}
-            scrollEnabled={false}
-            showsVerticalScrollIndicator={false}
-            showsHorizontalScrollIndicator={false}
-          />
-        ) : (
-          <View className="items-center gap-3">
-            <MaterialCommunityIcons
-              name="map-off-outline"
-              size={34}
-              color={colors.icon}
-            />
-            <Text className="text-center text-theme-text">
-              Map preview is unavailable in this build. Location entry still
-              works without the map.
-            </Text>
-          </View>
-        )}
+    <View className="w-full h-[400px] rounded-md overflow-hidden bg-theme-surface border border-transparent items-center justify-center px-4">
+    {WebView ? (
+      <WebView
+      ref={webViewRef}
+      originWhitelist={['*']}
+      source={{ html: mapHtml }}
+      onMessage={onMessage}
+      onLoadEnd={handleLoadEnd}
+      scrollEnabled={false}
+      showsVerticalScrollIndicator={false}
+      showsHorizontalScrollIndicator={false}
+      />
+    ) : (
+      <View className="items-center gap-3">
+      <MaterialCommunityIcons name="map-off-outline" size={34} color={colors.icon} />
+      <Text className="text-center text-theme-text">
+      Map preview is unavailable in this build. Location entry still works without the map.
+      </Text>
       </View>
+    )}
+    </View>
 
-      <View className="flex-row justify-between mt-2">
-        <Text className="text-sm text-theme-text opacity-70">
-          {location
-            ? `${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}`
-            : "No location selected"}
-        </Text>
-        {errorMsg && <Text className="text-red-500 text-sm">{errorMsg}</Text>}
-      </View>
+    <View className="flex-row justify-between mt-2">
+    <Text className="text-sm text-theme-text opacity-70">
+    {location ? `${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}` : "No location selected"}
+    </Text>
+    {errorMsg && <Text className="text-red-500 text-sm">{errorMsg}</Text>}
+    </View>
     </View>
   );
 };
