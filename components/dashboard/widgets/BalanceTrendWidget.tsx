@@ -1,7 +1,8 @@
 import React from "react";
 import { View, Text, useColorScheme } from "react-native";
 import { DashboardWidgetCard } from "./DashboardWidgetCard";
-import { useBalanceTrend, BalanceDataPoint } from "@/hooks/use-balance-trend";
+import { useBalanceTrend } from "@/hooks/use-balance-trend";
+import { BalanceDataPoint } from "@/utils/trendCalculations";
 import { CartesianChart, Line, Area } from "victory-native";
 import { Colors } from "@/constants/theme";
 import { formatCurrency } from "@/utils/formatCurrency";

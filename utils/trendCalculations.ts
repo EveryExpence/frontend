@@ -1,0 +1,100 @@
+import { SQLiteDatabase } from "expo-sqlite";
+import { getAllAccounts, getAccountBalance } from "@/data/accounts";
+import { getAllExpenseRecords } from "@/data/expenseRecords";
+
+export interface BalanceDataPoint {
+    day: string;
+    balance: number;
+    [key: string]: unknown;
+}
+
+export const calculateBalanceTrend = async (
+    db: SQLiteDatabase,
+    startDate: Date,
+    endDate: Date
+): Promise<{ points: BalanceDataPoint[]; percentageChange: number; primaryCurrency: string }> => {
+    const [accounts, records] = await Promise.all([
+        getAllAccounts(db),
+        getAllExpenseRecords(db),
+    ]);
+
+    let primaryCurrency = "PLN";
+    if (accounts.length > 0) {
+        primaryCurrency = accounts[0].currency;
+    }
+
+    let currentBalance = 0;
+    for (const acc of accounts) {
+        const bal = await getAccountBalance(db, acc.id);
+        currentBalance += bal;
+    }
+
+    const sortedRecords = [...records]
+        .filter(r => r.syncState !== 'deleted')
+        .sort((a, b) => {
+            const dateA = new Date(a.createdAt ?? 0).getTime();
+            const dateB = new Date(b.createdAt ?? 0).getTime();
+            return dateB - dateA;
+        });
+
+    let tempBalance = currentBalance;
+    let recordIdx = 0;
+
+    const endOfPeriod = new Date(endDate);
+    while (recordIdx < sortedRecords.length) {
+        const createdAt = sortedRecords[recordIdx].createdAt;
+        const rDate = createdAt ? new Date(createdAt) : new Date(0);
+        if (rDate > endOfPeriod) {
+            tempBalance -= sortedRecords[recordIdx].amount;
+            recordIdx++;
+        } else {
+            break;
+        }
+    }
+
+    const points: BalanceDataPoint[] = [];
+    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const step = Math.max(1, Math.ceil(diffDays / 30));
+
+    for (let i = 0; i <= diffDays; i += step) {
+        const d = new Date(endDate);
+        d.setDate(d.getDate() - i);
+        if (d < startDate && i !== 0) break;
+
+        const targetDate = d < startDate ? startDate : d;
+
+        while (recordIdx < sortedRecords.length) {
+            const createdAt = sortedRecords[recordIdx].createdAt;
+            const rDate = createdAt ? new Date(createdAt) : new Date(0);
+            if (rDate > targetDate) {
+                tempBalance -= sortedRecords[recordIdx].amount;
+                recordIdx++;
+            } else {
+                break;
+            }
+        }
+
+        points.push({
+            day: targetDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' }),
+            balance: tempBalance
+        });
+        if (targetDate.getTime() === startDate.getTime()) break;
+    }
+
+    const reversedPoints = points.reverse();
+
+    let percentageChange = 0;
+    if (reversedPoints.length > 0) {
+        const initialBalance = reversedPoints[0].balance;
+        const finalBalance = reversedPoints[reversedPoints.length - 1].balance;
+
+        if (initialBalance !== 0) {
+            percentageChange = ((finalBalance - initialBalance) / Math.abs(initialBalance)) * 100;
+        } else if (finalBalance !== 0) {
+            percentageChange = 100;
+        }
+    }
+
+    return { points: reversedPoints, percentageChange, primaryCurrency };
+};

@@ -1,15 +1,10 @@
 import { useSQLiteContext } from "expo-sqlite";
-import { getAllAccounts, getAccountBalance } from "@/data/accounts";
 import { getAllExpenseRecords } from "@/data/expenseRecords";
 import { getAllCategories } from "@/data/categories";
+import { getAllAccounts } from "@/data/accounts";
 import React from "react";
 import { formatCurrency } from "@/utils/formatCurrency";
-
-export interface BalanceDataPoint {
-    day: string;
-    balance: number;
-    [key: string]: unknown;
-}
+import { BalanceDataPoint, calculateBalanceTrend } from "@/utils/trendCalculations";
 
 export interface IncomeSource {
     categoryId: string;
@@ -41,15 +36,19 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date) => {
         if (!db) return;
         try {
             setLoading(true);
-            const [accounts, records, categories] = await Promise.all([
-                getAllAccounts(db),
-                getAllExpenseRecords(db),
-                getAllCategories(db)
-            ]);
+            
+            // 1. Get Trend Data using shared utility
+            const trendResult = await calculateBalanceTrend(db, startDate, endDate);
+            setData(trendResult.points);
+            setPercentageChange(trendResult.percentageChange);
+            setCurrency(trendResult.primaryCurrency);
 
-            if (accounts.length > 0) {
-                setCurrency(accounts[0].currency);
-            }
+            // 2. Calculate Sources
+            const [categories, records, accounts] = await Promise.all([
+                getAllCategories(db),
+                getAllExpenseRecords(db),
+                getAllAccounts(db)
+            ]);
 
             const categoryMap: Record<string, string> = {};
             categories.forEach(c => categoryMap[c.id] = c.name);
@@ -57,10 +56,10 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date) => {
             const accountCurrencyMap: Record<string, string> = {};
             accounts.forEach(a => accountCurrencyMap[a.id] = a.currency);
 
-            // 1. Calculate Income Sources for the period
             const startTs = startDate.getTime();
             const endTs = endDate.getTime();
 
+            // 2.1 Calculate Income Sources
             const incomeRecords = records.filter(r => {
                 if (r.amount <= 0 || r.syncState === 'deleted') return false;
                 const ts = typeof r.createdAt === 'number' ? r.createdAt : new Date(r.createdAt ?? 0).getTime();
@@ -76,7 +75,7 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date) => {
                 incomeGroupMap.set(catId, existing);
             });
 
-            const sources: IncomeSource[] = Array.from(incomeGroupMap.entries())
+            const iSources: IncomeSource[] = Array.from(incomeGroupMap.entries())
                 .sort((a, b) => b[1].total - a[1].total)
                 .slice(0, 3)
                 .map(([catId, d]) => ({
@@ -86,8 +85,9 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date) => {
                     displayAmount: formatCurrency(d.total, d.currency),
                     currency: d.currency
                 }));
-            setIncomeSources(sources);
+            setIncomeSources(iSources);
 
+            // 2.2 Calculate Spending Sources
             const spendingRecords = records.filter(r => {
                 if (r.amount >= 0 || r.syncState === 'deleted') return false;
                 const ts = typeof r.createdAt === 'number' ? r.createdAt : new Date(r.createdAt ?? 0).getTime();
@@ -114,84 +114,6 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date) => {
                     currency: d.currency
                 }));
             setSpendingSources(sSources);
-
-            let currentBalance = 0;
-            for (const acc of accounts) {
-                const bal = await getAccountBalance(db, acc.id);
-                currentBalance += bal;
-            }
-
-            const sortedRecords = [...records]
-                .filter(r => r.syncState !== 'deleted')
-                .sort((a, b) => {
-                    const dateA = new Date(a.createdAt ?? 0).getTime();
-                    const dateB = new Date(b.createdAt ?? 0).getTime();
-                    return dateB - dateA;
-                });
-
-            let tempBalance = currentBalance;
-            let recordIdx = 0;
-            const now = new Date();
-
-            const endOfPeriod = new Date(endDate);
-            while (recordIdx < sortedRecords.length) {
-                const createdAt = sortedRecords[recordIdx].createdAt;
-                const rDate = createdAt ? new Date(createdAt) : new Date(0);
-                if (rDate > endOfPeriod) {
-                    tempBalance -= sortedRecords[recordIdx].amount;
-                    recordIdx++;
-                } else {
-                    break;
-                }
-            }
-
-            const points: BalanceDataPoint[] = [];
-            const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            const step = Math.max(1, Math.ceil(diffDays / 30));
-
-            for (let i = 0; i <= diffDays; i += step) {
-                const d = new Date(endDate);
-                d.setDate(d.getDate() - i);
-                if (d < startDate && i !== 0) break;
-
-                const targetDate = d < startDate ? startDate : d;
-
-                while (recordIdx < sortedRecords.length) {
-                    const createdAt = sortedRecords[recordIdx].createdAt;
-                    const rDate = createdAt ? new Date(createdAt) : new Date(0);
-                    if (rDate > targetDate) {
-                        tempBalance -= sortedRecords[recordIdx].amount;
-                        recordIdx++;
-                    } else {
-                        break;
-                    }
-                }
-
-                points.push({
-                    day: targetDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' }),
-                    balance: tempBalance
-                });
-                if (targetDate === startDate) break;
-            }
-
-            const reversedPoints = points.reverse();
-            setData(reversedPoints);
-
-            if (reversedPoints.length > 0) {
-                const initialBalance = reversedPoints[0].balance;
-                const finalBalance = reversedPoints[reversedPoints.length - 1].balance;
-
-                if (initialBalance !== 0) {
-                    setPercentageChange(((finalBalance - initialBalance) / Math.abs(initialBalance)) * 100);
-                } else if (finalBalance !== 0) {
-                    setPercentageChange(100);
-                } else {
-                    setPercentageChange(0);
-                }
-            } else {
-                setPercentageChange(0);
-            }
 
         } catch (e: any) {
             setError(e?.message ?? String(e));
