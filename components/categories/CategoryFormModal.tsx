@@ -35,7 +35,7 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
 
     if (editingCategory) {
       setName(editingCategory.name);
-      setTypeIndex(Math.max(0, categoryTypes.indexOf(editingCategory.type)));
+      setTypeIndex(Math.max(0, categoryTypes.indexOf(editingCategory.type.toLowerCase() as any)));
     } else {
       setName('');
       setTypeIndex(0);

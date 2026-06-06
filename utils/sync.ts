@@ -187,7 +187,7 @@ export const syncExpenseRecords = async (db: SQLiteDatabase) => {
         const response = await apiFetch(updateExpenseRecordEndpoint(item.id), {
             method: "PUT",
             body: JSON.stringify({ 
-                amount: item.amount,
+                amount: Math.abs(item.amount),
                 date: dateStr,
                 time: timeStr,
                 location: item.location,
@@ -209,7 +209,7 @@ export const syncExpenseRecords = async (db: SQLiteDatabase) => {
             method: "POST",
             body: JSON.stringify({ 
                 id: item.id,
-                amount: item.amount,
+                amount: Math.abs(item.amount),
                 date: dateStr,
                 time: timeStr,
                 location: item.location,

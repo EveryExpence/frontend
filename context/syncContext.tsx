@@ -32,14 +32,26 @@ export const SyncProvider = ({ children }: { children: React.ReactNode }) => {
         setIsSyncing(true);
         console.log("SYNCHRONIZING");
 
-        const syncRequests = [
-            syncCategories(db),
-            syncAccounts(db),
-            syncPaymentMethods(db),
-            syncExpenseRecords(db),
-        ];
-
-        await Promise.allSettled(syncRequests);
+        try {
+            await syncCategories(db);
+        } catch (e) {
+            console.error("Failed to sync categories:", e);
+        }
+        try {
+            await syncAccounts(db);
+        } catch (e) {
+            console.error("Failed to sync accounts:", e);
+        }
+        try {
+            await syncPaymentMethods(db);
+        } catch (e) {
+            console.error("Failed to sync payment methods:", e);
+        }
+        try {
+            await syncExpenseRecords(db);
+        } catch (e) {
+            console.error("Failed to sync expense records:", e);
+        }
         console.log("SYNCHRONIZED");
         setIsSyncing(false);
     };
