@@ -10,11 +10,11 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { matchFont, DashPathEffect } from "@shopify/react-native-skia";
 import { useRouter } from "expo-router";
 
-export const BalanceTrendWidget: React.FC<{ onShowMore?: () => void }> = ({
-  onShowMore,
+export const BalanceTrendWidget: React.FC<{ onShowMore?: () => void; accountId?: string }> = ({
+  onShowMore, accountId
 }) => {
   const router = useRouter();
-  const { data, percentageChange, currency, loading, error } = useBalanceTrend();
+  const { data, percentageChange, currency, loading, error } = useBalanceTrend(accountId);
   const scheme = useColorScheme() ?? "light";
   const colors = Colors[scheme];
 
