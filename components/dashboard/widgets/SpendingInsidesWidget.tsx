@@ -11,8 +11,8 @@ import { getCategoryIcon } from "@/types/data/category";
 import { PolarChart, Pie } from "victory-native";
 import { CATEGORY_COLORS } from "@/constants/categoryColors";
 
-export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void }> = ({
-  onShowMore,
+export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void; accountId?: string }> = ({
+  onShowMore, accountId
 }) => {
   const scheme = useColorScheme() ?? "light";
   const [recordsRaw, setRecordsRaw] = React.useState<any[]>([]);
@@ -46,8 +46,12 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void }> = ({
 
         setLoading(true);
         const local = await getAllExpenseRecords(db);
+        let filteredLocal = local;
+        if (accountId) {
+            filteredLocal = local.filter((r) => r.accountId === accountId);
+        }
         if (mounted) {
-          setRecordsRaw(local);
+          setRecordsRaw(filteredLocal);
         }
       } catch (e: any) {
         if (mounted) setError(e?.message ?? String(e));
@@ -58,7 +62,7 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void }> = ({
     return () => {
       mounted = false;
     };
-  }, [db]);
+  }, [db, accountId]);
 
   const totalsByCategory = React.useMemo(() => {
     const map = new Map<string, { amount: number; currency: string }[]>();

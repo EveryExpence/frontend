@@ -2,7 +2,7 @@ import { useSQLiteContext } from "expo-sqlite";
 import React from "react";
 import { BalanceDataPoint, calculateBalanceTrend } from "@/utils/trendCalculations";
 
-export const useBalanceTrend = () => {
+export const useBalanceTrend = (accountId?: string) => {
     const db = useSQLiteContext();
     const [data, setData] = React.useState<BalanceDataPoint[]>([]);
     const [percentageChange, setPercentageChange] = React.useState<number>(0);
@@ -18,7 +18,7 @@ export const useBalanceTrend = () => {
             const start = new Date();
             start.setDate(now.getDate() - 30);
             
-            const result = await calculateBalanceTrend(db, start, now);
+            const result = await calculateBalanceTrend(db, start, now, accountId);
             
             setData(result.points);
             setPercentageChange(result.percentageChange);
@@ -28,7 +28,7 @@ export const useBalanceTrend = () => {
         } finally {
             setLoading(false);
         }
-    }, [db]);
+    }, [db, accountId]);
 
     React.useEffect(() => {
         fetchTrend();

@@ -37,7 +37,7 @@ function formatDateLabel(ts?: number) {
     return d.toLocaleDateString();
 }
 
-export function useExpenseRecords() {
+export function useExpenseRecords(accountId?: string) {
     const db = useSQLiteContext();
     const [records, setRecords] = React.useState<TransactionRecord[]>([]);
     const [loading, setLoading] = React.useState(false);
@@ -84,7 +84,7 @@ export function useExpenseRecords() {
         } finally {
             setLoading(false);
         }
-    }, [db]);
+    }, [db, accountId]);
 
     React.useEffect(() => {
         fetch();

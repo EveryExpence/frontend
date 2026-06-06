@@ -121,14 +121,19 @@ const Dashboard = () => {
             />
 
             <TransactionHistoryWidget
+              accountId={pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
               onSeeAllPress={() => router.push("/records")}
             />
 
             <SpendingInsidesWidget
+              accountId={pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
               onShowMore={() => router.push("/spending-insights")}
             />
 
-            <BalanceTrendWidget onShowMore={() => {}} />
+            <BalanceTrendWidget 
+              accountId={pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
+              onShowMore={() => {}} 
+            />
           </ScrollView>
         )}
       </SafeAreaView>

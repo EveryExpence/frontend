@@ -10,6 +10,7 @@ import { getCategoryIcon } from "@/types/data/category";
 interface TransactionHistoryWidgetProps {
   records?: TransactionRecord[];
   onSeeAllPress: () => void;
+  accountId?: string;
 }
 
 export const TransactionHistoryRow = ({
@@ -50,8 +51,8 @@ export const TransactionHistoryRow = ({
   );
 };
 
-export const TransactionHistoryWidget: React.FC<TransactionHistoryWidgetProps> = ({ records: propRecords, onSeeAllPress }) => {
-  const { records: localRecords, loading, error } = useExpenseRecords();
+export const TransactionHistoryWidget: React.FC<TransactionHistoryWidgetProps> = ({ records: propRecords, onSeeAllPress, accountId }) => {
+  const { records: localRecords, loading, error } = useExpenseRecords(accountId);
 
   const toShow = propRecords && propRecords.length > 0 ? propRecords : (localRecords ?? []).slice(0, 3);
 
