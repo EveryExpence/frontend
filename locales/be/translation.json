@@ -33,6 +33,10 @@
     "record_details": "Дэталі запісу",
     "update_success": "Запіс паспяхова абноўлены",
     "update_failed": "Не ўдалося абнавіць запіс",
+    "delete_record": "Выдаліць транзакцыю",
+    "delete_confirm": "Выдаліць {{title}}?",
+    "delete_success": "Транзакцыя выдалена",
+    "delete_failed": "Не ўдалося выдаліць транзакцыю",
     "uncategorized": "Без катэгорыі"
   },
   "balance_trend": {
@@ -67,6 +71,10 @@
     "enter_name": "Увядзіце назву",
     "select_account": "Выберыце рахунак",
     "search_account": "Пошук рахунку...",
+    "select_payment_method": "Выберыце метад аплаты",
+    "search_payment_method": "Пошук метаду аплаты...",
+    "create_payment_method": "Стварыць новы метад аплаты",
+    "payment_method_name": "Назва метаду аплаты",
     "analyze_ai": "Прааналізаваць чэк з дапамогай AI",
     "analyzing": "Аналіз чэка...",
     "save_record": "Захаваць новы запіс",

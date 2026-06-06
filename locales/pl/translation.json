@@ -33,6 +33,10 @@
     "record_details": "Szczegóły Rekordu",
     "update_success": "Rekord zaktualizowany pomyślnie",
     "update_failed": "Nie udało się zaktualizować rekordu",
+    "delete_record": "Usuń transakcję",
+    "delete_confirm": "Usunąć {{title}}?",
+    "delete_success": "Transakcja usunięta",
+    "delete_failed": "Nie udało się usunąć transakcji",
     "uncategorized": "Nieskategoryzowane"
   },
   "balance_trend": {
@@ -67,6 +71,10 @@
     "enter_name": "Wpisz nazwę",
     "select_account": "Wybierz konto",
     "search_account": "Szukaj konta...",
+    "select_payment_method": "Wybierz metodę płatności",
+    "search_payment_method": "Szukaj metody płatności...",
+    "create_payment_method": "Stwórz nową metodę płatności",
+    "payment_method_name": "Nazwa metody płatności",
     "analyze_ai": "Analizuj paragon za pomocą AI",
     "analyzing": "Analizowanie paragonu...",
     "save_record": "Zapisz nowy rekord",
