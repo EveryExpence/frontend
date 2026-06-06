@@ -5,6 +5,7 @@ import { formatCurrency } from "@/utils/formatCurrency";
 import { Colors } from "@/constants/theme";
 import { DashboardWidgetCard } from "./DashboardWidgetCard";
 import { useExpenseRecords, TransactionRecord } from "@/hooks/use-expense-records";
+import { getCategoryIcon } from "@/types/data/category";
 
 interface TransactionHistoryWidgetProps {
   records?: TransactionRecord[];
@@ -25,7 +26,7 @@ export const TransactionHistoryRow = ({
       <View className="flex-1 flex-row items-center">
         <View className="h-11 w-11 items-center justify-center rounded-full bg-theme-tint">
           <MaterialCommunityIcons
-            name="swap-vertical"
+            name={getCategoryIcon(record.categoryName)}
             size={20}
             color={colors.textLight}
           />

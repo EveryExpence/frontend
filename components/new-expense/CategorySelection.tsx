@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity, TextInput } from 'react-native'
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Dropdown } from 'react-native-element-dropdown'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import { Category, categoryTypes } from '@/types/data/category'
+import { Category, categoryTypes, getCategoryIcon } from '@/types/data/category'
 import { Colors } from '@/constants/theme'
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite'
 import { createCategory, getAllCategories } from '@/data/categories'
@@ -88,10 +88,20 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled }: 
                     renderLeftIcon={() => (
                         <MaterialCommunityIcons
                             className="mr-6"
-                            name="chart-waterfall"
+                            name={selectedCategory ? getCategoryIcon(selectedCategory.name) : "chart-waterfall"}
                             size={20}
                             color={colors.text}
                         />
+                    )}
+                    renderItem={(item) => (
+                        <View className="flex-row items-center p-3 gap-3">
+                            <MaterialCommunityIcons 
+                                name={getCategoryIcon(item.name)} 
+                                size={20} 
+                                color={colors.text} 
+                            />
+                            <Text className="text-[17px]" style={{ color: colors.text }}>{item.name}</Text>
+                        </View>
                     )}
                     renderRightIcon={() => disabled ? <></> : (
                         <MaterialCommunityIcons

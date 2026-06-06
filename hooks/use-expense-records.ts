@@ -2,6 +2,8 @@ import React from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
 import { getAllExpenseRecords } from '@/data/expenseRecords';
 import { getAllAccounts } from '@/data/accounts';
+import { getAllCategories } from '@/data/categories';
+import { getAllPaymentMethods } from '@/data/paymentMethods';
 import { formatCurrency } from '@/utils/formatCurrency';
 
 export interface TransactionRecord {
@@ -11,6 +13,8 @@ export interface TransactionRecord {
     currency: string;
     kind: 'income' | 'expense';
     dateLabel: string;
+    categoryName: string;
+    paymentMethodName: string;
 }
 
 export interface TransactionSection {
@@ -44,13 +48,21 @@ export function useExpenseRecords(accountId?: string) {
         try {
             setLoading(true);
             setError(null);
-            let local = await getAllExpenseRecords(db);
-            if (accountId) {
-                local = local.filter(r => r.accountId === accountId);
-            }
-            const accounts = await getAllAccounts(db);
+            const [local, accounts, categories, paymentMethods] = await Promise.all([
+                getAllExpenseRecords(db),
+                getAllAccounts(db),
+                getAllCategories(db),
+                getAllPaymentMethods(db)
+            ]);
+
             const accountMap: Record<string, string> = {};
             accounts.forEach((a) => (accountMap[a.id] = a.currency));
+
+            const categoryMap: Record<string, string> = {};
+            categories.forEach((c) => (categoryMap[c.id] = c.name));
+
+            const paymentMethodMap: Record<string, string> = {};
+            paymentMethods.forEach((pm) => (paymentMethodMap[pm.id] = pm.name));
 
             const mapped: TransactionRecord[] = local
                 .slice()
@@ -62,6 +74,8 @@ export function useExpenseRecords(accountId?: string) {
                     currency: accountMap[r.accountId] ?? 'PLN',
                     kind: r.amount >= 0 ? 'income' : 'expense',
                     dateLabel: formatDateLabel(r.createdAt),
+                    categoryName: categoryMap[r.categoryId] ?? 'Uncategorized',
+                    paymentMethodName: paymentMethodMap[r.paymentMethodId] ?? 'Unknown',
                 }));
 
             setRecords(mapped);
