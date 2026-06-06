@@ -3,6 +3,7 @@ import React, { Dispatch, SetStateAction } from 'react'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { Colors } from '@/constants/theme';
 import { Account } from '@/types/data/account';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     selectedAccount: Account | null;
@@ -13,12 +14,13 @@ interface Props {
 }
 
 const AmountInput = ({ selectedAccount, amount, setAmount, isValid, disabled }: Props) => {
+    const { t } = useTranslation();
     const scheme = useColorScheme() ?? 'light';
     const colors = Colors[scheme];
 
     return (
         <View className="w-full mb-8">
-            <Text className="text-2xl text-theme-text font-bold">Amount</Text>
+            <Text className="text-2xl text-theme-text font-bold">{t("new_expense.amount")}</Text>
 
             <View className="w-full flex flex-row items-center">
                 <MaterialCommunityIcons
@@ -28,11 +30,12 @@ const AmountInput = ({ selectedAccount, amount, setAmount, isValid, disabled }: 
                     className="absolute left-3 text-theme-icon z-50"
                 />
                 <TextInput
-                    placeholder='Enter amount'
-                    placeholderClassName="text-theme-text opacity-35"
+                    placeholder={t("new_expense.enter_amount")}
+                    placeholderTextColor={colors.icon}
                     value={amount}
                     onChangeText={setAmount}
                     editable={!disabled}
+                    style={{ color: colors.text }}
                     className={`px-16 w-full py-4 text-xl rounded-md bg-theme-surface text-theme-text
                         ${amount !== "" && selectedAccount !== null ? 'pr-16' : 'pr-4'}
                         ${isValid ? '' : "border border-red-500"}`}
@@ -44,7 +47,7 @@ const AmountInput = ({ selectedAccount, amount, setAmount, isValid, disabled }: 
             </View>
 
             <View className="relative h-0">
-                <Text className="absolute text-red-500">{isValid ? "" : "Must be a valid number"}</Text>
+                <Text className="absolute text-red-500">{isValid ? "" : t("new_expense.error_invalid_number")}</Text>
             </View>
         </View>
     )

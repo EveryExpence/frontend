@@ -8,6 +8,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Toast from 'react-native-toast-message';
 import ControlledInputField from '@/components/ControlledInputField';
+import { useTranslation } from 'react-i18next';
 
 export const formSchema = z.object({
   email: z.email("Must be a valid email"),
@@ -34,6 +35,7 @@ export const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 const SignUpScreen = () => {
+    const { t } = useTranslation();
     const router = useRouter();
     const theme = useColorScheme() || 'light';
     const colors = Colors[theme];
@@ -55,14 +57,14 @@ const SignUpScreen = () => {
 
         try {
             await register(email, password);
-            Toast.show({ text1: "Signed up successfully" });
+            Toast.show({ text1: t("auth.sign_up_success") });
             router.replace('/login');
         } catch (error) {
             let msg = error;
             if (error === 'Duplicate data') {
-                msg = 'Email already in use';
+                msg = t("auth.error_email_in_use");
             };
-            Toast.show({ text1: `Failed to sign up: ${msg}`, type: "error" });
+            Toast.show({ text1: `${t("auth.sign_up_failed")}: ${msg}`, type: "error" });
         }
     };
 
@@ -77,13 +79,13 @@ const SignUpScreen = () => {
     return (
         <View className="flex-1 justify-center gap-3">
             <View className="w-full px-8 justify-start">
-                <Text className="text-2xl pl-2 text-theme-text">Email</Text>
+                <Text className="text-2xl pl-2 text-theme-text">{t("auth.email")}</Text>
                 <Controller
                     control={form.control}
                     name="email"
                     render={({ field: { onChange, onBlur, value } }) => (
                         <TextInput
-                            placeholder='Enter email'
+                            placeholder={t("auth.enter_email")}
                             placeholderTextColor={colors.text}
                             textContentType="emailAddress"
                             autoCapitalize="none"
@@ -105,11 +107,11 @@ const SignUpScreen = () => {
 
             <View className="w-full px-8 justify-start">
                 <ControlledInputField
-                    label="Password"
+                    label={t("auth.password")}
                     name="password"
                     control={form.control}
                     secureTextEntry
-                    placeholder="Enter password"
+                    placeholder={t("auth.enter_password")}
                     placeholderTextColor={colors.text}
                     inputClassName={`w-full p-4 text-xl border rounded-md text-theme-text ${
                         form.formState.errors.password ? 'border-red-500' : 'border-theme-text'
@@ -119,11 +121,11 @@ const SignUpScreen = () => {
 
             <View className="w-full px-8 justify-start">
                 <ControlledInputField
-                    label="Confirm Password"
+                    label={t("auth.confirm_password")}
                     name="passwordConfirmation"
                     control={form.control}
                     secureTextEntry
-                    placeholder="Enter password again"
+                    placeholder={t("auth.confirm_new_password")}
                     placeholderTextColor={colors.text}
                     inputClassName={`w-full p-4 text-xl border rounded-md text-theme-text ${
                         form.formState.errors.passwordConfirmation ? 'border-red-500' : 'border-theme-text'
@@ -141,7 +143,7 @@ const SignUpScreen = () => {
                     }`}
                 >
                     <Text className="text-xl text-center text-theme-textLight">
-                        Sign up
+                        {t("auth.sign_up")}
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -151,7 +153,7 @@ const SignUpScreen = () => {
                     <Text
                         onPress={() => router.replace("/login")}
                         className="text-lg text-center underline text-theme-text"
-                    >Already have an account?</Text>
+                    >{t("auth.already_have_account")}</Text>
                 </View>
             </View>
         </View>

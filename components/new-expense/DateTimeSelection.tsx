@@ -3,6 +3,7 @@ import React, { Dispatch, SetStateAction, useState } from 'react'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Colors } from '@/constants/theme';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     selectedDateTime: Date;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 const DateTimeSelection = ({ selectedDateTime, setSelectedDateTime, disabled }: Props) => {
+    const { t, i18n } = useTranslation();
     const scheme = useColorScheme() ?? 'light';
     const colors = Colors[scheme];
     const [showDateSelection, setShowDateSelection] = useState(false);
@@ -20,7 +22,7 @@ const DateTimeSelection = ({ selectedDateTime, setSelectedDateTime, disabled }: 
 
     return (
         <View className="mb-8">
-            <Text className="text-2xl text-theme-text font-bold">Expense timestamp</Text>
+            <Text className="text-2xl text-theme-text font-bold">{t("new_expense.date")}</Text>
 
             <TouchableOpacity
                 onPress={() => disabled ? null : setShowDateSelection(true)}
@@ -28,7 +30,7 @@ const DateTimeSelection = ({ selectedDateTime, setSelectedDateTime, disabled }: 
                 className="bg-theme-surface py-4 px-3 rounded-md flex-row items-center gap-2"
             >
                 <MaterialCommunityIcons name="clock" size={20} color={colors.text} />
-                <Text className="text-xl text-theme-text pl-5">{selectedDateTime.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })} </Text>
+                <Text className="text-xl text-theme-text pl-5">{selectedDateTime.toLocaleDateString(i18n.language, { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })} </Text>
             </TouchableOpacity>
 
             {showDateSelection ?

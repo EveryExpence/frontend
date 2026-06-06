@@ -9,3 +9,16 @@ export interface PaymentMethod {
 export interface PaymentMethodInputDTO {
     name: string;
 }
+
+export interface CreatePaymentMethodRequestDTO {
+    name: string;
+}
+
+export interface RenamePaymentMethodRequestDTO {
+    newName: string;
+}
+
+export interface PaymentMethodResponseDTO {
+    id: string;
+    name: string;
+}

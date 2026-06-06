@@ -1,5 +1,5 @@
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
+import { ScrollView, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native'
+import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Account } from '@/types/data/account';
 import { Category } from '@/types/data/category';
@@ -19,9 +19,24 @@ import Toast from 'react-native-toast-message';
 import LocationSelection from '@/components/new-expense/LocationMap';
 import { Coordinates } from '@/types/data/location';
 import Topbar from '@/components/Topbar';
+import { useSync } from '@/context/syncContext';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors } from '@/constants/theme';
+import { apiFetch } from '@/utils/apiFetch';
+import { analyzeReceiptEndpoint } from '@/constants/endpoints';
+import { getAllCategories } from '@/data/categories';
+import { getAllPaymentMethods } from '@/data/paymentMethods';
+import { useAuth } from '@/context/authContext';
+import { useTranslation } from 'react-i18next';
 
 export default function NewExpense() {
+  const scheme = useColorScheme() ?? 'light';
+  const colors = Colors[scheme];
+  const { t } = useTranslation();
+  const { triggerSync } = useSync();
   const db = useSQLiteContext();
+  const { user } = useAuth();
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
@@ -33,15 +48,123 @@ export default function NewExpense() {
   const [images, setImages] = useState<string[]>([]);
   const [location, setLocation] = useState<Coordinates | null>(null);
   const [scrollEnabled, setScrollEnabled] = useState(true);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [recordType, setRecordType] = useState<"expense" | "income">("expense");
+
+  useEffect(() => {
+    if (selectedCategory) {
+      const typeLower = selectedCategory.type?.toLowerCase();
+      if (typeLower === "expense" || typeLower === "income") {
+        setRecordType(typeLower);
+      }
+    }
+  }, [selectedCategory]);
+
+  const changeRecordType = (type: "expense" | "income") => {
+    setRecordType(type);
+    if (selectedCategory) {
+      const typeLower = selectedCategory.type?.toLowerCase();
+      if (typeLower !== "varies" && typeLower !== type) {
+        setSelectedCategory(null);
+      }
+    }
+  };
+
+  const analyzeReceipt = async () => {
+    if (images.length === 0) {
+      Toast.show({ text1: t("new_expense.error_select_image"), type: "error" });
+      return;
+    }
+    setIsAnalyzing(true);
+    try {
+      const localCats = await getAllCategories(db);
+      const localPMs = await getAllPaymentMethods(db);
+
+      const formData = new FormData();
+      images.forEach((imageUri) => {
+        const filename = imageUri.split('/').pop() || 'receipt.jpg';
+        const match = /\.(\w+)$/.exec(filename);
+        const type = match ? `image/${match[1]}` : `image/jpeg`;
+        formData.append('images', { uri: imageUri, name: filename, type } as any);
+      });
+
+      localCats.forEach(c => formData.append('categories', c.name));
+      localPMs.forEach(pm => formData.append('paymentMethods', pm.name));
+
+      const response = await apiFetch(analyzeReceiptEndpoint, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 413) {
+          throw new Error("SIZE_LIMIT");
+        }
+        throw new Error("Failed to analyze receipt");
+      }
+
+      const data = await response.json();
+
+      if (data.amount) {
+        setAmount(data.amount.toString());
+      }
+
+      let desc = data.store_name || "";
+      if (data.products && data.products.length > 0) {
+        const productLines = data.products
+          .map((p: any) => `- ${p.name}: ${p.price}`)
+          .join('\n');
+        desc = desc ? `${desc}\n\nProducts:\n${productLines}` : productLines;
+      }
+      if (desc) {
+        setDescription(desc);
+      }
+
+      if (data.category) {
+        const matchedCat = localCats.find(c => c.name === data.category);
+        if (matchedCat) {
+          setSelectedCategory(matchedCat);
+        }
+      }
+
+      if (data.payment_method) {
+        const matchedPM = localPMs.find(pm => pm.name === data.payment_method);
+        if (matchedPM) {
+          setSelectedPaymentMethod(matchedPM);
+        }
+      }
+
+      if (data.location && data.location.lat && data.location.lng) {
+        setLocation({
+          latitude: data.location.lat,
+          longitude: data.location.lng,
+        });
+      }
+
+      Toast.show({ text1: t("new_expense.success_analysis_completed") });
+    } catch (error: any) {
+      console.error(error);
+      if (error.message === "SIZE_LIMIT") {
+        Toast.show({ text1: t("new_expense.error_size_limit"), type: "error" });
+      } else {
+        Toast.show({ text1: t("new_expense.error_failed_analysis"), text2: error.message, type: "error" });
+      }
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   const saveRecord = async () => {
     if (selectedAccount === null || selectedCategory === null || selectedPaymentMethod === null || !isAmountValid) {
-      Toast.show({ text1: "All required fields are needed", type: "error" });
+      Toast.show({ text1: t("new_expense.error_required"), type: "error" });
       return;
     }
-    const amountNumber = Number(amount);
+    const amountNumber = recordType === "expense" ? -Math.abs(Number(amount)) : Math.abs(Number(amount));
     if (amountNumber === 0) {
-      Toast.show({ text1: "Ammount has to be non-zero", type: "error" });
+      Toast.show({ text1: t("new_expense.error_zero_amount"), type: "error" });
       return;
     }
 
@@ -60,7 +183,7 @@ export default function NewExpense() {
       if (images.length > 0) {
         await saveAttachments(db, id, images);
       }
-      Toast.show({ text1: "Record was added" });
+      Toast.show({ text1: t("new_expense.success_added") });
       setSelectedAccount(null);
       setSelectedCategory(null);
       setSelectedPaymentMethod(null);
@@ -69,20 +192,57 @@ export default function NewExpense() {
       setDescription("");
       setImages([]);
       setLocation(null);
+      setRecordType("expense");
+      triggerSync();
     } catch {
-      Toast.show({ text1: "Failed to add a new record", type: "error" });
+      Toast.show({ text1: t("new_expense.error_failed_add"), type: "error" });
     }
   }
 
   return (
     <SafeAreaView>
-      <Topbar title="New Expense" />
+      <Topbar title={t("new_expense.title")} />
       <ScrollView className="px-4" scrollEnabled={scrollEnabled}>
+        <View className="flex-row bg-theme-surface p-1.5 rounded-lg mb-6 mt-4">
+          <TouchableOpacity
+            className={`flex-1 py-3 rounded-md items-center justify-center ${
+              recordType === "expense" ? "bg-theme-tint" : ""
+            }`}
+            activeOpacity={0.8}
+            onPress={() => changeRecordType("expense")}
+          >
+            <Text
+              className={`text-lg font-bold ${
+                recordType === "expense" ? "text-theme-textLight" : "text-theme-text"
+              }`}
+              style={recordType !== "expense" ? { opacity: 0.6 } : {}}
+            >
+              Expense
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            className={`flex-1 py-3 rounded-md items-center justify-center ${
+              recordType === "income" ? "bg-theme-tint" : ""
+            }`}
+            activeOpacity={0.8}
+            onPress={() => changeRecordType("income")}
+          >
+            <Text
+              className={`text-lg font-bold ${
+                recordType === "income" ? "text-theme-textLight" : "text-theme-text"
+              }`}
+              style={recordType !== "income" ? { opacity: 0.6 } : {}}
+            >
+              Income
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         <AccountSelection selectedAccount={selectedAccount} setSelectedAccount={setSelectedAccount} />
 
         <AmountInput selectedAccount={selectedAccount} amount={amount} setAmount={setAmount} isValid={isAmountValid} />
 
-        <CategorySelection selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
+        <CategorySelection selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} typeFilter={recordType} />
 
         <PaymentMethodSelection selectedPaymentMethod={selectedPaymentMethod} setSelectedPaymentMethod={setSelectedPaymentMethod} />
 
@@ -90,12 +250,31 @@ export default function NewExpense() {
 
         <DescriptionInput description={description} setDescription={setDescription} />
 
-        <ImageAttachmentSelection images={images} setImages={setImages} />
-
         <LocationSelection location={location} setLocation={setLocation} setScrollEnabled={setScrollEnabled} />
 
+        <ImageAttachmentSelection images={images} setImages={setImages} />
+
+        {user !== null && images.length > 0 && (
+          <TouchableOpacity
+            onPress={analyzeReceipt}
+            disabled={isAnalyzing}
+            className="w-full bg-theme-surface py-3.5 rounded-md mb-8 flex-row justify-center items-center gap-2 border border-theme-tint"
+            style={{ opacity: isAnalyzing ? 0.7 : 1 }}
+          >
+            {isAnalyzing ? (
+              <ActivityIndicator color={colors.tint} />
+            ) : (
+              <MaterialCommunityIcons name="image-search-outline" size={20} color={colors.tint} />
+            )}
+            <Text className="text-lg text-theme-tint font-bold">
+              {isAnalyzing ? t("new_expense.analyzing") : t("new_expense.analyze_ai")}
+            </Text>
+          </TouchableOpacity>
+        )}
+
+
         <TouchableOpacity onPress={saveRecord} className="w-full bg-theme-tint py-4 rounded-md">
-          <Text className="text-xl text-theme-textLight text-center font-bold">Save a new record</Text>
+          <Text className="text-xl text-theme-textLight text-center font-bold">{t("new_expense.save_record")}</Text>
         </TouchableOpacity>
 
         <View className="py-20" />

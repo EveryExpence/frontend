@@ -2,6 +2,7 @@ import React from 'react';
 import { Text, TouchableOpacity, View, useColorScheme } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
+import { getAccountIconName } from '@/utils/accountIcon';
 
 export type AccountCardItem = {
   id: string;
@@ -23,6 +24,7 @@ export default function AccountCard({
 }: AccountCardProps) {
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
+  const accountIcon = getAccountIconName(item.id);
 
   return (
     <View
@@ -31,7 +33,7 @@ export default function AccountCard({
     >
       <View className="flex-row items-center self-stretch flex-1 min-w-0">
         <MaterialCommunityIcons
-          name="cash-multiple"
+          name={accountIcon}
           size={48}
           color={colors.text}
           style={{ marginRight: 12 }}

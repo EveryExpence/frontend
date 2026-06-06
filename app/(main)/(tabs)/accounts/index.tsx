@@ -14,11 +14,16 @@ import {
 import AccountCard, { AccountCardItem } from '@/components/accounts/AccountCard';
 import AccountFormModal, { AccountFormData } from '@/components/accounts/AccountFormModal';
 import DeleteAccountModal from '@/components/accounts/DeleteAccountModal';
+import AccountsSectionTabs from '@/components/accounts/AccountsSectionTabs';
 import { formatBalance } from '@/utils/balance';
 import Topbar from '@/components/Topbar';
 import { useFocusEffect } from 'expo-router';
+import { useSync } from '@/context/syncContext';
+import { useTranslation } from 'react-i18next';
 
 export default function AccountsScreen() {
+  const { t } = useTranslation();
+  const { triggerSync } = useSync();
   const db = useSQLiteContext();
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
@@ -47,7 +52,7 @@ export default function AccountsScreen() {
       );
     } catch (e) {
       setAccounts([]);
-      Toast.show({ text1: `Failed to load accounts: ${e}`, type: 'error' });
+      Toast.show({ text1: `${t("accounts.load_failed")}: ${e}`, type: 'error' });
     } finally {
       setIsLoading(false);
     }
@@ -78,13 +83,14 @@ export default function AccountsScreen() {
     try {
       if (editingAccount) {
         await updateAccount(db, editingAccount.id, data);
-        Toast.show({ text1: 'Account updated', type: 'success' });
+        Toast.show({ text1: t("accounts.update_success"), type: 'success' });
       } else {
         await createAccount(db, data);
-        Toast.show({ text1: 'Account created', type: 'success' });
+        Toast.show({ text1: t("accounts.create_success"), type: 'success' });
       }
       setIsFormOpen(false);
       await loadAccounts();
+      triggerSync();
     } catch (e) {
       Toast.show({ text1: `${e}`, type: 'error' });
     }
@@ -96,10 +102,11 @@ export default function AccountsScreen() {
     setIsDeleting(true);
     try {
       await deleteAccount(db, deletingAccount.id);
-      Toast.show({ text1: 'Account deleted', type: 'success' });
+      Toast.show({ text1: t("accounts.delete_success"), type: 'success' });
       setIsDeleteOpen(false);
       setDeletingAccount(null);
       await loadAccounts();
+      triggerSync();
     } catch (e) {
       Toast.show({ text1: `${e}`, type: 'error' });
     } finally {
@@ -109,8 +116,11 @@ export default function AccountsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-theme-background">
-      <Topbar title="Accounts" />
-      <View className="flex-1 px-4">
+      <Topbar title={t("accounts.title")} />
+      <View className="px-4 pt-2">
+        <AccountsSectionTabs />
+      </View>
+      <View className="flex-1 px-4 pt-4">
         {isLoading ? (
           <View className="flex-1 items-center justify-center">
             <ActivityIndicator size={32} color={colors.tint} />
@@ -121,7 +131,7 @@ export default function AccountsScreen() {
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 24 }}
-            ListEmptyComponent={<Text className="pt-4 text-lg text-theme-icon mb-4">No accounts yet</Text>}
+            ListEmptyComponent={<Text className="pt-4 text-lg text-theme-icon mb-4">{t("accounts.no_accounts")}</Text>}
             renderItem={({ item }) => (
               <AccountCard
                 item={item}
@@ -137,7 +147,7 @@ export default function AccountsScreen() {
                   onPress={openAdd}
                 >
                   <MaterialCommunityIcons name="plus" size={22} color={colors.textLight} style={{ marginRight: 8 }} />
-                  <Text className="text-xl font-semibold text-theme-textLight">Add new account</Text>
+                  <Text className="text-xl font-semibold text-theme-textLight">{t("accounts.add_new")}</Text>
                 </TouchableOpacity>
                 <View className="py-20" />
               </View>

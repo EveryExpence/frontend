@@ -2,7 +2,10 @@ import React from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
 import { getAllExpenseRecords } from '@/data/expenseRecords';
 import { getAllAccounts } from '@/data/accounts';
+import { getAllCategories } from '@/data/categories';
+import { getAllPaymentMethods } from '@/data/paymentMethods';
 import { formatCurrency } from '@/utils/formatCurrency';
+import { useTranslation } from 'react-i18next';
 
 export interface TransactionRecord {
     id: string;
@@ -11,6 +14,8 @@ export interface TransactionRecord {
     currency: string;
     kind: 'income' | 'expense';
     dateLabel: string;
+    categoryName: string;
+    paymentMethodName: string;
 }
 
 export interface TransactionSection {
@@ -20,34 +25,50 @@ export interface TransactionSection {
     items: TransactionRecord[];
 }
 
-function formatDateLabel(ts?: number) {
-    if (!ts) return '';
-    const d = new Date(ts);
-    const now = new Date();
-    const isToday = d.toDateString() === now.toDateString();
-    const yesterday = new Date();
-    yesterday.setDate(now.getDate() - 1);
-    const isYesterday = d.toDateString() === yesterday.toDateString();
-    if (isToday) return 'Today';
-    if (isYesterday) return 'Yesterday';
-    return d.toLocaleDateString();
-}
-
-export function useExpenseRecords() {
+export function useExpenseRecords(accountId?: string) {
     const db = useSQLiteContext();
+    const { t } = useTranslation();
     const [records, setRecords] = React.useState<TransactionRecord[]>([]);
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
+
+    const formatDateLabel = React.useCallback((ts?: number) => {
+        if (!ts) return '';
+        const d = new Date(ts);
+        const now = new Date();
+        const isToday = d.toDateString() === now.toDateString();
+        const yesterday = new Date();
+        yesterday.setDate(now.getDate() - 1);
+        const isYesterday = d.toDateString() === yesterday.toDateString();
+        if (isToday) return t('common.today');
+        if (isYesterday) return t('common.yesterday');
+        return d.toLocaleDateString();
+    }, [t]);
 
     const fetch = React.useCallback(async () => {
         if (!db) return;
         try {
             setLoading(true);
             setError(null);
-            const local = await getAllExpenseRecords(db);
-            const accounts = await getAllAccounts(db);
+            let [local, accounts, categories, paymentMethods] = await Promise.all([
+                getAllExpenseRecords(db),
+                getAllAccounts(db),
+                getAllCategories(db),
+                getAllPaymentMethods(db)
+            ]);
+
+            if (accountId) {
+                local = local.filter(r => r.accountId === accountId);
+            }
+
             const accountMap: Record<string, string> = {};
             accounts.forEach((a) => (accountMap[a.id] = a.currency));
+
+            const categoryMap: Record<string, string> = {};
+            categories.forEach((c) => (categoryMap[c.id] = c.name));
+
+            const paymentMethodMap: Record<string, string> = {};
+            paymentMethods.forEach((pm) => (paymentMethodMap[pm.id] = pm.name));
 
             const mapped: TransactionRecord[] = local
                 .slice()
@@ -59,6 +80,8 @@ export function useExpenseRecords() {
                     currency: accountMap[r.accountId] ?? 'PLN',
                     kind: r.amount >= 0 ? 'income' : 'expense',
                     dateLabel: formatDateLabel(r.createdAt),
+                    categoryName: categoryMap[r.categoryId] ?? t('records.uncategorized'),
+                    paymentMethodName: paymentMethodMap[r.paymentMethodId] ?? t('common.other'),
                 }));
 
             setRecords(mapped);
@@ -67,7 +90,7 @@ export function useExpenseRecords() {
         } finally {
             setLoading(false);
         }
-    }, [db]);
+    }, [db, accountId]);
 
     React.useEffect(() => {
         fetch();
@@ -76,7 +99,7 @@ export function useExpenseRecords() {
     const sections = React.useMemo(() => {
         const map = new Map<string, TransactionRecord[]>();
         records.forEach((r) => {
-            const key = r.dateLabel || 'Other';
+            const key = r.dateLabel || t('common.other');
             const arr = map.get(key) ?? [];
             arr.push(r);
             map.set(key, arr);

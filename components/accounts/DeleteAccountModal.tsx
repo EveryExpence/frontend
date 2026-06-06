@@ -2,6 +2,7 @@ import React from 'react';
 import { Text, TouchableOpacity, useColorScheme } from 'react-native';
 import { Colors } from '@/constants/theme';
 import CustomModal from '@/components/Modal';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   visible: boolean;
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export default function DeleteAccountModal({ visible, name, isDeleting = false, onClose, onConfirm }: Props) {
+  const { t } = useTranslation();
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
 
@@ -21,10 +23,10 @@ export default function DeleteAccountModal({ visible, name, isDeleting = false, 
       setIsVisible={(next) => {
         if (!next) onClose();
       }}
-      title="Delete account"
+      title={t("accounts.delete_account")}
       cancelAction={
         <TouchableOpacity onPress={onClose} style={{ padding: 8 }}>
-          <Text className="text-2xl text-theme-icon">Cancel</Text>
+          <Text className="text-2xl text-theme-icon">{t("common.cancel")}</Text>
         </TouchableOpacity>
       }
       confirmAction={
@@ -34,13 +36,13 @@ export default function DeleteAccountModal({ visible, name, isDeleting = false, 
           style={{ marginLeft: 10, padding: 8, backgroundColor: colors.error, borderRadius: 8 }}
         >
           <Text className="text-2xl" style={{ color: colors.textLight }}>
-            {isDeleting ? 'Deleting...' : 'Delete'}
+            {isDeleting ? t("common.loading") : t("common.delete")}
           </Text>
         </TouchableOpacity>
       }
     >
       <Text className="text-2xl text-theme-icon" style={{ marginBottom: 4 }}>
-        Delete {name ?? ''}?
+        {t("accounts.delete_confirm", { name: name ?? '' })}
       </Text>
     </CustomModal>
   );

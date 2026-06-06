@@ -6,9 +6,12 @@ import {
   ActivityIndicator,
   Animated,
   ScrollView,
-  Text 
+  Text,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
@@ -19,14 +22,19 @@ import { AccountPage } from "@/components/dashboard/AccountPage";
 import { PaginationDots } from "@/components/dashboard/PaginationDots";
 import { useFocusEffect, useRouter } from "expo-router";
 import { TransactionHistoryWidget } from "@/components/dashboard/widgets/TransactionHistoryWidget";
+import SpendingInsidesWidget from "@/components/dashboard/widgets/SpendingInsidesWidget";
+import BalanceTrendWidget from "@/components/dashboard/widgets/BalanceTrendWidget";
+import { useTranslation } from "react-i18next";
 
 const { width } = Dimensions.get("window");
 
 type AccountWithComputed = Account & { computedBalance: number };
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const colorScheme: "light" | "dark" = useColorScheme() ?? "light";
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const { accounts, loading, error, totalsByCurrency, refetch } =
     useAccountsData();
@@ -79,12 +87,20 @@ const Dashboard = () => {
           </View>
         ) : error ? (
           <View className="p-4">
-            <Text className="text-theme-text">Error: {error}</Text>
+            <Text className="text-theme-text">{t("common.error")}: {error}</Text>
           </View>
         ) : (
-          <View style={{ flex: 1 }}>
+          <ScrollView
+            className="flex-1"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingHorizontal: 16,
+              paddingTop: Math.max(insets.top, 8),
+              paddingBottom: 50 + insets.bottom,
+            }}
+          >
             <FlatList
-              style={{ flexGrow: 0 }}
+              style={{ flexGrow: 0, marginHorizontal: -16 }}
               contentContainerStyle={{ flexGrow: 0 }}
               data={pages}
               keyExtractor={(i) => ("type" in i ? "total" : i.id)}
@@ -106,19 +122,30 @@ const Dashboard = () => {
               animatedIndex={animatedIndex}
             />
 
-            <ScrollView
-              className="flex-1"
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{
-                paddingHorizontal: 16,
-                paddingBottom: 24,
+            <TransactionHistoryWidget
+              accountId={pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
+              onSeeAllPress={() => {
+                const id = pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
+                router.push(id ? { pathname: "/records", params: { accountId: id } } : "/records");
               }}
-            >
-              <TransactionHistoryWidget
-                onSeeAllPress={() => router.push("/records")}
-              />
-            </ScrollView>
-          </View>
+            />
+
+            <SpendingInsidesWidget
+              accountId={pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
+              onShowMore={() => {
+                const id = pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
+                router.push(id ? { pathname: "/spending-insights", params: { accountId: id } } : "/spending-insights");
+              }}
+            />
+
+            <BalanceTrendWidget 
+              accountId={pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
+              onShowMore={() => {
+                const id = pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
+                router.push(id ? { pathname: "/balance-trend", params: { accountId: id } } : "/balance-trend");
+              }}
+            />
+          </ScrollView>
         )}
       </SafeAreaView>
     </LinearGradient>

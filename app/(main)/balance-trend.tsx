@@ -1,0 +1,247 @@
+import React, { useState, useCallback } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  useColorScheme,
+  ActivityIndicator,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Colors } from "@/constants/theme";
+import { useBalanceTrendDetails } from "@/hooks/use-balance-trend-details";
+import { BalanceDataPoint } from "@/utils/trendCalculations";
+import { useFocusEffect, useLocalSearchParams } from "expo-router";
+import { CartesianChart, Line, Area } from "victory-native";
+import { DateRangePicker } from "@/components/spending-insights/DateRangePicker";
+import { matchFont, DashPathEffect } from "@shopify/react-native-skia";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { getCategoryIcon } from "@/types/data/category";
+import { useTranslation } from "react-i18next";
+
+function getDefaultDateRange(): { start: Date; end: Date } {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+    23,
+    59,
+    59,
+    999,
+  );
+  return { start, end };
+}
+
+const BalanceTrendDetailsScreen: React.FC = () => {
+  const scheme = useColorScheme() ?? "light";
+  const colors = Colors[scheme];
+  const defaults = getDefaultDateRange();
+  const { t } = useTranslation();
+
+  const [startDate, setStartDate] = useState<Date>(defaults.start);
+  const [endDate, setEndDate] = useState<Date>(defaults.end);
+
+  const { accountId } = useLocalSearchParams<{ accountId?: string }>();
+
+  const {
+    data,
+    percentageChange,
+    incomeSources,
+    spendingSources,
+    loading,
+    error,
+    refetch,
+  } = useBalanceTrendDetails(startDate, endDate, accountId);
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
+
+  const font = matchFont({
+    fontFamily: "sans-serif",
+    fontSize: 12,
+    fontWeight: "normal",
+  });
+
+  const isPositive = percentageChange >= 0;
+
+  return (
+    <SafeAreaView className="flex-1 bg-theme-background">
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingTop: 20,
+          paddingBottom: 40,
+        }}
+      >
+        <Text className="text-[32px] font-bold text-theme-text mb-4">
+          {t("balance_trend.title")}
+        </Text>
+
+        <DateRangePicker
+          startDate={startDate}
+          endDate={endDate}
+          onStartDateChange={setStartDate}
+          onEndDateChange={setEndDate}
+          backgroundColor={colors.surface}
+          textColor={colors.text}
+          iconColor={colors.icon}
+        />
+
+        {loading && data.length === 0 ? (
+          <View className="items-center py-10">
+            <ActivityIndicator size="large" color={colors.tint} />
+          </View>
+        ) : error ? (
+          <View className="py-4">
+            <Text className="text-theme-error text-center">{error}</Text>
+          </View>
+        ) : (
+          <>
+            <View className="flex-row items-center mb-4">
+              <Text
+                className={`text-[28px] font-bold ${isPositive ? "text-[#208c05]" : "text-red-600"}`}
+              >
+                {isPositive ? "+" : "-"}
+                {Math.abs(percentageChange).toFixed(0)}%
+              </Text>
+              <Text className="ml-3 text-[24px] text-theme-text opacity-80">
+                {t("common.vs_previous")}
+              </Text>
+            </View>
+
+            <View style={{ height: 250, width: "100%", marginBottom: 30 }}>
+              {data.length > 0 ? (
+                <CartesianChart<BalanceDataPoint, "day", "balance">
+                  data={data}
+                  xKey="day"
+                  yKeys={["balance"]}
+                  xAxis={{
+                    font,
+                    labelColor: colors.text,
+                    lineColor: colors.text + "15",
+                  }}
+                  yAxis={[
+                    {
+                      font,
+                      labelColor: colors.text,
+                      lineColor: colors.text + "15",
+                      linePathEffect: <DashPathEffect intervals={[4, 4]} />,
+                    },
+                  ]}
+                >
+                  {({ points, chartBounds }) => (
+                    <>
+                      <Area
+                        points={points.balance}
+                        y0={chartBounds.bottom}
+                        color={colors.tint}
+                        opacity={0.15}
+                        animate={{ type: "timing", duration: 500 }}
+                      />
+                      <Line
+                        points={points.balance}
+                        color={colors.tint}
+                        strokeWidth={2}
+                        animate={{ type: "timing", duration: 500 }}
+                      />
+                    </>
+                  )}
+                </CartesianChart>
+              ) : (
+                <View className="flex-1 items-center justify-center bg-theme-surface rounded-xl">
+                  <Text className="text-theme-text opacity-60">
+                    {t("balance_trend.no_data_period")}
+                  </Text>
+                </View>
+              )}
+
+            </View>
+
+            <View className="bg-theme-surface rounded-xl p-4">
+              <Text className="text-[24px] font-bold text-theme-text mb-4">
+                {t("balance_trend.income_sources")}
+              </Text>
+
+              {incomeSources.length === 0 ? (
+                <Text className="text-theme-text opacity-60 italic">
+                  {t("balance_trend.no_income")}
+                </Text>
+              ) : (
+                incomeSources.map((source, index) => (
+                  <View
+                    key={source.categoryId}
+                    className={`flex-row items-center justify-between py-3 ${index < incomeSources.length - 1 ? "border-b border-black/5" : ""}`}
+                  >
+                    <View className="flex-row items-center flex-1">
+                      <View className="h-11 w-11 items-center justify-center rounded-full bg-theme-tint">
+                        <MaterialCommunityIcons
+                          name={getCategoryIcon(source.categoryName)}
+                          size={20}
+                          color={colors.textLight}
+                        />
+                      </View>
+                      <Text
+                        className="ml-3 text-[20px] font-medium text-theme-text flex-1"
+                        numberOfLines={1}
+                      >
+                        {source.categoryName}
+                      </Text>
+                    </View>
+                    <Text className="text-[20px] font-bold text-theme-text">
+                      +{source.displayAmount}
+                    </Text>
+                  </View>
+                ))
+              )}
+            </View>
+
+            <View className="bg-theme-surface rounded-xl p-4 mt-6">
+              <Text className="text-[24px] font-bold text-theme-text mb-4">
+                {t("balance_trend.spending_sources")}
+              </Text>
+
+              {spendingSources.length === 0 ? (
+                <Text className="text-theme-text opacity-60 italic">
+                  {t("balance_trend.no_spending")}
+                </Text>
+              ) : (
+                spendingSources.map((source, index) => (
+                  <View
+                    key={source.categoryId}
+                    className={`flex-row items-center justify-between py-3 ${index < spendingSources.length - 1 ? "border-b border-black/5" : ""}`}
+                  >
+                    <View className="flex-row items-center flex-1">
+                      <View className="h-11 w-11 items-center justify-center rounded-full bg-theme-tint">
+                        <MaterialCommunityIcons
+                          name={getCategoryIcon(source.categoryName)}
+                          size={20}
+                          color={colors.textLight}
+                        />
+                      </View>
+                      <Text
+                        className="ml-3 text-[20px] font-medium text-theme-text flex-1"
+                        numberOfLines={1}
+                      >
+                        {source.categoryName}
+                      </Text>
+                    </View>
+                    <Text className="text-[20px] font-bold text-theme-text">
+                      -{source.displayAmount}
+                    </Text>
+                  </View>
+                ))
+              )}
+            </View>
+          </>
+        )}
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+
+export default BalanceTrendDetailsScreen;
