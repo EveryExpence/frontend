@@ -14,8 +14,9 @@ import { useSQLiteContext } from "expo-sqlite";
 import { deleteExpenseRecord } from "@/data/expenseRecords";
 import Toast from "react-native-toast-message";
 import { useSync } from "@/context/syncContext";
+import DeleteRecordModal from "@/components/records/DeleteRecordModal";
 
-function TransactionRow({ item, onDelete }: { item: TransactionRecord; onDelete: (id: string) => void }) {
+function TransactionRow({ item, onDelete }: { item: TransactionRecord; onDelete: (item: TransactionRecord) => void }) {
   const scheme = useColorScheme() ?? "light";
   const colors = Colors[scheme];
   const router = useRouter();
@@ -53,7 +54,7 @@ function TransactionRow({ item, onDelete }: { item: TransactionRecord; onDelete:
       </Pressable>
 
       <TouchableOpacity
-        onPress={() => onDelete(item.id)}
+        onPress={() => onDelete(item)}
         className="pl-3 py-2"
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
@@ -72,7 +73,7 @@ function TransactionSectionCard({
   onDelete,
 }: {
   section: TransactionSection;
-  onDelete: (id: string) => void;
+  onDelete: (item: TransactionRecord) => void;
 }) {
   return (
     <View className="gap-3">
@@ -96,36 +97,36 @@ function TransactionSectionCard({
 }
 
 export default function RecordsScreen() {
-  const { sections, loading, error } = useExpenseRecords();
   const { t } = useTranslation();
   const { accountId } = useLocalSearchParams<{ accountId?: string }>();
   const db = useSQLiteContext();
   const { triggerSync } = useSync();
   const { sections, loading, error, refetch } = useExpenseRecords(accountId);
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [deleteModalVisible, setDeleteModalVisible] = React.useState(false);
+  const [recordToDelete, setRecordToDelete] = React.useState<TransactionRecord | null>(null);
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
-  const handleDelete = (id: string) => {
-    Alert.alert(
-      "Delete Transaction",
-      "Are you sure you want to delete this transaction?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteExpenseRecord(db, id);
-              Toast.show({ text1: "Transaction deleted", type: "success" });
-              refetch();
-              triggerSync();
-            } catch (e) {
-              Toast.show({ text1: "Failed to delete transaction", type: "error" });
-            }
-          },
-        },
-      ]
-    );
+  const handleDeletePress = (item: TransactionRecord) => {
+    setRecordToDelete(item);
+    setDeleteModalVisible(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!recordToDelete) return;
+    setIsDeleting(true);
+    try {
+      await deleteExpenseRecord(db, recordToDelete.id);
+      Toast.show({ text1: t("records.delete_success"), type: "success" });
+      refetch();
+      triggerSync();
+    } catch (e) {
+      Toast.show({ text1: t("records.delete_failed"), type: "error" });
+    } finally {
+      setIsDeleting(false);
+      setDeleteModalVisible(false);
+      setRecordToDelete(null);
+    }
   };
 
   const filteredSections = React.useMemo(() => {
@@ -181,10 +182,21 @@ export default function RecordsScreen() {
             </Text>
           )}
           {filteredSections.map((section: TransactionSection) => (
-            <TransactionSectionCard key={section.id} section={section} onDelete={handleDelete} />
+            <TransactionSectionCard key={section.id} section={section} onDelete={handleDeletePress} />
           ))}
         </View>
       </ScrollView>
+
+      <DeleteRecordModal
+        visible={deleteModalVisible}
+        title={recordToDelete?.title}
+        isDeleting={isDeleting}
+        onClose={() => {
+          setDeleteModalVisible(false);
+          setRecordToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+      />
     </SafeAreaView>
   );
 }

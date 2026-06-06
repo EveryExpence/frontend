@@ -33,6 +33,10 @@
     "record_details": "Record Details",
     "update_success": "Record updated successfully",
     "update_failed": "Failed to update record",
+    "delete_record": "Delete transaction",
+    "delete_confirm": "Delete {{title}}?",
+    "delete_success": "Transaction deleted",
+    "delete_failed": "Failed to delete transaction",
     "uncategorized": "Uncategorized"
   },
   "balance_trend": {
@@ -67,6 +71,10 @@
     "enter_name": "Enter name",
     "select_account": "Select account",
     "search_account": "Search account...",
+    "select_payment_method": "Select payment method",
+    "search_payment_method": "Search payment method...",
+    "create_payment_method": "Create a new payment method",
+    "payment_method_name": "Payment method name",
     "analyze_ai": "Analyze receipt with AI",
     "analyzing": "Analyzing receipt...",
     "save_record": "Save a new record",
@@ -95,7 +103,12 @@
     "select_language": "Select Language",
     "english": "English",
     "polish": "Polish",
-    "belarusian": "Belarusian"
+    "belarusian": "Belarusian",
+    "notifications": "Notifications",
+    "daily_reminders": "Daily Reminders",
+    "security": "Security",
+    "reminder_title": "Friendly Reminder 💰",
+    "reminder_body": "Don't forget to add your expenses for today!"
   },
   "auth": {
     "login": "Login",

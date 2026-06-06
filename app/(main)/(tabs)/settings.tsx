@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -9,6 +9,7 @@ import SettingsToggleRow from "@/components/settings/SettingsToggleRow";
 import SettingsActionRow from "@/components/settings/SettingsActionRow";
 import Topbar from "@/components/Topbar";
 import { useTheme } from "@/context/themeContext";
+import { scheduleDailyReminder, cancelDailyReminder, checkNotificationStatus } from "@/utils/notifications";
 import { useTranslation } from "react-i18next";
 import CustomModal from "@/components/Modal";
 
@@ -20,6 +21,12 @@ const SettingsScreen = () => {
   const { theme, toggleTheme } = useTheme();
   const { t, i18n } = useTranslation();
 
+  useEffect(() => {
+    (async () => {
+      const isEnabled = await checkNotificationStatus();
+      setNotificationsEnabled(isEnabled);
+    })();
+  }, []);
   const [isLanguageModalVisible, setIsLanguageModalVisible] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
@@ -39,9 +46,17 @@ const SettingsScreen = () => {
     }
   };
 
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
+  const changeLanguage = async (lng: string) => {
+    await i18n.changeLanguage(lng);
     setIsLanguageModalVisible(false);
+    
+    if (notificationsEnabled) {
+      const newT = i18n.getFixedT(lng);
+      await scheduleDailyReminder(
+        newT("settings.reminder_title"), 
+        newT("settings.reminder_body")
+      );
+    }
   };
 
   return (
@@ -84,14 +99,24 @@ const SettingsScreen = () => {
         <View className="h-2.5 bg-theme-background" />
 
         <Text className="text-2xl font-bold text-theme-text" selectable={false}>
-          Notifications
+          {t("settings.notifications")}
         </Text>
         <View className="rounded-md overflow-hidden bg-theme-surface">
           <SettingsToggleRow
-            title="Push Notifications"
+            title={t("settings.daily_reminders")}
             iconName="notifications-outline"
             isEnabled={notificationsEnabled}
-            onToggle={() => setNotificationsEnabled((prev) => !prev)}
+            onToggle={async () => {
+              if (notificationsEnabled) {
+                await cancelDailyReminder();
+                setNotificationsEnabled(false);
+              } else {
+                const title = t("settings.reminder_title");
+                const body = t("settings.reminder_body");
+                const success = await scheduleDailyReminder(title, body);
+                setNotificationsEnabled(success);
+              }
+            }}
           />
         </View>
 
@@ -100,7 +125,7 @@ const SettingsScreen = () => {
             <View className="h-2.5 bg-theme-background" />
 
             <Text className="text-2xl font-bold text-theme-text" selectable={false}>
-              Security
+              {t("settings.security")}
             </Text>
             <View className="rounded-md overflow-hidden bg-theme-surface">
               <SettingsActionRow

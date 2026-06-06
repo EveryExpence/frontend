@@ -23,9 +23,8 @@ const fetchCategories = async (db: SQLiteDatabase, callback: Dispatch<SetStateAc
     callback(await getAllCategories(db));
 }
 
-const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled }: Props) => {
-    const { t } = useTranslation();
 const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled, typeFilter }: Props) => {
+    const { t } = useTranslation();
     const scheme = useColorScheme() ?? 'light';
     const colors = Colors[scheme];
     const db = useSQLiteContext();
