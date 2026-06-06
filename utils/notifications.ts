@@ -26,7 +26,7 @@ export async function requestNotificationPermissions() {
   return true;
 }
 
-export async function scheduleDailyReminder() {
+export async function scheduleDailyReminder(title: string, body: string) {
   await cancelDailyReminder();
 
   const hasPermission = await requestNotificationPermissions();
@@ -34,8 +34,8 @@ export async function scheduleDailyReminder() {
 
   await Notifications.scheduleNotificationAsync({
     content: {
-      title: "Friendly Reminder 💰",
-      body: "Don't forget to add your expenses for today!",
+      title,
+      body,
       sound: true,
     },
     trigger: {

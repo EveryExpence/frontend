@@ -95,7 +95,12 @@
     "select_language": "Wybierz Język",
     "english": "Angielski",
     "polish": "Polski",
-    "belarusian": "Białoruski"
+    "belarusian": "Białoruski",
+    "notifications": "Powiadomienia",
+    "daily_reminders": "Codzienne przypomnienia",
+    "security": "Bezpieczeństwo",
+    "reminder_title": "Przyjazne Przypomnienie 💰",
+    "reminder_body": "Nie zapomnij dzisiaj dodać swoich wydatków!"
   },
   "auth": {
     "login": "Zaloguj się",

@@ -95,7 +95,12 @@
     "select_language": "Select Language",
     "english": "English",
     "polish": "Polish",
-    "belarusian": "Belarusian"
+    "belarusian": "Belarusian",
+    "notifications": "Notifications",
+    "daily_reminders": "Daily Reminders",
+    "security": "Security",
+    "reminder_title": "Friendly Reminder 💰",
+    "reminder_body": "Don't forget to add your expenses for today!"
   },
   "auth": {
     "login": "Login",

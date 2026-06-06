@@ -46,9 +46,17 @@ const SettingsScreen = () => {
     }
   };
 
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
+  const changeLanguage = async (lng: string) => {
+    await i18n.changeLanguage(lng);
     setIsLanguageModalVisible(false);
+    
+    if (notificationsEnabled) {
+      const newT = i18n.getFixedT(lng);
+      await scheduleDailyReminder(
+        newT("settings.reminder_title"), 
+        newT("settings.reminder_body")
+      );
+    }
   };
 
   return (
@@ -91,11 +99,11 @@ const SettingsScreen = () => {
         <View className="h-2.5 bg-theme-background" />
 
         <Text className="text-2xl font-bold text-theme-text" selectable={false}>
-          Notifications
+          {t("settings.notifications")}
         </Text>
         <View className="rounded-md overflow-hidden bg-theme-surface">
           <SettingsToggleRow
-            title="Daily Reminders"
+            title={t("settings.daily_reminders")}
             iconName="notifications-outline"
             isEnabled={notificationsEnabled}
             onToggle={async () => {
@@ -103,7 +111,9 @@ const SettingsScreen = () => {
                 await cancelDailyReminder();
                 setNotificationsEnabled(false);
               } else {
-                const success = await scheduleDailyReminder();
+                const title = t("settings.reminder_title");
+                const body = t("settings.reminder_body");
+                const success = await scheduleDailyReminder(title, body);
                 setNotificationsEnabled(success);
               }
             }}
@@ -115,7 +125,7 @@ const SettingsScreen = () => {
             <View className="h-2.5 bg-theme-background" />
 
             <Text className="text-2xl font-bold text-theme-text" selectable={false}>
-              Security
+              {t("settings.security")}
             </Text>
             <View className="rounded-md overflow-hidden bg-theme-surface">
               <SettingsActionRow

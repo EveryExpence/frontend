@@ -95,7 +95,12 @@
     "select_language": "Выберыце мову",
     "english": "Англійская",
     "polish": "Польская",
-    "belarusian": "Беларуская"
+    "belarusian": "Беларуская",
+    "notifications": "Апавяшчэнні",
+    "daily_reminders": "Штодзённыя напамінкі",
+    "security": "Бяспека",
+    "reminder_title": "Сяброўскі Напамін 💰",
+    "reminder_body": "Не забудзьцеся дадаць свае выдаткі сёння!"
   },
   "auth": {
     "login": "Увайсці",
