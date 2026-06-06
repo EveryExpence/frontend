@@ -23,7 +23,7 @@ interface Props {
 const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }: Props) => {
     const scheme = useColorScheme() ?? 'light';
     const colors = Colors[scheme];
-    const webViewRef = useRef<WebView>(null);
+    const webViewRef = useRef<any>(null);
     const [isFetching, setIsFetching] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const isMapLoadedRef = useRef(false);
@@ -161,7 +161,7 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
                     />
                 ) : (
                     <View className="items-center gap-3">
-                        <MaterialCommunityIcons name="map-off-outline" size={34} color={colors.icon} />
+                        <MaterialCommunityIcons name="map-outline" size={34} color={colors.icon} />
                         <Text className="text-center text-theme-text">
                             Map preview is unavailable in this build. Location entry still works without the map.
                         </Text>

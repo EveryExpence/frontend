@@ -2,10 +2,11 @@ import React from "react";
 import { View, Text, useColorScheme } from "react-native";
 import { DashboardWidgetCard } from "./DashboardWidgetCard";
 import { useBalanceTrend, BalanceDataPoint } from "@/hooks/use-balance-trend";
-import { CartesianChart, Line } from "victory-native";
+import { CartesianChart, Line, Area } from "victory-native";
 import { Colors } from "@/constants/theme";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { matchFont, DashPathEffect } from "@shopify/react-native-skia";
 
 export const BalanceTrendWidget: React.FC<{ onShowMore?: () => void }> = ({
   onShowMore,
@@ -14,39 +15,30 @@ export const BalanceTrendWidget: React.FC<{ onShowMore?: () => void }> = ({
   const scheme = useColorScheme() ?? "light";
   const colors = Colors[scheme];
 
-  const latestBalance = data.length > 0 ? data[data.length - 1].balance : 0;
   const isPositive = percentageChange >= 0;
+  
+  const font = matchFont({
+    fontFamily: "sans-serif",
+    fontSize: 12,
+    fontWeight: "normal",
+  });
 
   return (
     <DashboardWidgetCard
-      title="Balance trend"
-      actionLabel="Show more"
+      title="Balance Trend"
+      actionLabel="Show More"
       onActionPress={onShowMore}
     >
-      <View className="flex-row items-baseline justify-between">
-        <View>
-          <Text className="text-theme-text text-3xl font-bold">
-            {formatCurrency(latestBalance, currency)}
-          </Text>
-          <Text className="text-theme-text opacity-60 text-sm">
-            Total Balance
-          </Text>
-        </View>
-        <View
-          className={`flex-row items-center px-2 py-1 rounded-full ${isPositive ? "bg-green-100" : "bg-red-100"}`}
+      <View className="flex-row items-center">
+        <Text
+          className={`text-[20px] font-bold ${isPositive ? "text-[#208c05]" : "text-red-600"}`}
         >
-          <MaterialCommunityIcons
-            name={isPositive ? "arrow-up" : "arrow-down"}
-            size={16}
-            color={isPositive ? "#16a34a" : "#dc2626"}
-          />
-          <Text
-            style={{ color: isPositive ? "#16a34a" : "#dc2626" }}
-            className="font-semibold ml-1"
-          >
-            {Math.abs(percentageChange).toFixed(1)}%
-          </Text>
-        </View>
+          {isPositive ? "+" : "-"}
+          {Math.abs(percentageChange).toFixed(0)}%
+        </Text>
+        <Text className="ml-2 text-[18px] text-theme-text opacity-80">
+          vs previous period
+        </Text>
       </View>
 
       <View style={{ height: 200, width: "100%", marginTop: 16 }}>
@@ -63,19 +55,36 @@ export const BalanceTrendWidget: React.FC<{ onShowMore?: () => void }> = ({
             data={data}
             xKey="day"
             yKeys={["balance"]}
-            axisOptions={{
-              tickCount: 5,
+            xAxis={{
+              font,
               labelColor: colors.text,
-              lineColor: colors.text + "20",
+              lineColor: colors.text + "15",
             }}
+            yAxis={[
+              {
+                font,
+                labelColor: colors.text,
+                lineColor: colors.text + "15",
+                linePathEffect: <DashPathEffect intervals={[4, 4]} />,
+              },
+            ]}
           >
-            {({ points }) => (
-              <Line
-                points={points.balance}
-                color={colors.tint}
-                strokeWidth={3}
-                animate={{ type: "timing", duration: 500 }}
-              />
+            {({ points, chartBounds }) => (
+              <>
+                <Area
+                  points={points.balance}
+                  y0={chartBounds.bottom}
+                  color={colors.tint}
+                  opacity={0.15}
+                  animate={{ type: "timing", duration: 500 }}
+                />
+                <Line
+                  points={points.balance}
+                  color={colors.tint}
+                  strokeWidth={2}
+                  animate={{ type: "timing", duration: 500 }}
+                />
+              </>
             )}
           </CartesianChart>
         ) : (
