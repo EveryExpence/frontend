@@ -13,3 +13,10 @@ export interface AccountInputDTO {
     currency: string;
     balance: number;
 }
+
+export interface AccountResponseDTO {
+    id: string;
+    name: string;
+    currency: string;
+    balance: number;
+}

@@ -23,6 +23,7 @@ import { PaginationDots } from "@/components/dashboard/PaginationDots";
 import { useFocusEffect, useRouter } from "expo-router";
 import { TransactionHistoryWidget } from "@/components/dashboard/widgets/TransactionHistoryWidget";
 import SpendingInsidesWidget from "@/components/dashboard/widgets/SpendingInsidesWidget";
+import BalanceTrendWidget from "@/components/dashboard/widgets/BalanceTrendWidget";
 
 const { width } = Dimensions.get("window");
 
@@ -126,6 +127,8 @@ const Dashboard = () => {
             <SpendingInsidesWidget
               onShowMore={() => router.push("/spending-insights")}
             />
+
+            <BalanceTrendWidget onShowMore={() => {}} />
           </ScrollView>
         )}
       </SafeAreaView>
