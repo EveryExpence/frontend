@@ -139,6 +139,15 @@ export const getAllLocalExpenseRecordIds = async (db: SQLiteDatabase): Promise<s
 };
 
 export const insertRemoteExpenseRecord = async (db: SQLiteDatabase, record: ExpenseRecordResponseDTO) => {
+    let amount = Math.abs(record.amount);
+    const cat = await db.getFirstAsync<{ type: string }>(
+        "SELECT type FROM categories WHERE id = $id",
+        { $id: record.categoryId }
+    );
+    if (cat && cat.type?.toLowerCase() === "expense") {
+        amount = -amount;
+    }
+
     const stmt = await db.prepareAsync(`
         INSERT INTO expense_records (id, amount, location, description, paymentMethodId, categoryId, accountId, createdAt, syncState) 
         VALUES ($id, $amount, $location, $description, $paymentMethodId, $categoryId, $accountId, $createdAt, 'synced')
@@ -146,7 +155,7 @@ export const insertRemoteExpenseRecord = async (db: SQLiteDatabase, record: Expe
     await db.withExclusiveTransactionAsync(async () => {
         await stmt.executeAsync({
             $id: record.id,
-            $amount: record.amount,
+            $amount: amount,
             $location: record.location ?? null,
             $description: record.description,
             $paymentMethodId: record.paymentMethodId,
@@ -158,6 +167,25 @@ export const insertRemoteExpenseRecord = async (db: SQLiteDatabase, record: Expe
 };
 
 export const updateRemoteExpenseRecord = async (db: SQLiteDatabase, record: ExpenseRecordResponseDTO) => {
+    let amount = Math.abs(record.amount);
+    const existing = await db.getFirstAsync<{ amount: number }>(
+        "SELECT amount FROM expense_records WHERE id = $id",
+        { $id: record.id }
+    );
+    if (existing) {
+        if (existing.amount < 0) {
+            amount = -amount;
+        }
+    } else {
+        const cat = await db.getFirstAsync<{ type: string }>(
+            "SELECT type FROM categories WHERE id = $id",
+            { $id: record.categoryId }
+        );
+        if (cat && cat.type?.toLowerCase() === "expense") {
+            amount = -amount;
+        }
+    }
+
     const stmt = await db.prepareAsync(`
         UPDATE expense_records SET 
             amount = $amount, 
@@ -173,7 +201,7 @@ export const updateRemoteExpenseRecord = async (db: SQLiteDatabase, record: Expe
     await db.withExclusiveTransactionAsync(async () => {
         await stmt.executeAsync({
             $id: record.id,
-            $amount: record.amount,
+            $amount: amount,
             $location: record.location ?? null,
             $description: record.description,
             $paymentMethodId: record.paymentMethodId,
