@@ -43,11 +43,11 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
       });
 
       if (isMapLoadedRef.current) {
-        webViewRef.current?.injectJavaScript(`window.updateMapLocation(${coords.latitude}, ${coords.longitude}); true;`);
-      }
-
-      if (location !== null) {
-        return;
+        webViewRef.current?.injectJavaScript(`
+          window.updateMapLocation(${coords.latitude}, ${coords.longitude});
+          window.setMarker(${coords.latitude}, ${coords.longitude});
+          true;
+        `);
       }
 
       setLocation({ latitude: coords.latitude, longitude: coords.longitude });
@@ -56,7 +56,7 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
     } finally {
       setIsFetching(false);
     }
-  }, [location, setLocation]);
+  }, [setLocation]);
 
   useEffect(() => {
     if (!disabled) {
@@ -147,10 +147,11 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
     )}
     </View>
 
-    <View className="w-full h-[400px] rounded-md overflow-hidden bg-theme-surface border border-transparent items-center justify-center px-4">
+    <View className={`w-full h-[400px] rounded-md overflow-hidden bg-theme-surface border border-transparent ${!WebView ? 'items-center justify-center px-4' : ''}`}>
     {WebView ? (
       <WebView
       ref={webViewRef}
+      style={{ flex: 1, width: '100%', height: '100%' }}
       originWhitelist={['*']}
       source={{ html: mapHtml }}
       onMessage={onMessage}
