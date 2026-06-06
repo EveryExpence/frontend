@@ -96,7 +96,6 @@ function TransactionSectionCard({
 }
 
 export default function RecordsScreen() {
-  const { sections, loading, error } = useExpenseRecords();
   const { t } = useTranslation();
   const { accountId } = useLocalSearchParams<{ accountId?: string }>();
   const db = useSQLiteContext();
