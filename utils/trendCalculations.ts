@@ -11,12 +11,16 @@ export interface BalanceDataPoint {
 export const calculateBalanceTrend = async (
     db: SQLiteDatabase,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
+    accountId?: string
 ): Promise<{ points: BalanceDataPoint[]; percentageChange: number; primaryCurrency: string }> => {
-    const [accounts, records] = await Promise.all([
+    const [allAccounts, allRecords] = await Promise.all([
         getAllAccounts(db),
         getAllExpenseRecords(db),
     ]);
+    
+    const accounts = accountId ? allAccounts.filter(a => a.id === accountId) : allAccounts;
+    const records = accountId ? allRecords.filter(r => r.accountId === accountId) : allRecords;
 
     let primaryCurrency = "PLN";
     if (accounts.length > 0) {
