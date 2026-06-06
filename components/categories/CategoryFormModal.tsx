@@ -6,6 +6,7 @@ import CustomModal from '@/components/Modal';
 import { CategoryCardItem } from '@/components/categories/CategoryCard';
 import { categoryTypes } from '@/types/data/category';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTranslation } from 'react-i18next';
 
 export type CategoryFormData = {
   name: string;
@@ -20,6 +21,7 @@ type Props = {
 };
 
 export default function CategoryFormModal({ visible, editingCategory, onClose, onSave }: Props) {
+  const { t } = useTranslation();
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
 
@@ -59,10 +61,10 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
       setIsVisible={(next) => {
         if (!next) onClose();
       }}
-      title={isEditing ? 'Edit category' : 'Add category'}
+      title={isEditing ? t("categories.edit_category") : t("categories.add_category")}
       cancelAction={
         <TouchableOpacity onPress={onClose} style={{ padding: 10 }}>
-          <Text className="text-2xl text-theme-icon">Cancel</Text>
+          <Text className="text-2xl text-theme-icon">{t("common.cancel")}</Text>
         </TouchableOpacity>
       }
       confirmAction={
@@ -78,20 +80,20 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
           }}
         >
           <Text className="text-2xl" style={{ color: colors.textLight }}>
-            {isSaving ? 'Saving...' : 'Save'}
+            {isSaving ? t("common.loading") : t("common.save")}
           </Text>
         </TouchableOpacity>
       }
     >
       <ScrollView keyboardShouldPersistTaps="handled">
         <Text className="text-2xl text-theme-icon" style={{ marginBottom: 6 }}>
-          Name
+          {t("categories.name")}
         </Text>
         <TextInput
           className="text-2xl text-theme-text"
           value={name}
           onChangeText={setName}
-          placeholder="New category"
+          placeholder={t("categories.new_category_placeholder")}
           placeholderTextColor={colors.icon}
           style={{
             backgroundColor: colors.background,
@@ -102,7 +104,7 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
         />
 
         <Text className="text-2xl text-theme-icon" style={{ marginBottom: 6 }}>
-          Type
+          {t("categories.type")}
         </Text>
         <SegmentedControl
           tintColor={colors.tint}
@@ -110,7 +112,7 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
           activeFontStyle={{ color: colors.textLight }}
           backgroundColor={colors.surface}
           style={{ height: 36 }}
-          values={categoryTypes}
+          values={categoryTypes.map(type => t(`categories.type_${type}`))}
           selectedIndex={typeIndex}
           onChange={(event) => {
             setTypeIndex(event.nativeEvent.selectedSegmentIndex);

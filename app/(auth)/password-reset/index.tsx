@@ -5,6 +5,7 @@ import { Colors } from '@/constants/theme';
 import * as z from 'zod'
 import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useTranslation } from 'react-i18next';
 
 const formSchema = z.object({
     email: z.email("Must be a valid email")
@@ -13,6 +14,7 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 const PasswordResetScreen = () => {
+    const { t } = useTranslation();
     const router = useRouter();
     const theme = useColorScheme() || 'light';
     const colors = Colors[theme];
@@ -31,14 +33,14 @@ const PasswordResetScreen = () => {
     return (
         <View className="flex-1 justify-center gap-3">
             <View className="w-full px-8 justify-start">
-                <Text className="text-2xl pl-2 text-theme-text">Email</Text>
+                <Text className="text-2xl pl-2 text-theme-text">{t("auth.email")}</Text>
 
                 <Controller
                     control={form.control}
                     name="email"
                     render={({ field: { onChange, onBlur, value } }) => (
                         <TextInput
-                            placeholder='Enter email'
+                            placeholder={t("auth.enter_email")}
                             placeholderTextColor={colors.text}
                             textContentType="emailAddress"
                             autoCapitalize="none"
@@ -68,7 +70,7 @@ const PasswordResetScreen = () => {
                     }`}
                 >
                     <Text className="text-xl text-center text-theme-textLight">
-                        Reset password
+                        {t("auth.reset_password")}
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -78,7 +80,7 @@ const PasswordResetScreen = () => {
                     <Text
                         onPress={() => router.push("/login")}
                         className="text-lg text-center underline text-theme-text"
-                    >Login</Text>
+                    >{t("auth.login")}</Text>
                 </View>
             </View>
         </View>

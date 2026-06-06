@@ -1,6 +1,7 @@
 import { View, Text, Dimensions } from "react-native";
 import { formatCurrency } from "@/utils/formatCurrency";
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 const { width } = Dimensions.get("window");
 
@@ -11,13 +12,15 @@ interface TotalBalancePageProps {
 export const TotalBalancePage: React.FC<TotalBalancePageProps> = ({
   totalsByCurrency,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <View style={{ width, padding: 24 }}>
       <Text className="text-4xl mb-6 mt-8 text-center text-theme-text">
-        Total Balance
+        {t("dashboard.total_balance")}
       </Text>
       {Object.keys(totalsByCurrency).length === 0 ? (
-        <Text className="text-theme-text">No accounts</Text>
+        <Text className="text-theme-text text-center">{t("dashboard.no_accounts")}</Text>
       ) : (
         Object.entries(totalsByCurrency).map(([currency, value]) => (
           <Text

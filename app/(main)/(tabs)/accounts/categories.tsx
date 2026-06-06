@@ -13,8 +13,10 @@ import CategoryCard, { CategoryCardItem } from '@/components/categories/Category
 import CategoryFormModal, { CategoryFormData } from '@/components/categories/CategoryFormModal';
 import DeleteCategoryModal from '@/components/categories/DeleteCategoryModal';
 import { useSync } from '@/context/syncContext';
+import { useTranslation } from 'react-i18next';
 
 export default function CategoriesScreen() {
+	const { t } = useTranslation();
 	const { triggerSync } = useSync();
 	const db = useSQLiteContext();
 	const scheme = useColorScheme() ?? 'light';
@@ -106,7 +108,7 @@ export default function CategoriesScreen() {
 
 	return (
 		<SafeAreaView className="flex-1 bg-theme-background">
-			<Topbar title="Categories" />
+			<Topbar title={t("tabs.categories")} />
 			<View className="px-4 pt-2">
 				<AccountsSectionTabs />
 			</View>
@@ -121,7 +123,7 @@ export default function CategoriesScreen() {
 						keyExtractor={(item) => item.id}
 						showsVerticalScrollIndicator={false}
 						contentContainerStyle={{ paddingBottom: 24 }}
-						ListEmptyComponent={<Text className="pt-4 text-lg text-theme-icon mb-4">No categories yet</Text>}
+						ListEmptyComponent={<Text className="pt-4 text-lg text-theme-icon mb-4">{t("categories.no_categories")}</Text>}
 						renderItem={({ item }) => (
 							<CategoryCard
 								item={item}
@@ -137,7 +139,7 @@ export default function CategoriesScreen() {
 									onPress={openAdd}
 								>
 									<MaterialCommunityIcons name="plus" size={22} color={colors.textLight} style={{ marginRight: 8 }} />
-									<Text className="text-xl font-semibold text-theme-textLight">Add new category</Text>
+									<Text className="text-xl font-semibold text-theme-textLight">{t("categories.add_new")}</Text>
 								</TouchableOpacity>
 								<View className="py-20" />
 							</View>

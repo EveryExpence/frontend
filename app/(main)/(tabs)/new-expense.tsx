@@ -28,10 +28,12 @@ import { analyzeReceiptEndpoint } from '@/constants/endpoints';
 import { getAllCategories } from '@/data/categories';
 import { getAllPaymentMethods } from '@/data/paymentMethods';
 import { useAuth } from '@/context/authContext';
+import { useTranslation } from 'react-i18next';
 
 export default function NewExpense() {
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
+  const { t } = useTranslation();
   const { triggerSync } = useSync();
   const db = useSQLiteContext();
   const { user } = useAuth();
@@ -70,7 +72,7 @@ export default function NewExpense() {
 
   const analyzeReceipt = async () => {
     if (images.length === 0) {
-      Toast.show({ text1: "Please select an image first", type: "error" });
+      Toast.show({ text1: t("new_expense.error_select_image"), type: "error" });
       return;
     }
     setIsAnalyzing(true);
@@ -142,13 +144,13 @@ export default function NewExpense() {
         });
       }
 
-      Toast.show({ text1: "Receipt analysis completed!" });
+      Toast.show({ text1: t("new_expense.success_analysis_completed") });
     } catch (error: any) {
       console.error(error);
       if (error.message === "SIZE_LIMIT") {
-        Toast.show({ text1: "Cannot analyze: exceeds 15MB", type: "error" });
+        Toast.show({ text1: t("new_expense.error_size_limit"), type: "error" });
       } else {
-        Toast.show({ text1: "Failed to analyze receipt", text2: error.message, type: "error" });
+        Toast.show({ text1: t("new_expense.error_failed_analysis"), text2: error.message, type: "error" });
       }
     } finally {
       setIsAnalyzing(false);
@@ -157,12 +159,12 @@ export default function NewExpense() {
 
   const saveRecord = async () => {
     if (selectedAccount === null || selectedCategory === null || selectedPaymentMethod === null || !isAmountValid) {
-      Toast.show({ text1: "All required fields are needed", type: "error" });
+      Toast.show({ text1: t("new_expense.error_required"), type: "error" });
       return;
     }
     const amountNumber = recordType === "expense" ? -Math.abs(Number(amount)) : Math.abs(Number(amount));
     if (amountNumber === 0) {
-      Toast.show({ text1: "Amount has to be non-zero", type: "error" });
+      Toast.show({ text1: t("new_expense.error_zero_amount"), type: "error" });
       return;
     }
 
@@ -181,7 +183,7 @@ export default function NewExpense() {
       if (images.length > 0) {
         await saveAttachments(db, id, images);
       }
-      Toast.show({ text1: "Record was added" });
+      Toast.show({ text1: t("new_expense.success_added") });
       setSelectedAccount(null);
       setSelectedCategory(null);
       setSelectedPaymentMethod(null);
@@ -193,13 +195,13 @@ export default function NewExpense() {
       setRecordType("expense");
       triggerSync();
     } catch {
-      Toast.show({ text1: "Failed to add a new record", type: "error" });
+      Toast.show({ text1: t("new_expense.error_failed_add"), type: "error" });
     }
   }
 
   return (
     <SafeAreaView>
-      <Topbar title="New Expense" />
+      <Topbar title={t("new_expense.title")} />
       <ScrollView className="px-4" scrollEnabled={scrollEnabled}>
         <View className="flex-row bg-theme-surface p-1.5 rounded-lg mb-6 mt-4">
           <TouchableOpacity
@@ -265,14 +267,14 @@ export default function NewExpense() {
               <MaterialCommunityIcons name="image-search-outline" size={20} color={colors.tint} />
             )}
             <Text className="text-lg text-theme-tint font-bold">
-              {isAnalyzing ? "Analyzing receipt..." : "Analyze receipt with AI"}
+              {isAnalyzing ? t("new_expense.analyzing") : t("new_expense.analyze_ai")}
             </Text>
           </TouchableOpacity>
         )}
 
 
         <TouchableOpacity onPress={saveRecord} className="w-full bg-theme-tint py-4 rounded-md">
-          <Text className="text-xl text-theme-textLight text-center font-bold">Save a new record</Text>
+          <Text className="text-xl text-theme-textLight text-center font-bold">{t("new_expense.save_record")}</Text>
         </TouchableOpacity>
 
         <View className="py-20" />

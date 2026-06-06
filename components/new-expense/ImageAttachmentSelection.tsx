@@ -2,6 +2,7 @@ import { View, Text, TouchableOpacity, Image, ScrollView } from 'react-native'
 import React, { Dispatch, SetStateAction } from 'react'
 import * as ImagePicker from 'expo-image-picker'
 import { MaterialIcons } from '@expo/vector-icons'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
     images: string[];
@@ -9,6 +10,7 @@ interface Props {
 }
 
 const ImageAttachmentSelection = ({ images, setImages }: Props) => {
+    const { t } = useTranslation();
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
@@ -29,9 +31,9 @@ const ImageAttachmentSelection = ({ images, setImages }: Props) => {
     return (
         <View className="mb-8">
             <View className="flex-row items-center justify-between">
-                <Text className="text-2xl text-theme-text font-bold">Attachments</Text>
+                <Text className="text-2xl text-theme-text font-bold">{t("new_expense.attachments")}</Text>
                 <TouchableOpacity onPress={pickImage} className="bg-theme-surface px-4 py-2 rounded-md">
-                    <Text className="text-theme-text font-medium">Add Image</Text>
+                    <Text className="text-theme-text font-medium">{t("new_expense.add_image")}</Text>
                 </TouchableOpacity>
             </View>
 
