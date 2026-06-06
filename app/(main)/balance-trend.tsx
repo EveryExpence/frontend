@@ -15,7 +15,7 @@ import { CartesianChart, Line, Area } from "victory-native";
 import { DateRangePicker } from "@/components/spending-insights/DateRangePicker";
 import { matchFont, DashPathEffect } from "@shopify/react-native-skia";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { getCategoryIcon } from "@/utils/categoryIcon";
+import { getCategoryIcon } from "@/types/data/category";
 
 function getDefaultDateRange(): { start: Date; end: Date } {
   const now = new Date();
