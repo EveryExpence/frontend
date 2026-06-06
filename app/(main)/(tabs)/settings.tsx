@@ -82,7 +82,7 @@ const SettingsScreen = () => {
         </Text>
         <View className="rounded-md overflow-hidden bg-theme-surface">
           <SettingsToggleRow
-            title="Push Notifications"
+            title="Daily Reminders"
             iconName="notifications-outline"
             isEnabled={notificationsEnabled}
             onToggle={async () => {
