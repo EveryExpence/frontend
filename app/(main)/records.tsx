@@ -28,9 +28,14 @@ function TransactionRow({ item }: { item: TransactionRecord }) {
           />
         </View>
 
-        <Text className="flex-1 text-[18px] text-theme-text" numberOfLines={1}>
-          {item.title}
-        </Text>
+        <View className="flex-1">
+          <Text className="text-[18px] text-theme-text" numberOfLines={1}>
+            {item.title}
+          </Text>
+          <Text className="text-[13px] text-theme-text opacity-60" numberOfLines={1}>
+            {item.categoryName} • {item.paymentMethodName}
+          </Text>
+        </View>
       </View>
 
       <Text
@@ -67,7 +72,26 @@ function TransactionSectionCard({ section }: { section: TransactionSection }) {
 }
 
 export default function RecordsScreen() {
-  const { sections } = useExpenseRecords();
+  const { sections, loading, error } = useExpenseRecords();
+  const [searchQuery, setSearchQuery] = React.useState("");
+
+  const filteredSections = React.useMemo(() => {
+    if (!searchQuery.trim()) return sections;
+
+    const query = searchQuery.toLowerCase();
+    return sections
+      .map((section) => ({
+        ...section,
+        items: section.items.filter((item) => {
+          const titleMatch = item.title.toLowerCase().includes(query);
+          const categoryMatch = item.categoryName.toLowerCase().includes(query);
+          const amountMatch = Math.abs(item.amount).toString().includes(query);
+          return titleMatch || categoryMatch || amountMatch;
+        }),
+      }))
+      .filter((section) => section.items.length > 0);
+  }, [sections, searchQuery]);
+
   return (
     <SafeAreaView className="flex-1 bg-theme-background">
       <ScrollView
@@ -86,16 +110,24 @@ export default function RecordsScreen() {
               className="absolute left-3 top-3 z-10 text-theme-icon"
             />
             <Input
-              value=""
-              placeholder="Search"
-              editable={false}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder="Search by name, category or amount"
+              editable={true}
               className="pl-11"
             />
           </View>
         </View>
 
         <View className="mt-8 gap-6">
-          {sections.map((section: TransactionSection) => (
+          {loading && <Text className="text-theme-text text-center">Loading...</Text>}
+          {error && <Text className="text-theme-error text-center">{error}</Text>}
+          {!loading && filteredSections.length === 0 && (
+            <Text className="text-theme-text text-center opacity-60">
+              {searchQuery ? "No transactions found" : "No transactions yet"}
+            </Text>
+          )}
+          {filteredSections.map((section: TransactionSection) => (
             <TransactionSectionCard key={section.id} section={section} />
           ))}
         </View>

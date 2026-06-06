@@ -36,14 +36,12 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date) => {
         if (!db) return;
         try {
             setLoading(true);
-            
-            // 1. Get Trend Data using shared utility
+
             const trendResult = await calculateBalanceTrend(db, startDate, endDate);
             setData(trendResult.points);
             setPercentageChange(trendResult.percentageChange);
             setCurrency(trendResult.primaryCurrency);
 
-            // 2. Calculate Sources
             const [categories, records, accounts] = await Promise.all([
                 getAllCategories(db),
                 getAllExpenseRecords(db),
@@ -59,7 +57,6 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date) => {
             const startTs = startDate.getTime();
             const endTs = endDate.getTime();
 
-            // 2.1 Calculate Income Sources
             const incomeRecords = records.filter(r => {
                 if (r.amount <= 0 || r.syncState === 'deleted') return false;
                 const ts = typeof r.createdAt === 'number' ? r.createdAt : new Date(r.createdAt ?? 0).getTime();
@@ -87,7 +84,6 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date) => {
                 }));
             setIncomeSources(iSources);
 
-            // 2.2 Calculate Spending Sources
             const spendingRecords = records.filter(r => {
                 if (r.amount >= 0 || r.syncState === 'deleted') return false;
                 const ts = typeof r.createdAt === 'number' ? r.createdAt : new Date(r.createdAt ?? 0).getTime();
