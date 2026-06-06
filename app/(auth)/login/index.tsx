@@ -16,6 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Toast from "react-native-toast-message";
 import EncryptedStorage from "react-native-encrypted-storage";
 import ControlledInputField from "@/components/ControlledInputField";
+import { useTranslation } from "react-i18next";
 
 const formSchema = z.object({
   email: z.email("Must be a valid email"),
@@ -25,6 +26,7 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 const LoginScreen = () => {
+  const { t } = useTranslation();
   const router = useRouter();
   const theme = useColorScheme() || "light";
   const colors = Colors[theme];
@@ -44,11 +46,11 @@ const LoginScreen = () => {
       await login(email, password);
       router.replace("/dashboard");
       setTimeout(() => {
-        Toast.show({ text1: "Logged in successfully" });
+        Toast.show({ text1: t("auth.login_success") });
       }, 100);
       await EncryptedStorage.setItem("loggedIn", "true");
     } catch (error) {
-      Toast.show({ text1: `Login failed: ${error}`, type: "error" });
+      Toast.show({ text1: `${t("auth.login_failed")}: ${error}`, type: "error" });
     }
   };
 
@@ -68,14 +70,14 @@ const LoginScreen = () => {
   return (
     <View className="flex-1 justify-center gap-3">
       <View className="w-full px-8 justify-start">
-        <Text className="text-2xl pl-2 text-theme-text">Email</Text>
+        <Text className="text-2xl pl-2 text-theme-text">{t("auth.email")}</Text>
 
         <Controller
           control={form.control}
           name="email"
           render={({ field: { onChange, onBlur, value } }) => (
             <TextInput
-              placeholder="Enter email"
+              placeholder={t("auth.enter_email")}
               placeholderTextColor={colors.text}
               textContentType="emailAddress"
               value={value}
@@ -98,11 +100,11 @@ const LoginScreen = () => {
 
       <View className="w-full px-8 justify-start">
         <ControlledInputField
-          label="Password"
+          label={t("auth.password")}
           name="password"
           control={form.control}
           secureTextEntry
-          placeholder="Enter password"
+          placeholder={t("auth.enter_password")}
           placeholderTextColor={colors.text}
           inputClassName={`w-full p-4 text-xl border rounded-md text-theme-text ${
             form.formState.errors.password
@@ -122,7 +124,7 @@ const LoginScreen = () => {
           }`}
         >
           <Text className="text-xl text-center text-theme-textLight">
-            Login
+            {t("auth.login")}
           </Text>
         </TouchableOpacity>
       </View>
@@ -134,7 +136,7 @@ const LoginScreen = () => {
           className="w-full justify-start p-4 rounded-md bg-theme-surface"
         >
           <Text className="text-xl text-center text-theme-text">
-            Continue without login
+            {t("auth.continue_guest")}
           </Text>
         </TouchableOpacity>
       </View>
@@ -145,13 +147,13 @@ const LoginScreen = () => {
             onPress={() => router.push("/sign-up")}
             className="text-lg text-center underline text-theme-text"
           >
-            Sign up
+            {t("auth.sign_up")}
           </Text>
           <Text
             onPress={() => router.push("/password-reset")}
             className="text-lg text-center underline text-theme-text"
           >
-            Forgot password?
+            {t("auth.forgot_password")}
           </Text>
         </View>
       </View>

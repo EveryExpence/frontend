@@ -24,12 +24,14 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { TransactionHistoryWidget } from "@/components/dashboard/widgets/TransactionHistoryWidget";
 import SpendingInsidesWidget from "@/components/dashboard/widgets/SpendingInsidesWidget";
 import BalanceTrendWidget from "@/components/dashboard/widgets/BalanceTrendWidget";
+import { useTranslation } from "react-i18next";
 
 const { width } = Dimensions.get("window");
 
 type AccountWithComputed = Account & { computedBalance: number };
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const colorScheme: "light" | "dark" = useColorScheme() ?? "light";
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -85,7 +87,7 @@ const Dashboard = () => {
           </View>
         ) : error ? (
           <View className="p-4">
-            <Text className="text-theme-text">Error: {error}</Text>
+            <Text className="text-theme-text">{t("common.error")}: {error}</Text>
           </View>
         ) : (
           <ScrollView

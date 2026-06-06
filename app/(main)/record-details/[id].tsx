@@ -25,10 +25,12 @@ import LocationSelection from "@/components/new-expense/LocationMap";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useSync } from "@/context/syncContext";
+import { useTranslation } from "react-i18next";
 
 import Toast from "react-native-toast-message";
 
 export default function RecordDetailsScreen() {
+  const { t } = useTranslation();
   const { triggerSync } = useSync();
   const { id } = useLocalSearchParams<{ id: string }>();
   const db = useSQLiteContext();
@@ -100,7 +102,7 @@ export default function RecordDetailsScreen() {
       !selectedPaymentMethod ||
       !amount
     ) {
-      Toast.show({ text1: "Please fill all required fields", type: "error" });
+      Toast.show({ text1: t("new_expense.error_required"), type: "error" });
       return;
     }
 
@@ -124,18 +126,18 @@ export default function RecordDetailsScreen() {
         location: locationString ? locationString : undefined,
         createdAt: selectedDateTime.getTime(),
       });
-      Toast.show({ text1: "Record updated successfully", type: "success" });
+      Toast.show({ text1: t("records.update_success"), type: "success" });
       setIsEditing(false);
       triggerSync();
     } catch {
-      Toast.show({ text1: "Failed to update record", type: "error" });
+      Toast.show({ text1: t("records.update_failed"), type: "error" });
     }
   };
 
   if (loading) {
     return (
       <SafeAreaView className="flex-1 bg-theme-background">
-        <Topbar title="Record Details" />
+        <Topbar title={t("records.record_details")} />
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color={colors.tint} />
         </View>
@@ -145,7 +147,7 @@ export default function RecordDetailsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-theme-background">
-      <Topbar title="Record Details" />
+      <Topbar title={t("records.record_details")} />
       <ScrollView className="px-4 mt-4" scrollEnabled={scrollEnabled}>
         <AccountSelection
           selectedAccount={selectedAccount}
@@ -200,14 +202,14 @@ export default function RecordDetailsScreen() {
               onPress={() => setIsEditing(true)}
               className="w-full bg-theme-tint py-4 rounded-md flex-row justify-center items-center"
             >
-              <Text className="text-white font-bold text-lg">Edit Record</Text>
+              <Text className="text-white font-bold text-lg">{t("common.edit")}</Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
               onPress={handleSave}
               className="w-full bg-theme-tint py-4 rounded-md flex-row justify-center items-center"
             >
-              <Text className="text-white font-bold text-lg">Save Changes</Text>
+              <Text className="text-white font-bold text-lg">{t("common.save")}</Text>
             </TouchableOpacity>
           )}
         </View>

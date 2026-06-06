@@ -1,6 +1,7 @@
 import { Colors } from "@/constants/theme";
 import { usePathname, useRouter } from "expo-router";
 import { Pressable, Text, useColorScheme, View } from "react-native";
+import { useTranslation } from "react-i18next";
 
 type SectionKey = "accounts" | "payments" | "categories";
 type SectionPath =
@@ -8,17 +9,18 @@ type SectionPath =
     | "/accounts/payments"
     | "/accounts/categories";
 
-const sections: Array<{ key: SectionKey; label: string; path: SectionPath }> = [
-    { key: "accounts", label: "Accounts", path: "/accounts" },
-    { key: "payments", label: "Payments", path: "/accounts/payments" },
-    { key: "categories", label: "Categories", path: "/accounts/categories" },
-];
-
 export default function AccountsSectionTabs() {
+    const { t } = useTranslation();
     const router = useRouter()
     const pathname = usePathname();
     const scheme = useColorScheme() ?? "light";
     const colors = Colors[scheme];
+
+    const sections: Array<{ key: SectionKey; label: string; path: SectionPath }> = [
+        { key: "accounts", label: t("tabs.accounts"), path: "/accounts" },
+        { key: "payments", label: t("tabs.payments"), path: "/accounts/payments" },
+        { key: "categories", label: t("tabs.categories"), path: "/accounts/categories" },
+    ];
 
     return (
         <View className="flex-row flex-nowrap gap-2 rounded-2xl bg-theme-surface p-1.5">

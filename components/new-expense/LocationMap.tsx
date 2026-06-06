@@ -4,6 +4,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
 import * as Location from 'expo-location';
 import { Coordinates } from '@/types/data/location';
+import { useTranslation } from 'react-i18next';
 
 let WebView: any = null;
 
@@ -21,6 +22,7 @@ interface Props {
 }
 
 const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }: Props) => {
+  const { t } = useTranslation();
   const scheme = useColorScheme() ?? 'light';
     const colors = Colors[scheme];
     const webViewRef = useRef<any>(null);
@@ -34,7 +36,7 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        setErrorMsg('Permission denied');
+        setErrorMsg(t("new_expense.error_permission_denied"));
         return;
       }
 
@@ -43,20 +45,20 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
       });
 
       if (isMapLoadedRef.current) {
-        webViewRef.current?.injectJavaScript(`window.updateMapLocation(${coords.latitude}, ${coords.longitude}); true;`);
-      }
-
-      if (location !== null) {
-        return;
+        webViewRef.current?.injectJavaScript(`
+          window.updateMapLocation(${coords.latitude}, ${coords.longitude});
+          window.setMarker(${coords.latitude}, ${coords.longitude});
+          true;
+        `);
       }
 
       setLocation({ latitude: coords.latitude, longitude: coords.longitude });
     } catch {
-      setErrorMsg('Failed to fetch location');
+      setErrorMsg(t("new_expense.error_failed_fetch_location"));
     } finally {
       setIsFetching(false);
     }
-  }, [location, setLocation]);
+  }, [setLocation]);
 
   useEffect(() => {
     if (!disabled) {
@@ -127,7 +129,7 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
   return (
     <View className="w-full mb-8">
     <View className="flex-row justify-between items-center mb-2">
-    <Text className="text-2xl text-theme-text font-bold">Location</Text>
+    <Text className="text-2xl text-theme-text font-bold">{t("new_expense.location")}</Text>
 
     {!disabled && (
       <TouchableOpacity
@@ -140,17 +142,18 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
       ) : (
         <>
         <MaterialCommunityIcons name="crosshairs-gps" size={18} color={colors.text} />
-        <Text className="text-theme-text ml-2">Get Current</Text>
+        <Text className="text-theme-text ml-2">{t("new_expense.get_current")}</Text>
         </>
       )}
       </TouchableOpacity>
     )}
     </View>
 
-    <View className="w-full h-[400px] rounded-md overflow-hidden bg-theme-surface border border-transparent items-center justify-center px-4">
+    <View className={`w-full h-[400px] rounded-md overflow-hidden bg-theme-surface border border-transparent ${!WebView ? 'items-center justify-center px-4' : ''}`}>
     {WebView ? (
       <WebView
       ref={webViewRef}
+      style={{ flex: 1, width: '100%', height: '100%' }}
       originWhitelist={['*']}
       source={{ html: mapHtml }}
       onMessage={onMessage}
@@ -163,7 +166,7 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
       <View className="items-center gap-3">
         <MaterialCommunityIcons name="map-outline" size={34} color={colors.icon} />
         <Text className="text-center text-theme-text">
-          Map preview is unavailable in this build. Location entry still works without the map.
+          {t("new_expense.map_unavailable")}
         </Text>
       </View>
 
@@ -172,7 +175,7 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
 
     <View className="flex-row justify-between mt-2">
     <Text className="text-sm text-theme-text opacity-70">
-    {location ? `${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}` : "No location selected"}
+    {location ? `${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}` : t("new_expense.no_location_selected")}
     </Text>
     {errorMsg && <Text className="text-red-500 text-sm">{errorMsg}</Text>}
     </View>

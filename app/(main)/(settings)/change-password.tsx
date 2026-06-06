@@ -8,6 +8,7 @@ import { useRouter } from "expo-router";
 import { accessTokenKey } from "@/constants/encryptedStorageKeys";
 import ControlledInputField from "@/components/settings/ControlledInputField";
 import Topbar from "@/components/Topbar";
+import { useTranslation } from "react-i18next";
 
 type ChangePasswordForm = {
   oldPassword: string;
@@ -16,6 +17,7 @@ type ChangePasswordForm = {
 };
 
 const ChangePasswordScreen = () => {
+  const { t } = useTranslation();
   const router = useRouter();
   const { control, handleSubmit, reset, getValues, formState: { isValid } } = useForm<ChangePasswordForm>({
     mode: "onChange",
@@ -64,66 +66,66 @@ const ChangePasswordScreen = () => {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 40, paddingBottom: 24 }}
       >
-        <Topbar title="Change Password" onBack={() => router.back()} />
+        <Topbar title={t("settings.change_password")} onBack={() => router.back()} />
         <View
           className="p-5 rounded-md gap-4 bg-theme-surface"
         >
           <ControlledInputField
-            label="Old Password"
+            label={t("auth.old_password")}
             name="oldPassword"
             control={control}
             editable={!isSaving}
             secureTextEntry
-            placeholder="Enter old password"
+            placeholder={t("auth.enter_old_password")}
           />
 
           <ControlledInputField
-            label="New Password"
+            label={t("auth.new_password")}
             name="newPassword"
             control={control}
             editable={!isSaving}
             secureTextEntry
-            placeholder="Enter new password"
+            placeholder={t("auth.enter_new_password")}
             rules={{
-              required:"New password is required",
+              required: t("auth.error_password_required"),
               maxLength: {
                 value: 64,
-                message: "Password is too long",
+                message: t("auth.error_password_long"),
               },
               minLength: {
                 value: 8,
-                message: "Password is too short",
+                message: t("auth.error_password_short"),
               },
               pattern: {
                 value: /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).*$/,
-                message: "Password must contain at least one digit, one lowercase, and one uppercase letter",
+                message: t("auth.error_password_pattern"),
               },
             }}
           />
 
           <ControlledInputField
-            label="Confirm New Password"
+            label={t("auth.confirm_password")}
             name="confirmPassword"
             control={control}
             editable={!isSaving}
             secureTextEntry
-            placeholder="Confirm new password"
+            placeholder={t("auth.confirm_new_password")}
             rules={{
-              required:"Confirm password is required",
+              required: t("auth.error_confirm_required"),
               maxLength: {
                 value: 64,
-                message: "Password is too long",
+                message: t("auth.error_password_long"),
               },
               minLength: {
                 value: 8,
-                message: "Password is too short",
+                message: t("auth.error_password_short"),
               },
               pattern: {
                 value: /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).*$/,
-                message: "Password must contain at least one digit, one lowercase, and one uppercase letter",
+                message: t("auth.error_password_pattern"),
               },
               validate: (value) => {
-                return value === getValues("newPassword") || "Passwords do not match";
+                return value === getValues("newPassword") || t("auth.error_passwords_match");
               }
             }}
           />
@@ -141,7 +143,7 @@ const ChangePasswordScreen = () => {
           <Text 
           className="text-xl text-center text-theme-textLight font-semibold"
           >
-            {isSaving ? "Updating..." : "Update Password"}
+            {isSaving ? t("common.loading") : t("settings.update_password")}
             
           </Text>
         </TouchableOpacity>
