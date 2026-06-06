@@ -4,7 +4,7 @@ import { Slot } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
 
-const _layout = () => {
+const AuthLayout = () => {
     const { t } = useTranslation();
     return (
         <SafeAreaView className="flex-1">
@@ -44,4 +44,4 @@ const _layout = () => {
     )
 }
 
-export default _layout
+export default AuthLayout
