@@ -9,8 +9,7 @@
         "distribution": "store"
       },
       "ios": {
-        "distribution": "store",
-        "withoutCredentials": true
+        "simulator": true
       }
     },
     "preview": {
