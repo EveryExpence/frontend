@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - release
-      - feature/pipeline-and-build
+      - feature/pipelines-and-build
 
 jobs:
   build:
