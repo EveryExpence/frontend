@@ -1,0 +1,36 @@
+name: EAS Build
+
+on:
+  push:
+    branches:
+      - release
+      - feature/pipeline-and-build
+
+jobs:
+  build:
+    name: EAS Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Trigger Production Build (AAB + Unsigned iOS)
+        run: eas build --platform all --profile production --non-interactive --no-wait
+
+      - name: Trigger Preview Build (APK)
+        run: eas build --platform android --profile preview --non-interactive --no-wait
