@@ -22,6 +22,15 @@ const ProfileIdentityCard = ({
 }: ProfileIdentityCardProps) => {
   const iconColor = useThemeColor({}, "icon");
 
+  const getFullUrl = (url: string) => {
+    if (url && url.startsWith('/api/files')) {
+      const base = process.env.EXPO_PUBLIC_API_URL || '';
+      const domain = base.split('/api')[0];
+      return domain + url;
+    }
+    return url;
+  };
+
   return (
     <View className="items-center mb-8">
       <TouchableOpacity
@@ -33,7 +42,7 @@ const ProfileIdentityCard = ({
       >
         {displayAvatarUrl ? (
           <Image
-            source={{ uri: displayAvatarUrl }}
+            source={{ uri: getFullUrl(displayAvatarUrl) }}
             style={{ width: 100, height: 100, borderRadius: 50 }}
             resizeMode="cover"
           />

@@ -36,7 +36,7 @@ const ProfileScreen = () => {
 
   const isValidAvatarUrl = (value: string) => {
     if (!value) return true;
-    return /^https?:\/\/\S+$/i.test(value);
+    return /^https?:\/\/\S+$/i.test(value) || value.startsWith('/api/files/');
   }
 
   const loadUser = async () => {
