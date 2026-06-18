@@ -45,20 +45,26 @@ const ControlledInputField = <T extends FieldValues>({
           </Text>
 
           <View className="flex-row items-center">
-            <TextInput
-              editable={editable}
-              value={field.value ?? ""}
-              onChangeText={field.onChange}
-              onBlur={field.onBlur}
-              secureTextEntry={secureTextEntry && !isVisible}
-              placeholder={placeholder}
-              placeholderTextColor={placeholderTextColor}
-              className={
-                inputClassName ||
-                "w-full p-4 text-xl border border-theme-text rounded-md bg-theme-background text-theme-text"
-              }
-            />
-            {shouldShowToggle && (
+            {editable ? (
+              <TextInput
+                editable={editable}
+                value={field.value ?? ""}
+                onChangeText={field.onChange}
+                onBlur={field.onBlur}
+                secureTextEntry={secureTextEntry && !isVisible}
+                placeholder={placeholder}
+                placeholderTextColor={placeholderTextColor}
+                className={
+                  inputClassName ||
+                  "w-full p-4 text-xl border border-theme-text rounded-md bg-theme-background text-theme-text"
+                }
+              />
+            ) : (
+              <Text className={inputClassName || "w-full p-4 text-xl text-theme-text"}>
+                {secureTextEntry ? "••••••••" : (field.value || "-")}
+              </Text>
+            )}
+            {shouldShowToggle && editable && (
               <MaterialCommunityIcons
                 name={isVisible ? "eye-off" : "eye"}
                 size={24}

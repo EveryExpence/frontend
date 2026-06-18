@@ -33,5 +33,7 @@ export const updateExpenseRecordEndpoint = (id: string) => `${base}/expenseRecor
 export const deleteExpenseRecordEndpoint = (id: string) => `${base}/expenseRecord/${id}`;
 
 export const analyzeReceiptEndpoint = `${base}/receipts/analyze`;
-export const uploadFileEndpoint = `${base}/files/upload`;
+
+const domain = base.split('/api')[0];
+export const uploadFileEndpoint = `${domain}/api/files/upload`;
 
