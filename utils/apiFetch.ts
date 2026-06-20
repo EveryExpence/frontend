@@ -5,10 +5,24 @@ import { router } from 'expo-router';
 
 export const apiFetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     let token = await EncryptedStorage.getItem(accessTokenKey);
-    const headers = new Headers(init?.headers);
+    
+    const headers: Record<string, string> = {};
+    if (init?.headers) {
+        if (init.headers instanceof Headers) {
+            init.headers.forEach((value, key) => {
+                headers[key] = value;
+            });
+        } else if (Array.isArray(init.headers)) {
+            init.headers.forEach(([key, value]) => {
+                headers[key] = value;
+            });
+        } else {
+            Object.assign(headers, init.headers);
+        }
+    }
 
     if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
+        headers["Authorization"] = `Bearer ${token}`;
     }
 
     let response = await fetch(input, { ...init, headers });
@@ -43,7 +57,7 @@ export const apiFetch = async (input: RequestInfo | URL, init?: RequestInit): Pr
         await EncryptedStorage.setItem(accessTokenKey, accessToken);
         await EncryptedStorage.setItem(refreshTokenKey, newRefreshToken);
 
-        headers.set("Authorization", `Bearer ${accessToken}`);
+        headers["Authorization"] = `Bearer ${accessToken}`;
         
         response = await fetch(input, { ...init, headers });
     }

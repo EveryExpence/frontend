@@ -2,7 +2,8 @@ import {
     createCategoryEndpoint, deleteCategoryEndpoint, getCategoryEndpoint, updateCategoryEndpoint,
     createAccountEndpoint, deleteAccountEndpoint, getAccountsEndpoint, updateAccountEndpoint,
     createPaymentMethodEndpoint, deletePaymentMethodEndpoint, getPaymentMethodsEndpoint, updatePaymentMethodEndpoint,
-    createExpenseRecordEndpoint, deleteExpenseRecordEndpoint, getExpenseRecordsEndpoint, updateExpenseRecordEndpoint
+    createExpenseRecordEndpoint, deleteExpenseRecordEndpoint, getExpenseRecordsEndpoint, updateExpenseRecordEndpoint,
+    uploadFileEndpoint
 } from "@/constants/endpoints";
 import { deleteCategoryBatch, getAllLocalCategoryIds, getCategoriesWithSyncState, insertRemoteCategory, setCategoryBatchSynced, updateRemoteCategory } from "@/data/categories";
 import { deleteAccountBatch, getAllLocalAccountIds, getAccountsWithSyncState, insertRemoteAccount, setAccountBatchSynced, updateRemoteAccount } from "@/data/accounts";
@@ -14,6 +15,8 @@ import { CategoryResponseDTO } from "@/types/data/category";
 import { AccountResponseDTO } from "@/types/data/account";
 import { PaymentMethodResponseDTO } from "@/types/data/paymentMethod";
 import { ExpenseRecordResponseDTO } from "@/types/data/expenseRecord";
+import { getAttachmentsForExpense } from "@/data/attachments";
+import * as FileSystem from 'expo-file-system/legacy';
 
 export const syncCategories = async (db: SQLiteDatabase) => {
     const synchedCategoriesIds = [];
@@ -184,6 +187,42 @@ export const syncExpenseRecords = async (db: SQLiteDatabase) => {
     const updated = await getExpenseRecordsWithSyncState(db, 'updated');
     for (const item of updated) {
         const { dateStr, timeStr } = formatDateTime(item.createdAt);
+        
+        const localAttachments = await getAttachmentsForExpense(db, item.id);
+        const uploadedAttachments = [];
+        for (const localAtt of localAttachments) {
+            try {
+                const tempUri = FileSystem.cacheDirectory + 'temp_' + localAtt.id + '.jpg';
+                let binary = '';
+                const bytes = new Uint8Array(localAtt.content);
+                const len = bytes.byteLength;
+                for (let i = 0; i < len; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
+                const base64 = btoa(binary);
+                await FileSystem.writeAsStringAsync(tempUri, base64, { encoding: 'base64' });
+
+                const formData = new FormData();
+                formData.append('file', {
+                    uri: tempUri,
+                    name: 'attachment.jpg',
+                    type: 'image/jpeg'
+                } as any);
+
+                const uploadRes = await apiFetch(uploadFileEndpoint, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (uploadRes.ok) {
+                    const result = await uploadRes.json();
+                    uploadedAttachments.push(result.url);
+                }
+            } catch (e) {
+                console.error("Error uploading attachment", e);
+            }
+        }
+
         const response = await apiFetch(updateExpenseRecordEndpoint(item.id), {
             method: "PUT",
             body: JSON.stringify({ 
@@ -195,7 +234,7 @@ export const syncExpenseRecords = async (db: SQLiteDatabase) => {
                 paymentMethodId: item.paymentMethodId,
                 categoryId: item.categoryId,
                 description: item.description,
-                attachments: [],
+                attachments: uploadedAttachments,
             }),
             headers: { 'Content-Type': 'application/json' },
         });
@@ -205,6 +244,42 @@ export const syncExpenseRecords = async (db: SQLiteDatabase) => {
     const created = await getExpenseRecordsWithSyncState(db, 'created');
     for (const item of created) {
         const { dateStr, timeStr } = formatDateTime(item.createdAt);
+        
+        const localAttachments = await getAttachmentsForExpense(db, item.id);
+        const uploadedAttachments = [];
+        for (const localAtt of localAttachments) {
+            try {
+                const tempUri = FileSystem.cacheDirectory + 'temp_' + localAtt.id + '.jpg';
+                let binary = '';
+                const bytes = new Uint8Array(localAtt.content);
+                const len = bytes.byteLength;
+                for (let i = 0; i < len; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
+                const base64 = btoa(binary);
+                await FileSystem.writeAsStringAsync(tempUri, base64, { encoding: 'base64' });
+
+                const formData = new FormData();
+                formData.append('file', {
+                    uri: tempUri,
+                    name: 'attachment.jpg',
+                    type: 'image/jpeg'
+                } as any);
+
+                const uploadRes = await apiFetch(uploadFileEndpoint, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (uploadRes.ok) {
+                    const result = await uploadRes.json();
+                    uploadedAttachments.push(result.url);
+                }
+            } catch (e) {
+                console.error("Error uploading attachment", e);
+            }
+        }
+
         const response = await apiFetch(createExpenseRecordEndpoint, {
             method: "POST",
             body: JSON.stringify({ 
@@ -217,7 +292,7 @@ export const syncExpenseRecords = async (db: SQLiteDatabase) => {
                 paymentMethodId: item.paymentMethodId,
                 categoryId: item.categoryId,
                 description: item.description,
-                attachments: [],
+                attachments: uploadedAttachments,
             }),
             headers: { 'Content-Type': 'application/json' },
         });

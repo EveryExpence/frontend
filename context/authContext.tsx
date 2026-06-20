@@ -49,6 +49,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 
                 if (accessToken) {
                     const userData = await getUserData(accessToken);
+                    const syncState = await EncryptedStorage.getItem("avatarSyncState");
+                    if (syncState === "updated") {
+                        const localUri = await EncryptedStorage.getItem("localAvatarUrl");
+                        if (localUri) {
+                            userData.avatarUrl = localUri;
+                        }
+                    }
                     setUser({ ...userData });
                 }
             } catch (error) {
@@ -156,6 +163,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
 
         const userData = await getUserData(accessToken)
+        const syncState = await EncryptedStorage.getItem("avatarSyncState");
+        if (syncState === "updated") {
+            const localUri = await EncryptedStorage.getItem("localAvatarUrl");
+            if (localUri) {
+                userData.avatarUrl = localUri;
+            }
+        }
         setUser({ ...userData })
     };
 
