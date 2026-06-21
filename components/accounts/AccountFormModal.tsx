@@ -7,6 +7,7 @@ import CustomModal from '@/components/Modal';
 import { AccountCardItem } from '@/components/accounts/AccountCard';
 import { isValidBalanceInput, normalizeNumberInput, parseBalanceInput } from '@/utils/balance';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import Toast from 'react-native-toast-message';
 
 const CURRENCIES = ['USD', 'EUR', 'PLN', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD'];
 const DEFAULT_CURRENCY = CURRENCIES[0];
@@ -65,6 +66,8 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
     setIsSaving(true);
     try {
       await onSave({ name: name.trim(), currency, balance: parsed });
+    } catch (error: any) {
+      Toast.show({ text1: error?.message || "Failed to save account", type: "error" });
     } finally {
       setIsSaving(false);
     }
