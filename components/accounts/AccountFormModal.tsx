@@ -69,7 +69,7 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
     try {
       await onSave({ name: name.trim(), currency, balance: parsed });
     } catch (error: any) {
-      Toast.show({ text1: error?.message || "Failed to save account", type: "error" });
+      Toast.show({ text1: error?.message || t('accounts.save_failed'), type: "error" });
     } finally {
       setIsSaving(false);
     }

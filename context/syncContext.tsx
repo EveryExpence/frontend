@@ -4,6 +4,7 @@ import { useSQLiteContext } from "expo-sqlite";
 import { syncCategories, syncAccounts, syncPaymentMethods, syncExpenseRecords } from "@/utils/sync";
 import NetInfo from '@react-native-community/netinfo';
 import Toast from 'react-native-toast-message';
+import { useTranslation } from 'react-i18next';
 
 type SyncContextType = {
     triggerSync: () => Promise<void>;
@@ -26,6 +27,7 @@ export const SyncProvider = ({ children }: { children: React.ReactNode }) => {
     const { user } = useAuth();
     const [isSyncing, setIsSyncing] = useState(false);
     const [lastSyncError, setLastSyncError] = useState<string | null>(null);
+    const { t } = useTranslation();
 
     const syncData = async () => {
         if (!isInternetReachable.current || user === null || isSyncing) {
@@ -68,7 +70,7 @@ export const SyncProvider = ({ children }: { children: React.ReactNode }) => {
         if (errors.length > 0) {
             const errorMsg = `Sync failed for: ${errors.join(", ")}`;
             setLastSyncError(errorMsg);
-            Toast.show({ text1: 'Sync Error', text2: errorMsg, type: 'error' });
+            Toast.show({ text1: t('common.sync_error'), text2: errorMsg, type: 'error' });
         }
 
         setIsSyncing(false);

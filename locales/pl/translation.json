@@ -14,7 +14,8 @@
     "today": "Dzisiaj",
     "yesterday": "Wczoraj",
     "other": "Inne",
-    "total": "Suma"
+    "total": "Suma",
+    "sync_error": "Błąd synchronizacji"
   },
   "dashboard": {
     "total_balance": "Całkowite Saldo",
@@ -23,7 +24,8 @@
     "spending_insights": "Wnioski o Wydatkach",
     "major_spendings": "Główne Wydatki",
     "no_expenses": "Brak wydatków",
-    "no_accounts": "Brak kont"
+    "no_accounts": "Brak kont",
+    "insights_load_failed": "Nie udało się załadować wniosków o wydatkach"
   },
   "records": {
     "title": "Historia Transakcji",
@@ -37,7 +39,9 @@
     "delete_confirm": "Usunąć {{title}}?",
     "delete_success": "Transakcja usunięta",
     "delete_failed": "Nie udało się usunąć transakcji",
-    "uncategorized": "Nieskategoryzowane"
+    "uncategorized": "Nieskategoryzowane",
+    "load_failed": "Nie udało się załadować historii transakcji",
+    "load_record_failed": "Nie udało się załadować rekordu"
   },
   "balance_trend": {
     "title": "Wnioski o Wydatkach",
@@ -45,7 +49,9 @@
     "spending_sources": "Główne źródła wydatków",
     "no_income": "Nie znaleziono rekordów dochodów dla tego okresu.",
     "no_spending": "Nie znaleziono rekordów wydatków dla tego okresu.",
-    "no_data_period": "Brak danych dla tego okresu"
+    "no_data_period": "Brak danych dla tego okresu",
+    "load_failed": "Nie udało się załadować trendu salda",
+    "load_details_failed": "Nie udało się załadować szczegółów trendu"
   },
   "new_expense": {
     "title": "Nowy Wydatek",
@@ -88,7 +94,8 @@
     "error_select_image": "Proszę najpierw wybrać zdjęcie",
     "success_analysis_completed": "Analiza paragonu zakończona!",
     "error_size_limit": "Nie można analizować: rozmiar przekracza 15MB",
-    "error_failed_analysis": "Nie udało się przeanalizować paragonu"
+    "error_failed_analysis": "Nie udało się przeanalizować paragonu",
+    "image_picker_failed": "Nie udało się otworzyć wyboru zdjęć"
   },
   "settings": {
     "title": "Ustawienia",
@@ -108,7 +115,8 @@
     "daily_reminders": "Codzienne przypomnienia",
     "security": "Bezpieczeństwo",
     "reminder_title": "Przyjazne Przypomnienie 💰",
-    "reminder_body": "Nie zapomnij dzisiaj dodać swoich wydatków!"
+    "reminder_body": "Nie zapomnij dzisiaj dodać swoich wydatków!",
+    "password_update_success": "Pomyślnie zaktualizowano hasło"
   },
   "auth": {
     "login": "Zaloguj się",
@@ -146,7 +154,8 @@
     "error_username_short": "Nazwa użytkownika jest za krótka",
     "error_username_long": "Nazwa użytkownika jest za długa",
     "error_email_required": "Email jest wymagany",
-    "error_email_long": "Email jest za długi"
+    "error_email_long": "Email jest za długi",
+    "logout_failed": "Wylogowanie nieudane"
   },
   "tabs": {
     "dashboard": "Pulpit",
@@ -174,8 +183,9 @@
     "update_success": "Konto zaktualizowane",
     "create_success": "Konto utworzone",
     "delete_success": "Konto usunięte",
-    "load_failed": "Nie udało się załadować kont"
-  },
+    "load_failed": "Nie udało się załadować kont",
+    "save_failed": "Nie udało się zapisać konta"
+  },,
   "categories": {
     "no_categories": "Brak kategorii",
     "add_new": "Dodaj nową kategorię",

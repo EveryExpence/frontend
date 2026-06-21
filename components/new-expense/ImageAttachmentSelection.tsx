@@ -26,7 +26,7 @@ const ImageAttachmentSelection = ({ images, setImages }: Props) => {
             }
         } catch (error: any) {
             console.error("Failed to pick image:", error);
-            Toast.show({ text1: "Failed to open image picker", text2: error?.message, type: "error" });
+            Toast.show({ text1: t('new_expense.image_picker_failed'), text2: error?.message, type: "error" });
         }
     };
 

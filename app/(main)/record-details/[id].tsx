@@ -90,7 +90,7 @@ export default function RecordDetailsScreen() {
         console.error("Failed to load record:", err);
         const msg = err?.message ?? String(err);
         setLoadError(msg);
-        Toast.show({ text1: "Failed to load record", text2: msg, type: "error" });
+        Toast.show({ text1: t('records.load_record_failed'), text2: msg, type: "error" });
       } finally {
         setLoading(false);
       }

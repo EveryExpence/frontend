@@ -89,7 +89,7 @@ export function useExpenseRecords(accountId?: string) {
         } catch (e: any) {
             const msg = e?.message ?? String(e);
             setError(msg);
-            Toast.show({ type: "error", text1: "Failed to load expense records", text2: msg });
+            Toast.show({ type: "error", text1: t('records.load_failed'), text2: msg });
         } finally {
             setLoading(false);
         }

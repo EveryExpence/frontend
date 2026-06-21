@@ -6,6 +6,7 @@ import React from "react";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { BalanceDataPoint, calculateBalanceTrend } from "@/utils/trendCalculations";
 import Toast from 'react-native-toast-message';
+import { useTranslation } from 'react-i18next';
 
 export interface IncomeSource {
     categoryId: string;
@@ -32,6 +33,7 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date, accountId
     const [currency, setCurrency] = React.useState<string>("PLN");
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
+    const { t } = useTranslation();
 
     const fetchData = React.useCallback(async () => {
         if (!db) return;
@@ -117,7 +119,7 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date, accountId
         } catch (e: any) {
             const msg = e?.message ?? String(e);
             setError(msg);
-            Toast.show({ type: "error", text1: "Failed to load trend details", text2: msg });
+            Toast.show({ type: "error", text1: t('balance_trend.load_details_failed'), text2: msg });
         } finally {
             setLoading(false);
         }

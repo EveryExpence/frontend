@@ -35,7 +35,7 @@ const SettingsScreen = () => {
     try {
       await logout();
     } catch (error: any) {
-      Toast.show({ text1: "Logout failed", text2: error?.message, type: "error" });
+      Toast.show({ text1: t('auth.logout_failed'), text2: error?.message, type: "error" });
     } finally {
       router.replace("/(auth)/login");
     }
