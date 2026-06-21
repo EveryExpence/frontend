@@ -79,8 +79,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                const errorMessage = errorData.detail ?? errorData.message ?? errorData.title;
-                throw errorMessage;
+                const errorMessage = errorData.detail ?? errorData.message ?? errorData.title ?? "Login failed";
+                throw new Error(errorMessage);
             }
     
             const { accessToken, refreshToken } = await response.json();
@@ -140,8 +140,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                const errorMessage = errorData.detail ?? errorData.message ?? errorData.title;
-                throw errorMessage;
+                const errorMessage = errorData.detail ?? errorData.message ?? errorData.title ?? "Registration failed";
+                throw new Error(errorMessage);
             }
         } finally {
             setIsLoading(false);
@@ -149,14 +149,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     const refreshUser = async  () => {
-        const accessToken = await EncryptedStorage.getItem(accessTokenKey)
-        if(!accessToken){
-            setUser(null)
-            return
-        }
+        try {
+            const accessToken = await EncryptedStorage.getItem(accessTokenKey)
+            if(!accessToken){
+                setUser(null)
+                return
+            }
 
-        const userData = await getUserData(accessToken)
-        setUser({ ...userData })
+            const userData = await getUserData(accessToken)
+            setUser({ ...userData })
+        } catch (error) {
+            console.error("Failed to refresh user data:", error);
+            setUser(null);
+            throw error;
+        }
     };
 
     return <AuthContext.Provider value={{ user, isInitializing, isLoading, login, register, logout, refreshUser }}>{children}</AuthContext.Provider>
