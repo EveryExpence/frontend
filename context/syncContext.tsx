@@ -6,6 +6,7 @@ import NetInfo from '@react-native-community/netinfo';
 
 type SyncContextType = {
     triggerSync: () => Promise<void>;
+    lastSyncError: string | null;
 };
 
 const SyncContext = createContext<SyncContextType | null>(null);
@@ -23,6 +24,7 @@ export const SyncProvider = ({ children }: { children: React.ReactNode }) => {
     const isInternetReachable = useRef(false);
     const { user } = useAuth();
     const [isSyncing, setIsSyncing] = useState(false);
+    const [lastSyncError, setLastSyncError] = useState<string | null>(null);
 
     const syncData = async () => {
         if (!isInternetReachable.current || user === null || isSyncing) {
@@ -30,29 +32,42 @@ export const SyncProvider = ({ children }: { children: React.ReactNode }) => {
         }
 
         setIsSyncing(true);
-        console.log("SYNCHRONIZING");
+        setLastSyncError(null);
+        const errors: string[] = [];
 
         try {
             await syncCategories(db);
-        } catch (e) {
-            console.error("Failed to sync categories:", e);
+        } catch (e: any) {
+            const msg = e?.message ?? String(e);
+            console.error("Failed to sync categories:", msg);
+            errors.push("categories");
         }
         try {
             await syncAccounts(db);
-        } catch (e) {
-            console.error("Failed to sync accounts:", e);
+        } catch (e: any) {
+            const msg = e?.message ?? String(e);
+            console.error("Failed to sync accounts:", msg);
+            errors.push("accounts");
         }
         try {
             await syncPaymentMethods(db);
-        } catch (e) {
-            console.error("Failed to sync payment methods:", e);
+        } catch (e: any) {
+            const msg = e?.message ?? String(e);
+            console.error("Failed to sync payment methods:", msg);
+            errors.push("payment methods");
         }
         try {
             await syncExpenseRecords(db);
-        } catch (e) {
-            console.error("Failed to sync expense records:", e);
+        } catch (e: any) {
+            const msg = e?.message ?? String(e);
+            console.error("Failed to sync expense records:", msg);
+            errors.push("expense records");
         }
-        console.log("SYNCHRONIZED");
+
+        if (errors.length > 0) {
+            setLastSyncError(`Sync failed for: ${errors.join(", ")}`);
+        }
+
         setIsSyncing(false);
     };
 
@@ -68,7 +83,7 @@ export const SyncProvider = ({ children }: { children: React.ReactNode }) => {
     }, [isInternetReachable.current, user]);
 
     return (
-        <SyncContext.Provider value={{ triggerSync: syncData }}>
+        <SyncContext.Provider value={{ triggerSync: syncData, lastSyncError }}>
             {children}
         </SyncContext.Provider>
     );
