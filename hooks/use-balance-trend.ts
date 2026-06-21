@@ -1,6 +1,7 @@
 import { useSQLiteContext } from "expo-sqlite";
 import React from "react";
 import { BalanceDataPoint, calculateBalanceTrend } from "@/utils/trendCalculations";
+import Toast from 'react-native-toast-message';
 
 export const useBalanceTrend = (accountId?: string) => {
     const db = useSQLiteContext();
@@ -24,7 +25,9 @@ export const useBalanceTrend = (accountId?: string) => {
             setPercentageChange(result.percentageChange);
             setCurrency(result.primaryCurrency);
         } catch (e: any) {
-            setError(e?.message ?? String(e));
+            const msg = e?.message ?? String(e);
+            setError(msg);
+            Toast.show({ type: "error", text1: "Failed to load balance trend", text2: msg });
         } finally {
             setLoading(false);
         }

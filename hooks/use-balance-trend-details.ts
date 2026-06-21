@@ -5,6 +5,7 @@ import { getAllAccounts } from "@/data/accounts";
 import React from "react";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { BalanceDataPoint, calculateBalanceTrend } from "@/utils/trendCalculations";
+import Toast from 'react-native-toast-message';
 
 export interface IncomeSource {
     categoryId: string;
@@ -114,7 +115,9 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date, accountId
             setSpendingSources(sSources);
 
         } catch (e: any) {
-            setError(e?.message ?? String(e));
+            const msg = e?.message ?? String(e);
+            setError(msg);
+            Toast.show({ type: "error", text1: "Failed to load trend details", text2: msg });
         } finally {
             setLoading(false);
         }

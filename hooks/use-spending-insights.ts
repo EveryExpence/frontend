@@ -7,6 +7,7 @@ import { ExpenseRecord } from "@/types/data/expenseRecord";
 import { Category } from "@/types/data/category";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { CATEGORY_COLORS } from "@/constants/categoryColors";
+import Toast from 'react-native-toast-message';
 
 export interface CategoryExpenseItem {
     id: string;
@@ -127,7 +128,9 @@ export function useSpendingInsights(startDate: Date, endDate: Date, accountId?: 
             setCategoryGroups(groups);
             setTotalDisplayLines(lines);
         } catch (e: any) {
-            setError(e?.message ?? String(e));
+            const msg = e?.message ?? String(e);
+            setError(msg);
+            Toast.show({ type: "error", text1: "Failed to load spending insights", text2: msg });
         } finally {
             setLoading(false);
         }

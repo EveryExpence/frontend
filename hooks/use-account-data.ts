@@ -2,6 +2,7 @@ import { useSQLiteContext } from "expo-sqlite";
 import { getAllAccounts as getAllLocalAccounts, getAccountBalance } from "@/data/accounts";
 import { Account } from "@/types/data/account";
 import React from "react";
+import Toast from 'react-native-toast-message';
 
 export type AccountWithComputed = Account & { computedBalance: number };
 
@@ -36,7 +37,9 @@ export const useAccountsData = () => {
 
             setAccounts(accountsWithBalances);
         } catch (e: any) {
-            setError(e?.message ?? String(e));
+            const msg = e?.message ?? String(e);
+            setError(msg);
+            Toast.show({ type: "error", text1: "Failed to load accounts", text2: msg });
         } finally {
             setLoading(false);
         }
