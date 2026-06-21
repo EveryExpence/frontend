@@ -1,6 +1,7 @@
 import React from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Text, View, useColorScheme } from "react-native";
+import { Text, View, useColorScheme, TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { Colors } from "@/constants/theme";
 import { DashboardWidgetCard } from "./DashboardWidgetCard";
@@ -22,8 +23,13 @@ export const TransactionHistoryRow = ({
   const scheme = useColorScheme() ?? "light";
   const colors = Colors[scheme];
 
+  const router = useRouter();
+
   return (
-    <View className="flex-row items-center justify-between py-1">
+    <TouchableOpacity 
+      className="flex-row items-center justify-between py-1"
+      onPress={() => router.push(`/record-details/${record.id}`)}
+    >
       <View className="flex-1 flex-row items-center">
         <View className="h-11 w-11 items-center justify-center rounded-full bg-theme-tint">
           <MaterialCommunityIcons
@@ -48,7 +54,7 @@ export const TransactionHistoryRow = ({
       >
         {formatCurrency(record.amount, record.currency)}
       </Text>
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -57,6 +63,8 @@ export const TransactionHistoryWidget: React.FC<TransactionHistoryWidgetProps> =
   const { t } = useTranslation();
 
   const toShow = propRecords && propRecords.length > 0 ? propRecords : (localRecords ?? []).slice(0, 3);
+
+  if (!loading && !error && toShow.length === 0) return null;
 
   return (
     <DashboardWidgetCard title={t("dashboard.transaction_history")} actionLabel={t("common.see_all")} onActionPress={onSeeAllPress}>

@@ -46,11 +46,19 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
       });
 
       if (isMapLoadedRef.current) {
-        webViewRef.current?.injectJavaScript(`
-          window.updateMapLocation(${coords.latitude}, ${coords.longitude});
-          window.setMarker(${coords.latitude}, ${coords.longitude});
-          true;
-        `);
+        if (disabled) {
+          webViewRef.current?.injectJavaScript(`window.updateMapLocation(${coords.latitude}, ${coords.longitude}); true;`);
+        } else {
+          webViewRef.current?.injectJavaScript(`
+            window.updateMapLocation(${coords.latitude}, ${coords.longitude});
+            window.setMarker(${coords.latitude}, ${coords.longitude});
+            true;
+          `);
+        }
+      }
+      
+      if (!disabled) {
+        setLocation({ latitude: coords.latitude, longitude: coords.longitude });
       }
 
       setLocation({ latitude: coords.latitude, longitude: coords.longitude });
@@ -62,7 +70,7 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
     } finally {
       setIsFetching(false);
     }
-  }, [setLocation]);
+  }, [setLocation, disabled, t]);
 
   useEffect(() => {
     if (!disabled) {
@@ -137,22 +145,20 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
     <View className="flex-row justify-between items-center mb-2">
     <Text className="text-2xl text-theme-text font-bold">{t("new_expense.location")}</Text>
 
-    {!disabled && (
-      <TouchableOpacity
+    <TouchableOpacity
       onPress={getCurrentLocation}
       className="flex-row items-center bg-theme-surface px-3 py-2 rounded-md"
       disabled={isFetching}
-      >
+    >
       {isFetching ? (
         <ActivityIndicator size="small" color={colors.text} />
       ) : (
         <>
-        <MaterialCommunityIcons name="crosshairs-gps" size={18} color={colors.text} />
-        <Text className="text-theme-text ml-2">{t("new_expense.get_current")}</Text>
+          <MaterialCommunityIcons name="crosshairs-gps" size={18} color={colors.text} />
+          <Text className="text-theme-text ml-2">{t("new_expense.get_current")}</Text>
         </>
       )}
-      </TouchableOpacity>
-    )}
+    </TouchableOpacity>
     </View>
 
     <View className={`w-full h-[400px] rounded-md overflow-hidden bg-theme-surface border border-transparent ${!WebView ? 'items-center justify-center px-4' : ''}`}>

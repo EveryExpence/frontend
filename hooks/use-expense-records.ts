@@ -17,6 +17,7 @@ export interface TransactionRecord {
     dateLabel: string;
     categoryName: string;
     paymentMethodName: string;
+    location?: string;
 }
 
 export interface TransactionSection {
@@ -83,6 +84,7 @@ export function useExpenseRecords(accountId?: string) {
                     dateLabel: formatDateLabel(r.createdAt),
                     categoryName: categoryMap[r.categoryId] ?? t('records.uncategorized'),
                     paymentMethodName: paymentMethodMap[r.paymentMethodId] ?? t('common.other'),
+                    location: r.location,
                 }));
 
             setRecords(mapped);

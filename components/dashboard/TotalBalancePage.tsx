@@ -22,14 +22,21 @@ export const TotalBalancePage: React.FC<TotalBalancePageProps> = ({
       {Object.keys(totalsByCurrency).length === 0 ? (
         <Text className="text-theme-text text-center">{t("dashboard.no_accounts")}</Text>
       ) : (
-        Object.entries(totalsByCurrency).map(([currency, value]) => (
-          <Text
-            key={currency}
-            className="text-6xl mt-4 text-center text-theme-text"
-          >
-            {formatCurrency(value, currency)}
-          </Text>
-        ))
+        <>
+          {Object.entries(totalsByCurrency).slice(0, 3).map(([currency, value]) => (
+            <Text
+              key={currency}
+              className="text-6xl mt-4 text-center text-theme-text"
+            >
+              {formatCurrency(value, currency)}
+            </Text>
+          ))}
+          {Object.entries(totalsByCurrency).length > 3 && (
+            <Text className="text-2xl mt-4 text-center text-theme-text opacity-70">
+              +{Object.entries(totalsByCurrency).length - 3} {t("dashboard.others", "others")}
+            </Text>
+          )}
+        </>
       )}
     </View>
   );
