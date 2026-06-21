@@ -32,7 +32,7 @@ export default function DeleteRecordModal({
       title={t("records.delete_record")}
       cancelAction={
         <TouchableOpacity onPress={onClose} style={{ padding: 8 }}>
-          <Text className="text-2xl text-theme-icon">{t("common.cancel")}</Text>
+          <Text className="text-lg text-theme-icon">{t("common.cancel")}</Text>
         </TouchableOpacity>
       }
       confirmAction={
@@ -41,13 +41,13 @@ export default function DeleteRecordModal({
           disabled={isDeleting}
           style={{ marginLeft: 10, padding: 8, backgroundColor: colors.error, borderRadius: 8 }}
         >
-          <Text className="text-2xl" style={{ color: colors.textLight }}>
+          <Text className="text-lg font-medium" style={{ color: colors.textLight }}>
             {isDeleting ? t("common.loading") : t("common.delete")}
           </Text>
         </TouchableOpacity>
       }
     >
-      <Text className="text-2xl text-theme-icon" style={{ marginBottom: 4 }}>
+      <Text className="text-lg text-theme-text" style={{ marginBottom: 4 }}>
         {t("records.delete_confirm", { title: title ?? '' })}
       </Text>
     </CustomModal>

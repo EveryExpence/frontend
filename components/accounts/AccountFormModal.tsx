@@ -81,7 +81,7 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
       title={isEditing ? t("accounts.edit_account") : t("accounts.add_account")}
       cancelAction={
         <TouchableOpacity onPress={onClose} style={{ padding: 10 }}>
-          <Text className="text-2xl text-theme-icon">{t("common.cancel")}</Text>
+          <Text className="text-lg text-theme-icon">{t("common.cancel")}</Text>
         </TouchableOpacity>
       }
       confirmAction={
@@ -96,16 +96,16 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
             opacity: canSave ? 1 : 0.5,
           }}
         >
-          <Text className="text-2xl" style={{ color: colors.textLight }}>
+          <Text className="text-lg font-medium" style={{ color: colors.textLight }}>
             {isSaving ? t("common.loading") : t("common.save")}
           </Text>
         </TouchableOpacity>
       }
     >
       <ScrollView keyboardShouldPersistTaps="handled">
-        <Text className="text-2xl text-theme-icon" style={{ marginBottom: 6 }}>{t("accounts.name")}</Text>
+        <Text className="text-lg text-theme-icon" style={{ marginBottom: 6 }}>{t("accounts.name")}</Text>
         <TextInput
-          className="text-2xl text-theme-text"
+          className="text-lg text-theme-text"
           value={name}
           onChangeText={setName}
           placeholder={t("accounts.enter_name_placeholder")}
@@ -118,9 +118,9 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
           }}
         />
 
-        <Text className="text-2xl text-theme-icon" style={{ marginBottom: 6 }}>{t("accounts.balance")}</Text>
+        <Text className="text-lg text-theme-icon" style={{ marginBottom: 6 }}>{t("accounts.balance")}</Text>
         <TextInput
-          className="text-2xl text-theme-text"
+          className="text-lg text-theme-text"
           value={balanceField}
           onChangeText={setBalanceField}
           keyboardType="decimal-pad"
@@ -140,7 +140,7 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
           </Text>
         )}
 
-        <Text className="text-2xl text-theme-icon">{t("accounts.currency")}</Text>
+        <Text className="text-lg text-theme-icon">{t("accounts.currency")}</Text>
         <Dropdown
           style={{
             backgroundColor: colors.background,

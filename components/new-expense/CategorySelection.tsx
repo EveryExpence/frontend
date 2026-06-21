@@ -6,7 +6,6 @@ import { Category, categoryTypes, getCategoryIcon } from '@/types/data/category'
 import { Colors } from '@/constants/theme'
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite'
 import { createCategory, getAllCategories } from '@/data/categories'
-import CustomModal from '../Modal'
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import { useColorScheme } from '@/hooks/use-color-scheme'
 import { useFocusEffect } from 'expo-router'
@@ -29,35 +28,6 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled, ty
     const colors = Colors[scheme];
     const db = useSQLiteContext();
     const [categories, setCategories] = useState<Category[]>([]);
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [newCategoryName, setNewCategoryName] = useState("");
-    const [newCategoryTypeIndex, setNewCategoryTypeIndex] = useState(2);
-
-    useEffect(() => {
-        if (isModalVisible) {
-            if (typeFilter === "expense") {
-                setNewCategoryTypeIndex(0);
-            } else if (typeFilter === "income") {
-                setNewCategoryTypeIndex(1);
-            } else {
-                setNewCategoryTypeIndex(2);
-            }
-        }
-    }, [isModalVisible, typeFilter]);
-
-    const saveNewCategory = async () => {
-        await createCategory(db, { name: newCategoryName, type: categoryTypes[newCategoryTypeIndex] });
-        await fetchCategories(db, setCategories);
-        setIsModalVisible(false);
-        setNewCategoryName("");
-        if (typeFilter === "expense") {
-            setNewCategoryTypeIndex(0);
-        } else if (typeFilter === "income") {
-            setNewCategoryTypeIndex(1);
-        } else {
-            setNewCategoryTypeIndex(2);
-        }
-    }
 
     useFocusEffect(
         React.useCallback(() => {
@@ -132,76 +102,9 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled, ty
                         />
                     )}
                 />
-
-                {!disabled && (
-                    <TouchableOpacity onPress={() => setIsModalVisible(true)}>
-                        <MaterialCommunityIcons name="plus" size={32} color={colors.text} />
-                    </TouchableOpacity>
-                )}
             </View>
 
-            <CustomModal
-                isVisible={isModalVisible}
-                setIsVisible={setIsModalVisible}
-                title={t("new_expense.create_category")}
-                cancelAction={
-                    <TouchableOpacity onPress={() => setIsModalVisible(false)}>
-                        <Text className="text-xl text-theme-text">{t("common.cancel")}</Text>
-                    </TouchableOpacity>
-                }
-                confirmAction={
-                    <TouchableOpacity
-                        onPress={saveNewCategory}
-                        className="bg-theme-tint rounded-md px-5 py-3"
-                    >
-                        <Text className="text-xl text-theme-text">{t("common.save")}</Text>
-                    </TouchableOpacity>
-                }
-            >
-                <View className="w-full mb-4">
-                    <Text className="text-xl text-theme-text opacity-85">{t("new_expense.category_name")}</Text>
 
-                    <View className="w-full flex-row items-center">
-                        <MaterialCommunityIcons
-                            className="absolute pl-4 z-30"
-                            name="text-long"
-                            size={20}
-                            color={colors.text}
-                        />
-
-                        <TextInput
-                            placeholder={t("new_expense.enter_name")}
-                            placeholderClassName="text-theme-text opacity-35"
-                            value={newCategoryName}
-                            onChangeText={setNewCategoryName}
-                            className="px-12 w-full py-4 text-xl rounded-md bg-theme-surface text-theme-text border border-theme-text"
-                        />
-                    </View>
-                </View>
-
-                <View className="w-full mb-4">
-                    <Text className="text-xl text-theme-text opacity-85">{t("new_expense.category_name")}</Text>
-
-                    <SegmentedControl
-                        tintColor={colors.tint}
-                        fontStyle={{
-                            color: colors.text,
-                        }}
-                        activeFontStyle={{
-                            color: colors.textLight,
-                        }}
-                        backgroundColor={colors.surface}
-                        style={{
-                            height: 36
-                        }}
-                        values={categoryTypes}
-                        selectedIndex={newCategoryTypeIndex}
-                        onChange={(event) => {
-                            setNewCategoryTypeIndex(event.nativeEvent.selectedSegmentIndex);
-                        }}
-                    />
-                </View>
-            </CustomModal>
         </View>
     )
 }
