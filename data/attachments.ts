@@ -3,34 +3,39 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { nanoid } from 'nanoid';
 
 export const saveAttachments = async (db: SQLiteDatabase, expenseRecordId: string, imageUris: string[]) => {
-    const stmt = await db.prepareAsync(`
-        INSERT INTO attachments (
-            id,
-            expense_record_id,
-            content
-        ) VALUES (
-            $id,
-            $expense_record_id,
-            $content
-        );
-    `);
+    try {
+        const stmt = await db.prepareAsync(`
+            INSERT INTO attachments (
+                id,
+                expense_record_id,
+                content
+            ) VALUES (
+                $id,
+                $expense_record_id,
+                $content
+            );
+        `);
 
-    await db.withExclusiveTransactionAsync(async () => {
-        for (const uri of imageUris) {
-            const base64 = await FileSystem.readAsStringAsync(uri, { encoding: 'base64' });
-            const binaryString = atob(base64);
-            const bytes = new Uint8Array(binaryString.length);
-            for (let i = 0; i < binaryString.length; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
+        await db.withExclusiveTransactionAsync(async () => {
+            for (const uri of imageUris) {
+                const base64 = await FileSystem.readAsStringAsync(uri, { encoding: 'base64' });
+                const binaryString = atob(base64);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+
+                await stmt.executeAsync({
+                    $id: nanoid(),
+                    $expense_record_id: expenseRecordId,
+                    $content: bytes,
+                });
             }
-
-            await stmt.executeAsync({
-                $id: nanoid(),
-                $expense_record_id: expenseRecordId,
-                $content: bytes,
-            });
-        }
-    });
+        });
+    } catch (error) {
+        console.error("Failed to save attachments:", error);
+        throw new Error(`Failed to save attachments: ${error instanceof Error ? error.message : String(error)}`);
+    }
 };
 
 export const getAttachmentsForExpense = async (db: SQLiteDatabase, expenseRecordId: string): Promise<{ id: string, content: Uint8Array }[]> => {
