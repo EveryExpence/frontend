@@ -189,6 +189,7 @@ export const syncPaymentMethods = async (db: SQLiteDatabase) => {
 }
 
 export const syncExpenseRecords = async (db: SQLiteDatabase) => {
+    try {
     const formatDateTime = (val: any) => {
         let dateStr = "2024-01-01";
         let timeStr = "00:00:00";

@@ -185,7 +185,7 @@
     "delete_success": "Konto usunięte",
     "load_failed": "Nie udało się załadować kont",
     "save_failed": "Nie udało się zapisać konta"
-  },,
+  },
   "categories": {
     "no_categories": "Brak kategorii",
     "add_new": "Dodaj nową kategorię",

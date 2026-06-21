@@ -4,6 +4,7 @@ import { refreshEndpoint } from "@/constants/endpoints";
 import { router } from 'expo-router';
 
 export const apiFetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    try {
     let token = await EncryptedStorage.getItem(accessTokenKey);
 
     const headers: Record<string, string> = {};
@@ -42,7 +43,7 @@ export const apiFetch = async (input: RequestInfo | URL, init?: RequestInit): Pr
             headers.set("Authorization", `Bearer ${token}`);
         }
 
-        let response: Response;
+
         try {
             response = await fetch(input, { ...init, headers });
         } catch (networkError) {
@@ -118,6 +119,8 @@ export const apiFetch = async (input: RequestInfo | URL, init?: RequestInit): Pr
         }
 
         return response;
+    } // closes if (response.status === 401 || response.status === 403)
+    return response;
     } catch (unexpectedError) {
         console.error("Unexpected error in apiFetch:", unexpectedError);
         return new Response(JSON.stringify({ message: "An unexpected error occurred." }), {
@@ -125,6 +128,5 @@ export const apiFetch = async (input: RequestInfo | URL, init?: RequestInit): Pr
             statusText: "Unexpected Error",
             headers: { "Content-Type": "application/json" },
         });
-
     }
 };
