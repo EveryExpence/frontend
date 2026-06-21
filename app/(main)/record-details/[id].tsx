@@ -47,6 +47,7 @@ export default function RecordDetailsScreen() {
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState<Coordinates | null>(null);
   const [scrollEnabled, setScrollEnabled] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -83,8 +84,11 @@ export default function RecordDetailsScreen() {
             });
           }
         }
-      } catch (err) {
-        console.error(err);
+      } catch (err: any) {
+        console.error("Failed to load record:", err);
+        const msg = err?.message ?? String(err);
+        setLoadError(msg);
+        Toast.show({ text1: "Failed to load record", text2: msg, type: "error" });
       } finally {
         setLoading(false);
       }
