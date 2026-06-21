@@ -8,9 +8,7 @@ import { AccountCardItem } from '@/components/accounts/AccountCard';
 import { isValidBalanceInput, normalizeNumberInput, parseBalanceInput } from '@/utils/balance';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useTranslation } from 'react-i18next';
-
-const CURRENCIES = ['USD', 'EUR', 'PLN', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD'];
-const DEFAULT_CURRENCY = CURRENCIES[0];
+import { CURRENCIES } from '@/constants/currencies';
 
 export type AccountFormData = {
   name: string;
@@ -32,7 +30,7 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
 
   const [name, setName] = useState('');
   const [balanceField, setBalanceField] = useState('');
-  const [currency, setCurrency] = useState(DEFAULT_CURRENCY);
+  const [currency, setCurrency] = useState('USD');
   const [isSaving, setIsSaving] = useState(false);
 
   const isEditing = editingAccount !== null;
@@ -40,7 +38,7 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
   const canSave = name.trim() && isBalanceValid && !isSaving;
 
   const currencyOptions = React.useMemo(
-    () => CURRENCIES.map((c) => ({ label: c, value: c })),
+    () => CURRENCIES.map((c) => ({ label: `${c.code} (${c.symbol}) - ${c.name}`, value: c.code })),
     []
   );
 
@@ -50,11 +48,11 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
     if (editingAccount) {
       setName(editingAccount.name);
       setBalanceField(normalizeNumberInput(String(editingAccount.balance)));
-      setCurrency(editingAccount.currency ?? DEFAULT_CURRENCY);
+      setCurrency(editingAccount.currency ?? 'USD');
     } else {
       setName('');
       setBalanceField('');
-      setCurrency(DEFAULT_CURRENCY);
+      setCurrency('USD');
     }
   }, [visible, editingAccount]);
 

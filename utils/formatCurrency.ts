@@ -1,11 +1,15 @@
+import { getCurrencyInfo } from "@/constants/currencies";
+
 export const formatCurrency = (value: number, currency: string) => {
+    const currencyInfo = getCurrencyInfo(currency);
     try {
-        return new Intl.NumberFormat(undefined, {
+        const formatted = new Intl.NumberFormat(undefined, {
             style: "currency",
-            currency,
+            currency: currencyInfo.code,
             maximumFractionDigits: 2,
         }).format(value);
+        return `${formatted} (${currencyInfo.code})`;
     } catch {
-        return `${value.toFixed(2)} ${currency}`;
+        return `${currencyInfo.symbol}${value.toFixed(2)} (${currencyInfo.code})`;
     }
 };

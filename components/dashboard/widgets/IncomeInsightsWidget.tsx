@@ -67,15 +67,16 @@ export const IncomeInsightsWidget: React.FC<{ onShowMore?: () => void; accountId
   }, [db, accountId]);
 
   const totalsByCategory = React.useMemo(() => {
-    const map = new Map<string, { amount: number; currency: string }[]>();
+    const map = new Map<string, { amount: number; currency: string; categoryId: string }[]>();
     recordsRaw.forEach((r) => {
       if (r.amount === undefined || r.amount === null) return;
       if (r.amount <= 0) return;
       const cat = r.categoryId ?? "uncategorized";
       const currency = accounts[r.accountId] ?? "PLN";
-      const entry = map.get(cat) ?? [];
-      entry.push({ amount: r.amount, currency });
-      map.set(cat, entry);
+      const key = `${cat}_${currency}`;
+      const entry = map.get(key) ?? [];
+      entry.push({ amount: r.amount, currency, categoryId: cat });
+      map.set(key, entry);
     });
     return map;
   }, [recordsRaw, accounts]);
@@ -102,22 +103,21 @@ export const IncomeInsightsWidget: React.FC<{ onShowMore?: () => void; accountId
       const bTotal = b[1].reduce((s, e) => s + e.amount, 0);
       return bTotal - aTotal;
     });
-    entries.forEach(([catId, entries], idx) => {
+    const grandTotal = entries.reduce((acc, [, entry]) => acc + entry.reduce((s, e) => s + e.amount, 0), 0);
+
+    entries.forEach(([key, entries], idx) => {
+      const catId = entries[0].categoryId;
       const label = categories[catId] ?? "Other";
       const primaryCurrency = entries[0].currency;
-      const amounts: Record<string, number> = {};
       let chartValue = 0;
-      entries.forEach(({ amount, currency }) => {
-        amounts[currency] = (amounts[currency] ?? 0) + amount;
-        if (currency === primaryCurrency) chartValue += amount;
-        else if (!primaryCurrency) chartValue += amount;
+      entries.forEach(({ amount }) => {
+        chartValue += amount;
       });
-      const displayParts = Object.entries(amounts)
-        .sort(([, a], [, b]) => b - a)
-        .map(([curr, amt]) => formatCurrency(amt, curr));
-      const displayAmount = displayParts.join(" | ");
+
+      const percentage = grandTotal > 0 ? ((chartValue / grandTotal) * 100).toFixed(1) : "0.0";
+      const displayAmount = `${percentage}%`;
       arr.push({
-        label,
+        label: `${label} (${primaryCurrency})`,
         value: chartValue,
         color: CATEGORY_COLORS[idx % CATEGORY_COLORS.length],
         categoryId: catId,
@@ -142,6 +142,8 @@ export const IncomeInsightsWidget: React.FC<{ onShowMore?: () => void; accountId
       .map(([curr, amt]) => formatCurrency(amt, curr))
       .join(" | ");
   }, [recordsRaw, accounts]);
+
+  if (!loading && !error && data.length === 0) return null;
 
   return (
     <DashboardWidgetCard

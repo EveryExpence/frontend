@@ -64,6 +64,8 @@ export const TransactionHistoryWidget: React.FC<TransactionHistoryWidgetProps> =
 
   const toShow = propRecords && propRecords.length > 0 ? propRecords : (localRecords ?? []).slice(0, 3);
 
+  if (!loading && !error && toShow.length === 0) return null;
+
   return (
     <DashboardWidgetCard title={t("dashboard.transaction_history")} actionLabel={t("common.see_all")} onActionPress={onSeeAllPress}>
       <View>

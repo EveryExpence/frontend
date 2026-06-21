@@ -77,14 +77,16 @@ export function useIncomeInsights(startDate: Date, endDate: Date, accountId?: st
             filtered.forEach((r) => {
                 const catId = r.categoryId ?? "uncategorized";
                 const currency = accountCurrencyMap[r.accountId] ?? "PLN";
-                const existing = groupMap.get(catId) ?? {
+                const key = `${catId}_${currency}`;
+                const existing = groupMap.get(key) ?? {
                     records: [],
                     totalAbs: 0,
                     currency,
+                    categoryId: catId,
                 };
                 existing.records.push(r);
                 existing.totalAbs += Math.abs(r.amount);
-                groupMap.set(catId, existing);
+                groupMap.set(key, existing);
             });
 
             const sortedEntries = Array.from(groupMap.entries()).sort(
@@ -93,8 +95,8 @@ export function useIncomeInsights(startDate: Date, endDate: Date, accountId?: st
 
             const currencyTotals = new Map<string, number>();
             const groups: CategoryGroup[] = sortedEntries.map(
-                ([catId, data], idx) => {
-                    const catName = categoryMap[catId]?.name ?? "Other";
+                ([key, data], idx) => {
+                    const catName = categoryMap[data.categoryId]?.name ?? "Other";
                     const prev = currencyTotals.get(data.currency) ?? 0;
                     currencyTotals.set(data.currency, prev + data.totalAbs);
 
@@ -109,8 +111,8 @@ export function useIncomeInsights(startDate: Date, endDate: Date, accountId?: st
                         }));
 
                     return {
-                        categoryId: catId,
-                        categoryName: catName,
+                        categoryId: key,
+                        categoryName: `${catName} (${data.currency})`,
                         totalAmount: data.totalAbs,
                         displayAmount: formatCurrency(data.totalAbs, data.currency),
                         color: CATEGORY_COLORS[idx % CATEGORY_COLORS.length],

@@ -28,6 +28,8 @@ export const BalanceTrendWidget: React.FC<{ onShowMore?: () => void; accountId?:
     fontWeight: "normal",
   });
 
+  if (!loading && !error && data.length === 0) return null;
+
   return (
     <DashboardWidgetCard
       title={t("dashboard.balance_trend")}
