@@ -112,7 +112,9 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
         setLocation({ latitude: data.latitude, longitude: data.longitude });
         setErrorMsg(null);
       }
-    } catch { }
+    } catch (parseError) {
+      console.warn("Failed to parse WebView message:", parseError);
+    }
   };
 
   const handleLoadEnd = () => {
