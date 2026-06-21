@@ -10,6 +10,7 @@ import CustomModal from '../Modal'
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import { useColorScheme } from '@/hooks/use-color-scheme'
 import { useFocusEffect } from 'expo-router'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
     selectedCategory: Category | null;
@@ -23,6 +24,7 @@ const fetchCategories = async (db: SQLiteDatabase, callback: Dispatch<SetStateAc
 }
 
 const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled, typeFilter }: Props) => {
+    const { t } = useTranslation();
     const scheme = useColorScheme() ?? 'light';
     const colors = Colors[scheme];
     const db = useSQLiteContext();
@@ -65,7 +67,7 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled, ty
 
     return (
         <View className="mb-8">
-            <Text className="text-2xl font-bold text-theme-text">Category</Text>
+            <Text className="text-2xl font-bold text-theme-text">{t("new_expense.category")}</Text>
 
             <View className="flex-row justify-between items-center gap-2">
                 <Dropdown
@@ -99,9 +101,9 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled, ty
                     maxHeight={300}
                     labelField="name"
                     valueField="id"
-                    placeholder="Select category"
+                    placeholder={t("new_expense.select_category")}
                     disable={disabled}
-                    searchPlaceholder="Search category..."
+                    searchPlaceholder={t("new_expense.search_category")}
                     value={selectedCategory?.id ?? undefined}
                     onChange={item => setSelectedCategory(item)}
                     renderLeftIcon={() => (
@@ -141,10 +143,10 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled, ty
             <CustomModal
                 isVisible={isModalVisible}
                 setIsVisible={setIsModalVisible}
-                title="Create a new category"
+                title={t("new_expense.create_category")}
                 cancelAction={
                     <TouchableOpacity onPress={() => setIsModalVisible(false)}>
-                        <Text className="text-xl text-theme-text">Cancel</Text>
+                        <Text className="text-xl text-theme-text">{t("common.cancel")}</Text>
                     </TouchableOpacity>
                 }
                 confirmAction={
@@ -152,12 +154,12 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled, ty
                         onPress={saveNewCategory}
                         className="bg-theme-tint rounded-md px-5 py-3"
                     >
-                        <Text className="text-xl text-theme-text">Save</Text>
+                        <Text className="text-xl text-theme-text">{t("common.save")}</Text>
                     </TouchableOpacity>
                 }
             >
                 <View className="w-full mb-4">
-                    <Text className="text-xl text-theme-text opacity-85">Category name</Text>
+                    <Text className="text-xl text-theme-text opacity-85">{t("new_expense.category_name")}</Text>
 
                     <View className="w-full flex-row items-center">
                         <MaterialCommunityIcons
@@ -168,7 +170,7 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled, ty
                         />
 
                         <TextInput
-                            placeholder='Enter name'
+                            placeholder={t("new_expense.enter_name")}
                             placeholderClassName="text-theme-text opacity-35"
                             value={newCategoryName}
                             onChangeText={setNewCategoryName}
@@ -178,7 +180,7 @@ const CategorySelection = ({ selectedCategory, setSelectedCategory, disabled, ty
                 </View>
 
                 <View className="w-full mb-4">
-                    <Text className="text-xl text-theme-text opacity-85">Category type</Text>
+                    <Text className="text-xl text-theme-text opacity-85">{t("new_expense.category_name")}</Text>
 
                     <SegmentedControl
                         tintColor={colors.tint}

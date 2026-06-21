@@ -13,6 +13,15 @@ type Props = {
 const SettingsProfileRow = ({ userName, email, avatarUrl, onPress }: Props) => {
   const iconColor = useThemeColor({}, "icon");
 
+  const getFullUrl = (url: string) => {
+    if (url && url.startsWith('/api/files')) {
+      const base = process.env.EXPO_PUBLIC_API_URL || '';
+      const domain = base.split('/api')[0];
+      return domain + url;
+    }
+    return url;
+  };
+
   return (
     <TouchableOpacity
       activeOpacity={0.8}
@@ -23,7 +32,7 @@ const SettingsProfileRow = ({ userName, email, avatarUrl, onPress }: Props) => {
         <View className="w-14 h-14 rounded-full mr-3 items-center justify-center overflow-hidden bg-theme-surface">
           {avatarUrl ? (
             <Image
-              source={{ uri: avatarUrl }}
+              source={{ uri: getFullUrl(avatarUrl) }}
               style={{ width: 60, height: 60, borderRadius: 20 }}
               resizeMode="cover"
             />

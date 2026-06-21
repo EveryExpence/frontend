@@ -13,8 +13,10 @@ import PaymentMethodCard, { PaymentMethodCardItem } from '@/components/payments/
 import PaymentMethodFormModal, { PaymentMethodFormData } from '@/components/payments/PaymentMethodFormModal';
 import DeletePaymentMethodModal from '@/components/payments/DeletePaymentMethodModal';
 import { useSync } from '@/context/syncContext';
+import { useTranslation } from 'react-i18next';
 
 export default function PaymentsScreen() {
+	const { t } = useTranslation();
 	const { triggerSync } = useSync();
 	const db = useSQLiteContext();
 	const scheme = useColorScheme() ?? 'light';
@@ -41,7 +43,7 @@ export default function PaymentsScreen() {
 			);
 		} catch (e) {
 			setPaymentMethods([]);
-			Toast.show({ text1: `Failed to load payment methods: ${e}`, type: 'error' });
+			Toast.show({ text1: `${t("payments.load_failed")}: ${e}`, type: 'error' });
 		} finally {
 			setIsLoading(false);
 		}
@@ -72,10 +74,10 @@ export default function PaymentsScreen() {
 		try {
 			if (editingPaymentMethod) {
 				await updatePaymentMethod(db, editingPaymentMethod.id, data);
-				Toast.show({ text1: 'Payment method updated', type: 'success' });
+				Toast.show({ text1: t("payments.update_success"), type: 'success' });
 			} else {
 				await createPaymentMethod(db, data);
-			Toast.show({ text1: 'Payment method created', type: 'success' });
+			Toast.show({ text1: t("payments.create_success"), type: 'success' });
 			}
 			setIsFormOpen(false);
 			await loadPaymentMethods();
@@ -91,7 +93,7 @@ export default function PaymentsScreen() {
 		setIsDeleting(true);
 		try {
 			await deletePaymentMethod(db, deletingPaymentMethod.id);
-			Toast.show({ text1: 'Payment method deleted', type: 'success' });
+			Toast.show({ text1: t("payments.delete_success"), type: 'success' });
 			setIsDeleteOpen(false);
 			setDeletingPaymentMethod(null);
 			await loadPaymentMethods();
@@ -105,7 +107,7 @@ export default function PaymentsScreen() {
 
 	return (
 		<SafeAreaView className="flex-1 bg-theme-background">
-			<Topbar title="Payment Methods" />
+			<Topbar title={t("tabs.payments")} />
 			<View className="px-4 pt-2">
 				<AccountsSectionTabs />
 			</View>
@@ -120,7 +122,7 @@ export default function PaymentsScreen() {
 						keyExtractor={(item) => item.id}
 						showsVerticalScrollIndicator={false}
 						contentContainerStyle={{ paddingBottom: 24 }}
-						ListEmptyComponent={<Text className="pt-4 text-lg text-theme-icon mb-4">No payment methods yet</Text>}
+						ListEmptyComponent={<Text className="pt-4 text-lg text-theme-icon mb-4">{t("payments.no_payments")}</Text>}
 						renderItem={({ item }) => (
 							<PaymentMethodCard
 								item={item}
@@ -136,7 +138,7 @@ export default function PaymentsScreen() {
 									onPress={openAdd}
 								>
 									<MaterialCommunityIcons name="plus" size={22} color={colors.textLight} style={{ marginRight: 8 }} />
-									<Text className="text-xl font-semibold text-theme-textLight">Add new payment method</Text>
+									<Text className="text-xl font-semibold text-theme-textLight">{t("payments.add_new")}</Text>
 								</TouchableOpacity>
 								<View className="py-20" />
 							</View>

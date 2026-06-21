@@ -4,6 +4,7 @@ import { Colors } from '@/constants/theme';
 import CustomModal from '@/components/Modal';
 import { PaymentMethodCardItem } from '@/components/payments/PaymentMethodCard';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTranslation } from 'react-i18next';
 
 export type PaymentMethodFormData = {
   name: string;
@@ -22,6 +23,7 @@ export default function PaymentMethodFormModal({
   onClose,
   onSave,
 }: Props) {
+  const { t } = useTranslation();
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
 
@@ -58,10 +60,10 @@ export default function PaymentMethodFormModal({
       setIsVisible={(next) => {
         if (!next) onClose();
       }}
-      title={isEditing ? 'Edit payment method' : 'Add payment method'}
+      title={isEditing ? t("payments.edit_payment_method") : t("payments.add_payment_method")}
       cancelAction={
         <TouchableOpacity onPress={onClose} style={{ padding: 10 }}>
-          <Text className="text-2xl text-theme-icon">Cancel</Text>
+          <Text className="text-2xl text-theme-icon">{t("common.cancel")}</Text>
         </TouchableOpacity>
       }
       confirmAction={
@@ -77,20 +79,20 @@ export default function PaymentMethodFormModal({
           }}
         >
           <Text className="text-2xl" style={{ color: colors.textLight }}>
-            {isSaving ? 'Saving...' : 'Save'}
+            {isSaving ? t("common.loading") : t("common.save")}
           </Text>
         </TouchableOpacity>
       }
     >
       <ScrollView keyboardShouldPersistTaps="handled">
         <Text className="text-2xl text-theme-icon" style={{ marginBottom: 6 }}>
-          Name
+          {t("payments.name")}
         </Text>
         <TextInput
           className="text-2xl text-theme-text"
           value={name}
           onChangeText={setName}
-          placeholder="Card"
+          placeholder={t("payments.new_payment_method_placeholder")}
           placeholderTextColor={colors.icon}
           style={{
             backgroundColor: colors.background,

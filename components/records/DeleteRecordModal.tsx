@@ -6,15 +6,15 @@ import { useTranslation } from 'react-i18next';
 
 type Props = {
   visible: boolean;
-  name?: string | null;
+  title?: string | null;
   isDeleting?: boolean;
   onClose: () => void;
   onConfirm: () => void;
 };
 
-export default function DeleteCategoryModal({
+export default function DeleteRecordModal({
   visible,
-  name,
+  title,
   isDeleting = false,
   onClose,
   onConfirm,
@@ -29,7 +29,7 @@ export default function DeleteCategoryModal({
       setIsVisible={(next) => {
         if (!next) onClose();
       }}
-      title={t("categories.delete_category")}
+      title={t("records.delete_record")}
       cancelAction={
         <TouchableOpacity onPress={onClose} style={{ padding: 8 }}>
           <Text className="text-2xl text-theme-icon">{t("common.cancel")}</Text>
@@ -48,7 +48,7 @@ export default function DeleteCategoryModal({
       }
     >
       <Text className="text-2xl text-theme-icon" style={{ marginBottom: 4 }}>
-        {t("categories.delete_confirm", { name: name ?? '' })}
+        {t("records.delete_confirm", { title: title ?? '' })}
       </Text>
     </CustomModal>
   );

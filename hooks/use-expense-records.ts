@@ -6,6 +6,7 @@ import { getAllCategories } from '@/data/categories';
 import { getAllPaymentMethods } from '@/data/paymentMethods';
 import { formatCurrency } from '@/utils/formatCurrency';
 import Toast from 'react-native-toast-message';
+import { useTranslation } from 'react-i18next';
 
 export interface TransactionRecord {
     id: string;
@@ -25,24 +26,25 @@ export interface TransactionSection {
     items: TransactionRecord[];
 }
 
-function formatDateLabel(ts?: number) {
-    if (!ts) return '';
-    const d = new Date(ts);
-    const now = new Date();
-    const isToday = d.toDateString() === now.toDateString();
-    const yesterday = new Date();
-    yesterday.setDate(now.getDate() - 1);
-    const isYesterday = d.toDateString() === yesterday.toDateString();
-    if (isToday) return 'Today';
-    if (isYesterday) return 'Yesterday';
-    return d.toLocaleDateString();
-}
-
 export function useExpenseRecords(accountId?: string) {
     const db = useSQLiteContext();
+    const { t } = useTranslation();
     const [records, setRecords] = React.useState<TransactionRecord[]>([]);
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
+
+    const formatDateLabel = React.useCallback((ts?: number) => {
+        if (!ts) return '';
+        const d = new Date(ts);
+        const now = new Date();
+        const isToday = d.toDateString() === now.toDateString();
+        const yesterday = new Date();
+        yesterday.setDate(now.getDate() - 1);
+        const isYesterday = d.toDateString() === yesterday.toDateString();
+        if (isToday) return t('common.today');
+        if (isYesterday) return t('common.yesterday');
+        return d.toLocaleDateString();
+    }, [t]);
 
     const fetch = React.useCallback(async () => {
         if (!db) return;
@@ -79,8 +81,8 @@ export function useExpenseRecords(accountId?: string) {
                     currency: accountMap[r.accountId] ?? 'PLN',
                     kind: r.amount >= 0 ? 'income' : 'expense',
                     dateLabel: formatDateLabel(r.createdAt),
-                    categoryName: categoryMap[r.categoryId] ?? 'Uncategorized',
-                    paymentMethodName: paymentMethodMap[r.paymentMethodId] ?? 'Unknown',
+                    categoryName: categoryMap[r.categoryId] ?? t('records.uncategorized'),
+                    paymentMethodName: paymentMethodMap[r.paymentMethodId] ?? t('common.other'),
                 }));
 
             setRecords(mapped);
@@ -100,7 +102,7 @@ export function useExpenseRecords(accountId?: string) {
     const sections = React.useMemo(() => {
         const map = new Map<string, TransactionRecord[]>();
         records.forEach((r) => {
-            const key = r.dateLabel || 'Other';
+            const key = r.dateLabel || t('common.other');
             const arr = map.get(key) ?? [];
             arr.push(r);
             map.set(key, arr);

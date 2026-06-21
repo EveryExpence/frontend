@@ -8,32 +8,34 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Toast from 'react-native-toast-message';
 import ControlledInputField from '@/components/ControlledInputField';
+import { useTranslation } from 'react-i18next';
 
 export const formSchema = z.object({
-  email: z.email("Must be a valid email"),
-  password: z
-    .string()
-    .nonempty("Password is required")
-    .min(8, "Must be at least 8 character long")
-    .max(64, "Must be shorter than 64 characters")
-    .regex(/[a-z]/, "Must include at least 1 lowercase character")
-    .regex(/[A-Z]/, "Must include at least 1 uppercase character")
-    .regex(/[0-9]/, "Must include at least 1 digit")
-    .regex(/[^a-zA-Z0-9]/, "Must include at least 1 special character"),
-  passwordConfirmation: z.string(),
+    email: z.email("Must be a valid email"),
+    password: z
+        .string()
+        .nonempty("Password is required")
+        .min(8, "Must be at least 8 character long")
+        .max(64, "Must be shorter than 64 characters")
+        .regex(/[a-z]/, "Must include at least 1 lowercase character")
+        .regex(/[A-Z]/, "Must include at least 1 uppercase character")
+        .regex(/[0-9]/, "Must include at least 1 digit")
+        .regex(/[^a-zA-Z0-9]/, "Must include at least 1 special character"),
+    passwordConfirmation: z.string(),
 }).superRefine(({ password, passwordConfirmation }, ctx) => {
-  if (password !== passwordConfirmation) {
-    ctx.addIssue({
-      code: "custom",
-      message: "Passwords do not match",
-      path: ["passwordConfirmation"],
-    })
-  }
+    if (password !== passwordConfirmation) {
+        ctx.addIssue({
+            code: "custom",
+            message: "Passwords do not match",
+            path: ["passwordConfirmation"],
+        })
+    }
 });
 
 type FormSchema = z.infer<typeof formSchema>;
 
 const SignUpScreen = () => {
+    const { t } = useTranslation();
     const router = useRouter();
     const theme = useColorScheme() || 'light';
     const colors = Colors[theme];
@@ -55,11 +57,14 @@ const SignUpScreen = () => {
 
         try {
             await register(email, password);
-            Toast.show({ text1: "Signed up successfully" });
+            Toast.show({ text1: t("auth.sign_up_success") });
             router.replace('/login');
-        } catch (error: any) {
-            const msg = error?.message ?? String(error);
-            Toast.show({ text1: "Failed to sign up", text2: msg === 'Duplicate data' ? 'Email already in use' : msg, type: "error" });
+        } catch (error) {
+            let msg = error;
+            if (error === 'Duplicate data') {
+                msg = t("auth.error_email_in_use");
+            };
+            Toast.show({ text1: `${t("auth.sign_up_failed")}: ${msg}`, type: "error" });
         }
     };
 
@@ -74,22 +79,21 @@ const SignUpScreen = () => {
     return (
         <View className="flex-1 justify-center gap-3">
             <View className="w-full px-8 justify-start">
-                <Text className="text-2xl pl-2 text-theme-text">Email</Text>
+                <Text className="text-2xl pl-2 text-theme-text">{t("auth.email")}</Text>
                 <Controller
                     control={form.control}
                     name="email"
                     render={({ field: { onChange, onBlur, value } }) => (
                         <TextInput
-                            placeholder='Enter email'
+                            placeholder={t("auth.enter_email")}
                             placeholderTextColor={colors.text}
                             textContentType="emailAddress"
                             autoCapitalize="none"
                             value={value}
                             onChangeText={onChange}
                             onBlur={onBlur}
-                            className={`p-4 text-xl border rounded-md text-theme-text ${
-                                form.formState.errors.email ? 'border-red-500' : 'border-theme-text'
-                            }`}
+                            className={`p-4 text-xl border rounded-md text-theme-text ${form.formState.errors.email ? 'border-red-500' : 'border-theme-text'
+                                }`}
                         />
                     )}
                 />
@@ -102,29 +106,27 @@ const SignUpScreen = () => {
 
             <View className="w-full px-8 justify-start">
                 <ControlledInputField
-                    label="Password"
+                    label={t("auth.password")}
                     name="password"
                     control={form.control}
                     secureTextEntry
-                    placeholder="Enter password"
+                    placeholder={t("auth.enter_password")}
                     placeholderTextColor={colors.text}
-                    inputClassName={`w-full p-4 text-xl border rounded-md text-theme-text ${
-                        form.formState.errors.password ? 'border-red-500' : 'border-theme-text'
-                    }`}
+                    inputClassName={`w-full p-4 text-xl border rounded-md text-theme-text ${form.formState.errors.password ? 'border-red-500' : 'border-theme-text'
+                        }`}
                 />
             </View>
 
             <View className="w-full px-8 justify-start">
                 <ControlledInputField
-                    label="Confirm Password"
+                    label={t("auth.confirm_password")}
                     name="passwordConfirmation"
                     control={form.control}
                     secureTextEntry
-                    placeholder="Enter password again"
+                    placeholder={t("auth.confirm_new_password")}
                     placeholderTextColor={colors.text}
-                    inputClassName={`w-full p-4 text-xl border rounded-md text-theme-text ${
-                        form.formState.errors.passwordConfirmation ? 'border-red-500' : 'border-theme-text'
-                    }`}
+                    inputClassName={`w-full p-4 text-xl border rounded-md text-theme-text ${form.formState.errors.passwordConfirmation ? 'border-red-500' : 'border-theme-text'
+                        }`}
                 />
             </View>
 
@@ -133,22 +135,21 @@ const SignUpScreen = () => {
                     activeOpacity={0.8}
                     onPress={form.handleSubmit(onSubmit)}
                     disabled={!form.formState.isValid}
-                    className={`w-full justify-start p-4 rounded-md bg-theme-tint ${
-                        !form.formState.isValid ? 'opacity-50' : 'opacity-100'
-                    }`}
+                    className={`w-full justify-start p-4 rounded-md bg-theme-tint ${!form.formState.isValid ? 'opacity-50' : 'opacity-100'
+                        }`}
                 >
                     <Text className="text-xl text-center text-theme-textLight">
-                        Sign up
+                        {t("auth.sign_up")}
                     </Text>
                 </TouchableOpacity>
             </View>
-            
+
             <View className="relative h-0 w-full">
                 <View className="absolute top-4 gap-2 w-full">
                     <Text
                         onPress={() => router.replace("/login")}
                         className="text-lg text-center underline text-theme-text"
-                    >Already have an account?</Text>
+                    >{t("auth.already_have_account")}</Text>
                 </View>
             </View>
         </View>
