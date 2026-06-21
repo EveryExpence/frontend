@@ -12,6 +12,8 @@ import { useTheme } from "@/context/themeContext";
 import { scheduleDailyReminder, cancelDailyReminder, checkNotificationStatus } from "@/utils/notifications";
 import { useTranslation } from "react-i18next";
 import CustomModal from "@/components/Modal";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Colors } from "@/constants/theme";
 
 const Divider = () => <View className="h-px bg-theme-icon opacity-20 mx-6" />;
 
@@ -68,8 +70,8 @@ const SettingsScreen = () => {
         </Text>
         <View className="rounded-md overflow-hidden bg-theme-surface">
           <SettingsProfileRow
-            userName={user === null ? "Not logged in" : (user.publicUsername ?? "User")}
-            email={user?.email ?? "Tap to login to access full features"}
+            userName={user === null ? t("settings.not_logged_in", "Not logged in") : (user.publicUsername ?? t("settings.user", "User"))}
+            email={user?.email ?? t("settings.tap_to_login", "Tap to login to access full features")}
             avatarUrl={user?.avatarUrl}
             onPress={() => user ? router.push("/profile") : router.replace("/(auth)/login")}
           />
@@ -91,7 +93,7 @@ const SettingsScreen = () => {
           <SettingsPreferenceRow
             title={t("settings.dark_mode")}
             iconName="contrast-outline"
-            currentValue={theme === "light" ? "Light" : "Dark"}
+            currentValue={theme === "light" ? t("settings.light", "Light") : t("settings.dark", "Dark")}
             onPress={toggleTheme}
           />
         </View>
@@ -150,37 +152,35 @@ const SettingsScreen = () => {
         isVisible={isLanguageModalVisible}
         setIsVisible={setIsLanguageModalVisible}
         title={t("settings.select_language")}
-        cancelAction={
-          <TouchableOpacity onPress={() => setIsLanguageModalVisible(false)}>
-            <Text className="text-xl text-theme-text">{t("common.cancel")}</Text>
-          </TouchableOpacity>
-        }
-        confirmAction={null}
+        showCloseIcon={true}
       >
-        <View className="w-full gap-4">
+        <View className="w-full gap-4 mt-2">
           <TouchableOpacity 
             onPress={() => changeLanguage("en")}
-            className={`p-4 rounded-md ${i18n.language === "en" ? "bg-theme-tint" : "bg-theme-surface"}`}
+            className={`flex-row justify-between items-center p-4 rounded-md ${i18n.language === "en" ? "bg-theme-tint" : "bg-theme-background"}`}
           >
-            <Text className={`text-xl ${i18n.language === "en" ? "text-theme-textLight" : "text-theme-text"}`}>
+            <Text className={`text-xl ${i18n.language === "en" ? "text-theme-textLight font-bold" : "text-theme-text"}`}>
               {t("settings.english")}
             </Text>
+            {i18n.language === "en" && <MaterialCommunityIcons name="check" size={24} color={Colors.light.textLight} />}
           </TouchableOpacity>
           <TouchableOpacity 
             onPress={() => changeLanguage("pl")}
-            className={`p-4 rounded-md ${i18n.language === "pl" ? "bg-theme-tint" : "bg-theme-surface"}`}
+            className={`flex-row justify-between items-center p-4 rounded-md ${i18n.language === "pl" ? "bg-theme-tint" : "bg-theme-background"}`}
           >
-            <Text className={`text-xl ${i18n.language === "pl" ? "text-theme-textLight" : "text-theme-text"}`}>
+            <Text className={`text-xl ${i18n.language === "pl" ? "text-theme-textLight font-bold" : "text-theme-text"}`}>
               {t("settings.polish")}
             </Text>
+            {i18n.language === "pl" && <MaterialCommunityIcons name="check" size={24} color={Colors.light.textLight} />}
           </TouchableOpacity>
           <TouchableOpacity 
             onPress={() => changeLanguage("be")}
-            className={`p-4 rounded-md ${i18n.language === "be" ? "bg-theme-tint" : "bg-theme-surface"}`}
+            className={`flex-row justify-between items-center p-4 rounded-md ${i18n.language === "be" ? "bg-theme-tint" : "bg-theme-background"}`}
           >
-            <Text className={`text-xl ${i18n.language === "be" ? "text-theme-textLight" : "text-theme-text"}`}>
+            <Text className={`text-xl ${i18n.language === "be" ? "text-theme-textLight font-bold" : "text-theme-text"}`}>
               {t("settings.belarusian")}
             </Text>
+            {i18n.language === "be" && <MaterialCommunityIcons name="check" size={24} color={Colors.light.textLight} />}
           </TouchableOpacity>
         </View>
       </CustomModal>

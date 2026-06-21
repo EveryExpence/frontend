@@ -23,6 +23,7 @@ import { PaginationDots } from "@/components/dashboard/PaginationDots";
 import { useFocusEffect, useRouter } from "expo-router";
 import { TransactionHistoryWidget } from "@/components/dashboard/widgets/TransactionHistoryWidget";
 import SpendingInsidesWidget from "@/components/dashboard/widgets/SpendingInsidesWidget";
+import IncomeInsightsWidget from "@/components/dashboard/widgets/IncomeInsightsWidget";
 import BalanceTrendWidget from "@/components/dashboard/widgets/BalanceTrendWidget";
 import { ExpenseMapWidget } from "@/components/dashboard/widgets/ExpenseMapWidget";
 import { useTranslation } from "react-i18next";
@@ -138,6 +139,14 @@ const Dashboard = () => {
               onShowMore={() => {
                 const id = pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
                 router.push(id ? { pathname: "/spending-insights", params: { accountId: id } } : "/spending-insights");
+              }}
+            />
+
+            <IncomeInsightsWidget
+              accountId={pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
+              onShowMore={() => {
+                const id = pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
+                router.push(id ? { pathname: "/income-insights", params: { accountId: id } } : "/income-insights");
               }}
             />
 
