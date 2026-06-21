@@ -23,7 +23,9 @@ import { PaginationDots } from "@/components/dashboard/PaginationDots";
 import { useFocusEffect, useRouter } from "expo-router";
 import { TransactionHistoryWidget } from "@/components/dashboard/widgets/TransactionHistoryWidget";
 import SpendingInsidesWidget from "@/components/dashboard/widgets/SpendingInsidesWidget";
+import IncomeInsightsWidget from "@/components/dashboard/widgets/IncomeInsightsWidget";
 import BalanceTrendWidget from "@/components/dashboard/widgets/BalanceTrendWidget";
+import { ExpenseMapWidget } from "@/components/dashboard/widgets/ExpenseMapWidget";
 import { useTranslation } from "react-i18next";
 
 const { width } = Dimensions.get("window");
@@ -39,6 +41,7 @@ const Dashboard = () => {
   const { accounts, loading, error, totalsByCurrency, refetch } =
     useAccountsData();
   const [pageIndex, setPageIndex] = React.useState(0);
+  const [scrollEnabled, setScrollEnabled] = React.useState(true);
   const animatedIndex = React.useRef(new Animated.Value(0)).current;
 
   useFocusEffect(
@@ -92,6 +95,7 @@ const Dashboard = () => {
         ) : (
           <ScrollView
             className="flex-1"
+            scrollEnabled={scrollEnabled}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
               paddingHorizontal: 16,
@@ -138,12 +142,25 @@ const Dashboard = () => {
               }}
             />
 
+            <IncomeInsightsWidget
+              accountId={pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
+              onShowMore={() => {
+                const id = pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
+                router.push(id ? { pathname: "/income-insights", params: { accountId: id } } : "/income-insights");
+              }}
+            />
+
             <BalanceTrendWidget 
               accountId={pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
               onShowMore={() => {
                 const id = pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
                 router.push(id ? { pathname: "/balance-trend", params: { accountId: id } } : "/balance-trend");
               }}
+            />
+
+            <ExpenseMapWidget
+              accountId={pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
+              setScrollEnabled={setScrollEnabled}
             />
           </ScrollView>
         )}

@@ -12,7 +12,7 @@ import { useTranslation } from "react-i18next";
 import { PolarChart, Pie } from "victory-native";
 import { CATEGORY_COLORS } from "@/constants/categoryColors";
 
-export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void; accountId?: string }> = ({
+export const IncomeInsightsWidget: React.FC<{ onShowMore?: () => void; accountId?: string }> = ({
   onShowMore, accountId
 }) => {
   const scheme = useColorScheme() ?? "light";
@@ -70,12 +70,12 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void; accountI
     const map = new Map<string, { amount: number; currency: string; categoryId: string }[]>();
     recordsRaw.forEach((r) => {
       if (r.amount === undefined || r.amount === null) return;
-      if (r.amount >= 0) return;
+      if (r.amount <= 0) return;
       const cat = r.categoryId ?? "uncategorized";
       const currency = accounts[r.accountId] ?? "PLN";
       const key = `${cat}_${currency}`;
       const entry = map.get(key) ?? [];
-      entry.push({ amount: Math.abs(r.amount), currency, categoryId: cat });
+      entry.push({ amount: r.amount, currency, categoryId: cat });
       map.set(key, entry);
     });
     return map;
@@ -132,10 +132,10 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void; accountI
     const map = new Map<string, number>();
     recordsRaw.forEach((r) => {
       if (r.amount === undefined || r.amount === null) return;
-      if (r.amount >= 0) return;
+      if (r.amount <= 0) return;
       const currency = accounts[r.accountId] ?? "PLN";
       const prev = map.get(currency) ?? 0;
-      map.set(currency, prev + Math.abs(r.amount));
+      map.set(currency, prev + r.amount);
     });
     return Array.from(map.entries())
       .sort((a, b) => b[1] - a[1])
@@ -147,7 +147,7 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void; accountI
 
   return (
     <DashboardWidgetCard
-      title={t("dashboard.spending_insights")}
+      title={t("dashboard.income_insights", "Income Insights")}
       actionLabel={onShowMore ? t("common.see_all") : undefined}
       onActionPress={onShowMore}
     >
@@ -155,7 +155,7 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void; accountI
         <View style={{ width: 120, height: 120 }}>
           {data.length === 0 ? (
             <View className="flex-1 items-center justify-center">
-              <Text className="text-theme-text text-xs">{t("dashboard.no_expenses")}</Text>
+              <Text className="text-theme-text text-xs text-center">{t("dashboard.no_income", "No income")}</Text>
             </View>
           ) : (
             <PolarChart<
@@ -214,4 +214,4 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void; accountI
   );
 };
 
-export default SpendingInsidesWidget;
+export default IncomeInsightsWidget;

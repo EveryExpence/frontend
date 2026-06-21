@@ -64,7 +64,7 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
       title={isEditing ? t("categories.edit_category") : t("categories.add_category")}
       cancelAction={
         <TouchableOpacity onPress={onClose} style={{ padding: 10 }}>
-          <Text className="text-2xl text-theme-icon">{t("common.cancel")}</Text>
+          <Text className="text-lg text-theme-icon">{t("common.cancel")}</Text>
         </TouchableOpacity>
       }
       confirmAction={
@@ -79,18 +79,18 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
             opacity: canSave ? 1 : 0.5,
           }}
         >
-          <Text className="text-2xl" style={{ color: colors.textLight }}>
+          <Text className="text-lg font-medium" style={{ color: colors.textLight }}>
             {isSaving ? t("common.loading") : t("common.save")}
           </Text>
         </TouchableOpacity>
       }
     >
       <ScrollView keyboardShouldPersistTaps="handled">
-        <Text className="text-2xl text-theme-icon" style={{ marginBottom: 6 }}>
+        <Text className="text-lg text-theme-icon" style={{ marginBottom: 6 }}>
           {t("categories.name")}
         </Text>
         <TextInput
-          className="text-2xl text-theme-text"
+          className="text-lg text-theme-text"
           value={name}
           onChangeText={setName}
           placeholder={t("categories.new_category_placeholder")}
@@ -103,7 +103,7 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
           }}
         />
 
-        <Text className="text-2xl text-theme-icon" style={{ marginBottom: 6 }}>
+        <Text className="text-lg text-theme-icon" style={{ marginBottom: 6 }}>
           {t("categories.type")}
         </Text>
         <SegmentedControl

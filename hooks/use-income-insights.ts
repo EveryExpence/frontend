@@ -8,7 +8,7 @@ import { Category } from "@/types/data/category";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { CATEGORY_COLORS } from "@/constants/categoryColors";
 
-export interface CategoryExpenseItem {
+export interface CategoryIncomeItem {
     id: string;
     description: string;
     amount: number;
@@ -23,10 +23,10 @@ export interface CategoryGroup {
     displayAmount: string;
     color: string;
     currency: string;
-    items: CategoryExpenseItem[];
+    items: CategoryIncomeItem[];
 }
 
-export function useSpendingInsights(startDate: Date, endDate: Date, accountId?: string) {
+export function useIncomeInsights(startDate: Date, endDate: Date, accountId?: string) {
     const db = useSQLiteContext();
     const [categoryGroups, setCategoryGroups] = React.useState<CategoryGroup[]>(
         [],
@@ -60,7 +60,7 @@ export function useSpendingInsights(startDate: Date, endDate: Date, accountId?: 
 
             const filtered = allRecords.filter((r) => {
                 if (accountId && r.accountId !== accountId) return false;
-                if (r.amount >= 0) return false;
+                if (r.amount <= 0) return false; // Only income
                 if (!r.createdAt) return false;
                 const ts =
                     typeof r.createdAt === "number"
@@ -100,7 +100,7 @@ export function useSpendingInsights(startDate: Date, endDate: Date, accountId?: 
                     const prev = currencyTotals.get(data.currency) ?? 0;
                     currencyTotals.set(data.currency, prev + data.totalAbs);
 
-                    const items: CategoryExpenseItem[] = data.records
+                    const items: CategoryIncomeItem[] = data.records
                         .sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))
                         .map((r) => ({
                             id: r.id,
@@ -114,7 +114,7 @@ export function useSpendingInsights(startDate: Date, endDate: Date, accountId?: 
                         categoryId: key,
                         categoryName: `${catName} (${data.currency})`,
                         totalAmount: data.totalAbs,
-                        displayAmount: formatCurrency(-data.totalAbs, data.currency),
+                        displayAmount: formatCurrency(data.totalAbs, data.currency),
                         color: CATEGORY_COLORS[idx % CATEGORY_COLORS.length],
                         currency: data.currency,
                         items,
