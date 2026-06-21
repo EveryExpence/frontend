@@ -9,6 +9,7 @@ import SettingsToggleRow from "@/components/settings/SettingsToggleRow";
 import SettingsActionRow from "@/components/settings/SettingsActionRow";
 import Topbar from "@/components/Topbar";
 import { useTheme } from "@/context/themeContext";
+import Toast from 'react-native-toast-message';
 
 type Language = "eng" | "pl";
 
@@ -25,6 +26,8 @@ const SettingsScreen = () => {
   const handleLogout = async () => {
     try {
       await logout();
+    } catch (error: any) {
+      Toast.show({ text1: "Logout failed", text2: error?.message, type: "error" });
     } finally {
       router.replace("/(auth)/login");
     }
