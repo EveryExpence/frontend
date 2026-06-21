@@ -47,8 +47,8 @@ const LoginScreen = () => {
         Toast.show({ text1: "Logged in successfully" });
       }, 100);
       await EncryptedStorage.setItem("loggedIn", "true");
-    } catch (error) {
-      Toast.show({ text1: `Login failed: ${error}`, type: "error" });
+    } catch (error: any) {
+      Toast.show({ text1: "Login failed", text2: error?.message ?? String(error), type: "error" });
     }
   };
 

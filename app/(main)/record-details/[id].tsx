@@ -131,8 +131,8 @@ export default function RecordDetailsScreen() {
       Toast.show({ text1: "Record updated successfully", type: "success" });
       setIsEditing(false);
       triggerSync();
-    } catch {
-      Toast.show({ text1: "Failed to update record", type: "error" });
+    } catch (e: any) {
+      Toast.show({ text1: "Failed to update record", text2: e?.message ?? String(e), type: "error" });
     }
   };
 

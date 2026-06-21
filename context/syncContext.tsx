@@ -3,6 +3,7 @@ import { useAuth } from "./authContext";
 import { useSQLiteContext } from "expo-sqlite";
 import { syncCategories, syncAccounts, syncPaymentMethods, syncExpenseRecords } from "@/utils/sync";
 import NetInfo from '@react-native-community/netinfo';
+import Toast from 'react-native-toast-message';
 
 type SyncContextType = {
     triggerSync: () => Promise<void>;
@@ -65,7 +66,9 @@ export const SyncProvider = ({ children }: { children: React.ReactNode }) => {
         }
 
         if (errors.length > 0) {
-            setLastSyncError(`Sync failed for: ${errors.join(", ")}`);
+            const errorMsg = `Sync failed for: ${errors.join(", ")}`;
+            setLastSyncError(errorMsg);
+            Toast.show({ text1: 'Sync Error', text2: errorMsg, type: 'error' });
         }
 
         setIsSyncing(false);

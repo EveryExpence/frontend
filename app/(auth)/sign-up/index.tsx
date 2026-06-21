@@ -57,12 +57,9 @@ const SignUpScreen = () => {
             await register(email, password);
             Toast.show({ text1: "Signed up successfully" });
             router.replace('/login');
-        } catch (error) {
-            let msg = error;
-            if (error === 'Duplicate data') {
-                msg = 'Email already in use';
-            };
-            Toast.show({ text1: `Failed to sign up: ${msg}`, type: "error" });
+        } catch (error: any) {
+            const msg = error?.message ?? String(error);
+            Toast.show({ text1: "Failed to sign up", text2: msg === 'Duplicate data' ? 'Email already in use' : msg, type: "error" });
         }
     };
 

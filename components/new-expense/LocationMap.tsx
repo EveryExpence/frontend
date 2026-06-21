@@ -4,6 +4,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
 import * as Location from 'expo-location';
 import { Coordinates } from '@/types/data/location';
+import Toast from 'react-native-toast-message';
 
 let WebView: any = null;
 
@@ -51,8 +52,10 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
       }
 
       setLocation({ latitude: coords.latitude, longitude: coords.longitude });
-    } catch {
-      setErrorMsg('Failed to fetch location');
+    } catch (e: any) {
+      const msg = e?.message ?? 'Failed to fetch location';
+      setErrorMsg(msg);
+      Toast.show({ text1: 'Location Error', text2: msg, type: 'error' });
     } finally {
       setIsFetching(false);
     }

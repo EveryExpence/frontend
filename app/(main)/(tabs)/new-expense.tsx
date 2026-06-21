@@ -192,8 +192,8 @@ export default function NewExpense() {
       setLocation(null);
       setRecordType("expense");
       triggerSync();
-    } catch {
-      Toast.show({ text1: "Failed to add a new record", type: "error" });
+    } catch (e: any) {
+      Toast.show({ text1: "Failed to add a new record", text2: e?.message ?? String(e), type: "error" });
     }
   }
 

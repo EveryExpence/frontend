@@ -41,7 +41,7 @@ export const apiFetch = async (input: RequestInfo | URL, init?: RequestInit): Pr
             if (!refreshToken) {
                 try {
                     await EncryptedStorage.removeItem(accessTokenKey);
-                } catch { /* best effort cleanup */ }
+                } catch { }
                 router.replace('/login');
                 return response;
             }
@@ -65,7 +65,7 @@ export const apiFetch = async (input: RequestInfo | URL, init?: RequestInit): Pr
                 try {
                     await EncryptedStorage.removeItem(accessTokenKey);
                     await EncryptedStorage.removeItem(refreshTokenKey);
-                } catch { /* best effort cleanup */ }
+                } catch { }
                 router.replace('/login');
                 return response;
             }
