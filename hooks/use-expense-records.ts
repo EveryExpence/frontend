@@ -5,6 +5,7 @@ import { getAllAccounts } from '@/data/accounts';
 import { getAllCategories } from '@/data/categories';
 import { getAllPaymentMethods } from '@/data/paymentMethods';
 import { formatCurrency } from '@/utils/formatCurrency';
+import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
 
 export interface TransactionRecord {
@@ -88,7 +89,9 @@ export function useExpenseRecords(accountId?: string) {
 
             setRecords(mapped);
         } catch (e: any) {
-            setError(e?.message ?? String(e));
+            const msg = e?.message ?? String(e);
+            setError(msg);
+            Toast.show({ type: "error", text1: t('records.load_failed'), text2: msg });
         } finally {
             setLoading(false);
         }

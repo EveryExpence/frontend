@@ -7,6 +7,7 @@ import CustomModal from '@/components/Modal';
 import { AccountCardItem } from '@/components/accounts/AccountCard';
 import { isValidBalanceInput, normalizeNumberInput, parseBalanceInput } from '@/utils/balance';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
 import { CURRENCIES } from '@/constants/currencies';
 
@@ -65,6 +66,8 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
     setIsSaving(true);
     try {
       await onSave({ name: name.trim(), currency, balance: parsed });
+    } catch (error: any) {
+      Toast.show({ text1: error?.message || t('accounts.save_failed'), type: "error" });
     } finally {
       setIsSaving(false);
     }

@@ -4,6 +4,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
 import * as Location from 'expo-location';
 import { Coordinates } from '@/types/data/location';
+import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
 
 let WebView: any = null;
@@ -59,8 +60,13 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
       if (!disabled) {
         setLocation({ latitude: coords.latitude, longitude: coords.longitude });
       }
-    } catch {
-      setErrorMsg(t("new_expense.error_failed_fetch_location"));
+
+      setLocation({ latitude: coords.latitude, longitude: coords.longitude });
+    } catch (e: any) {
+      const fallback = t("new_expense.error_failed_fetch_location");
+      const msg = e?.message ?? fallback;
+      setErrorMsg(msg);
+      Toast.show({ text1: fallback, text2: msg, type: 'error' });
     } finally {
       setIsFetching(false);
     }
@@ -120,7 +126,9 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
         setLocation({ latitude: data.latitude, longitude: data.longitude });
         setErrorMsg(null);
       }
-    } catch { }
+    } catch (parseError) {
+      console.warn("Failed to parse WebView message:", parseError);
+    }
   };
 
   const handleLoadEnd = () => {

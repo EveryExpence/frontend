@@ -205,32 +205,28 @@ export default function NewExpense() {
       <ScrollView className="px-4" scrollEnabled={scrollEnabled}>
         <View className="flex-row bg-theme-surface p-1.5 rounded-lg mb-6 mt-4">
           <TouchableOpacity
-            className={`flex-1 py-3 rounded-md items-center justify-center ${
-              recordType === "expense" ? "bg-theme-tint" : ""
-            }`}
+            className={`flex-1 py-3 rounded-md items-center justify-center ${recordType === "expense" ? "bg-theme-tint" : ""
+              }`}
             activeOpacity={0.8}
             onPress={() => changeRecordType("expense")}
           >
             <Text
-              className={`text-lg font-bold ${
-                recordType === "expense" ? "text-theme-textLight" : "text-theme-text"
-              }`}
+              className={`text-lg font-bold ${recordType === "expense" ? "text-theme-textLight" : "text-theme-text"
+                }`}
               style={recordType !== "expense" ? { opacity: 0.6 } : {}}
             >
               Expense
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            className={`flex-1 py-3 rounded-md items-center justify-center ${
-              recordType === "income" ? "bg-theme-tint" : ""
-            }`}
+            className={`flex-1 py-3 rounded-md items-center justify-center ${recordType === "income" ? "bg-theme-tint" : ""
+              }`}
             activeOpacity={0.8}
             onPress={() => changeRecordType("income")}
           >
             <Text
-              className={`text-lg font-bold ${
-                recordType === "income" ? "text-theme-textLight" : "text-theme-text"
-              }`}
+              className={`text-lg font-bold ${recordType === "income" ? "text-theme-textLight" : "text-theme-text"
+                }`}
               style={recordType !== "income" ? { opacity: 0.6 } : {}}
             >
               Income

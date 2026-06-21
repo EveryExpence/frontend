@@ -2,7 +2,8 @@ import { View, Text, TouchableOpacity, Image, ScrollView } from 'react-native'
 import React, { Dispatch, SetStateAction } from 'react'
 import * as ImagePicker from 'expo-image-picker'
 import { MaterialIcons } from '@expo/vector-icons'
-import { useTranslation } from 'react-i18next'
+import Toast from 'react-native-toast-message';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     images: string[];
@@ -12,15 +13,20 @@ interface Props {
 const ImageAttachmentSelection = ({ images, setImages }: Props) => {
     const { t } = useTranslation();
     const pickImage = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'],
-            allowsMultipleSelection: true,
-            quality: 0.8,
-        });
+        try {
+            let result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ['images'],
+                allowsMultipleSelection: true,
+                quality: 0.8,
+            });
 
-        if (!result.canceled) {
-            const selectedUris = result.assets.map(asset => asset.uri);
-            setImages(prev => [...prev, ...selectedUris]);
+            if (!result.canceled) {
+                const selectedUris = result.assets.map(asset => asset.uri);
+                setImages(prev => [...prev, ...selectedUris]);
+            }
+        } catch (error: any) {
+            console.error("Failed to pick image:", error);
+            Toast.show({ text1: t('new_expense.image_picker_failed'), text2: error?.message, type: "error" });
         }
     };
 

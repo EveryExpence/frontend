@@ -9,6 +9,7 @@ import SettingsToggleRow from "@/components/settings/SettingsToggleRow";
 import SettingsActionRow from "@/components/settings/SettingsActionRow";
 import Topbar from "@/components/Topbar";
 import { useTheme } from "@/context/themeContext";
+import Toast from 'react-native-toast-message';
 import { scheduleDailyReminder, cancelDailyReminder, checkNotificationStatus } from "@/utils/notifications";
 import { useTranslation } from "react-i18next";
 import CustomModal from "@/components/Modal";
@@ -35,6 +36,8 @@ const SettingsScreen = () => {
   const handleLogout = async () => {
     try {
       await logout();
+    } catch (error: any) {
+      Toast.show({ text1: t('auth.logout_failed'), text2: error?.message, type: "error" });
     } finally {
       router.replace("/(auth)/login");
     }

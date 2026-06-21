@@ -86,7 +86,11 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
   const setTheme = useCallback(async (nextTheme: AppTheme) => {
     setPreferredTheme(nextTheme);
-    await EncryptedStorage.setItem(themePreferenceKey, nextTheme);
+    try {
+      await EncryptedStorage.setItem(themePreferenceKey, nextTheme);
+    } catch (error) {
+      console.warn("Failed to save theme preference:", error);
+    }
   }, []);
 
   const toggleTheme = useCallback(async () => {

@@ -38,7 +38,7 @@ const ChangePasswordScreen = () => {
 
       await updateUserPassword(token, oldPassword, newPassword);
       reset();
-      Toast.show({ text1: "Password updated successfully" });
+      Toast.show({ text1: t('settings.password_update_success') });
     } catch (err: any) {
       console.error(err);
       Toast.show({

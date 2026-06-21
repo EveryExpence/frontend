@@ -7,6 +7,8 @@ import { ExpenseRecord } from "@/types/data/expenseRecord";
 import { Category } from "@/types/data/category";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { CATEGORY_COLORS } from "@/constants/categoryColors";
+import Toast from 'react-native-toast-message';
+import { useTranslation } from 'react-i18next';
 
 export interface CategoryExpenseItem {
     id: string;
@@ -36,6 +38,7 @@ export function useSpendingInsights(startDate: Date, endDate: Date, accountId?: 
     );
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
+    const { t } = useTranslation();
 
     const fetch = React.useCallback(async () => {
         if (!db) return;
@@ -129,7 +132,9 @@ export function useSpendingInsights(startDate: Date, endDate: Date, accountId?: 
             setCategoryGroups(groups);
             setTotalDisplayLines(lines);
         } catch (e: any) {
-            setError(e?.message ?? String(e));
+            const msg = e?.message ?? String(e);
+            setError(msg);
+            Toast.show({ type: "error", text1: t('dashboard.insights_load_failed'), text2: msg });
         } finally {
             setLoading(false);
         }

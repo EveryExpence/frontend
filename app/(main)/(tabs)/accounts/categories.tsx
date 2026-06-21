@@ -42,9 +42,9 @@ export default function CategoriesScreen() {
 					type: category.type,
 				}))
 			);
-		} catch (e) {
+		} catch (e: any) {
 			setCategories([]);
-			Toast.show({ text1: `Failed to load categories: ${e}`, type: 'error' });
+			Toast.show({ text1: `${t('categories.load_failed')}: ${e?.message ?? String(e)}`, type: 'error' });
 		} finally {
 			setIsLoading(false);
 		}
@@ -75,10 +75,10 @@ export default function CategoriesScreen() {
 		try {
 			if (editingCategory) {
 				await updateCategory(db, editingCategory.id, data);
-				Toast.show({ text1: 'Category updated', type: 'success' });
+				Toast.show({ text1: t('categories.update_success'), type: 'success' });
 			} else {
 				await createCategory(db, data);
-				Toast.show({ text1: 'Category created', type: 'success' });
+				Toast.show({ text1: t('categories.create_success'), type: 'success' });
 			}
 			setIsFormOpen(false);
 			await loadCategories();
@@ -94,7 +94,7 @@ export default function CategoriesScreen() {
 		setIsDeleting(true);
 		try {
 			await deleteCategory(db, deletingCategory.id);
-			Toast.show({ text1: 'Category deleted', type: 'success' });
+			Toast.show({ text1: t('categories.delete_success'), type: 'success' });
 			setIsDeleteOpen(false);
 			setDeletingCategory(null);
 			await loadCategories();
