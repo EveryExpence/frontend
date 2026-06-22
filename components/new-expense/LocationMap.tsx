@@ -185,7 +185,7 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
     )}
     </View>
 
-    <View className="flex-row justify-between mt-2">
+    <View className="flex-col mt-2 gap-1">
     <Text className="text-sm text-theme-text opacity-70">
     {location ? `${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}` : t("new_expense.no_location_selected")}
     </Text>

@@ -3,10 +3,13 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { getAllExpenseRecords } from '@/data/expenseRecords';
 import { getAllAccounts } from '@/data/accounts';
 import { getAllCategories } from '@/data/categories';
+import { Category } from '@/types/data/category';
 import { getAllPaymentMethods } from '@/data/paymentMethods';
 import { formatCurrency } from '@/utils/formatCurrency';
+import { fetchExchangeRates, convertAmountToUSD } from '@/utils/exchangeRates';
 import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/context/authContext';
 
 export interface TransactionRecord {
     id: string;
@@ -16,6 +19,7 @@ export interface TransactionRecord {
     kind: 'income' | 'expense';
     dateLabel: string;
     categoryName: string;
+    categoryIcon?: string;
     paymentMethodName: string;
     location?: string;
 }
@@ -31,8 +35,11 @@ export function useExpenseRecords(accountId?: string) {
     const db = useSQLiteContext();
     const { t } = useTranslation();
     const [records, setRecords] = React.useState<TransactionRecord[]>([]);
+    const [rates, setRates] = React.useState<Record<string, number>>({});
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
+    const { user } = useAuth();
+    const convertToUSD = !!user;
 
     const formatDateLabel = React.useCallback((ts?: number) => {
         if (!ts) return '';
@@ -59,6 +66,11 @@ export function useExpenseRecords(accountId?: string) {
                 getAllPaymentMethods(db)
             ]);
 
+            if (convertToUSD) {
+                const fetchedRates = await fetchExchangeRates("USD");
+                setRates(fetchedRates);
+            }
+
             if (accountId) {
                 local = local.filter(r => r.accountId === accountId);
             }
@@ -66,8 +78,8 @@ export function useExpenseRecords(accountId?: string) {
             const accountMap: Record<string, string> = {};
             accounts.forEach((a) => (accountMap[a.id] = a.currency));
 
-            const categoryMap: Record<string, string> = {};
-            categories.forEach((c) => (categoryMap[c.id] = c.name));
+            const categoryMap: Record<string, Category> = {};
+            categories.forEach((c) => (categoryMap[c.id] = c));
 
             const paymentMethodMap: Record<string, string> = {};
             paymentMethods.forEach((pm) => (paymentMethodMap[pm.id] = pm.name));
@@ -82,7 +94,8 @@ export function useExpenseRecords(accountId?: string) {
                     currency: accountMap[r.accountId] ?? 'PLN',
                     kind: r.amount >= 0 ? 'income' : 'expense',
                     dateLabel: formatDateLabel(r.createdAt),
-                    categoryName: categoryMap[r.categoryId] ?? t('records.uncategorized'),
+                    categoryName: categoryMap[r.categoryId]?.name ?? t('records.uncategorized'),
+                    categoryIcon: categoryMap[r.categoryId]?.icon,
                     paymentMethodName: paymentMethodMap[r.paymentMethodId] ?? t('common.other'),
                     location: r.location,
                 }));
@@ -95,7 +108,7 @@ export function useExpenseRecords(accountId?: string) {
         } finally {
             setLoading(false);
         }
-    }, [db, accountId]);
+    }, [db, accountId, convertToUSD]);
 
     React.useEffect(() => {
         fetch();
@@ -111,13 +124,22 @@ export function useExpenseRecords(accountId?: string) {
         });
 
         return Array.from(map.entries()).map(([title, items], idx) => {
-            const totals: Record<string, number> = {};
-            items.forEach((it) => {
-                totals[it.currency] = (totals[it.currency] || 0) + it.amount;
-            });
-            const summary = Object.entries(totals)
-                .map(([curr, sum]) => formatCurrency(sum, curr))
-                .join(' | ');
+            let summary = '';
+            if (convertToUSD) {
+                let usdTotal = 0;
+                items.forEach((it) => {
+                    usdTotal += convertAmountToUSD(it.amount, it.currency, rates);
+                });
+                summary = formatCurrency(usdTotal, "USD");
+            } else {
+                const totals: Record<string, number> = {};
+                items.forEach((it) => {
+                    totals[it.currency] = (totals[it.currency] || 0) + it.amount;
+                });
+                summary = Object.entries(totals)
+                    .map(([curr, sum]) => formatCurrency(sum, curr))
+                    .join(' | ');
+            }
 
             return {
                 id: `section-${idx}`,
@@ -126,7 +148,7 @@ export function useExpenseRecords(accountId?: string) {
                 items,
             };
         });
-    }, [records]);
+    }, [records, convertToUSD, rates]);
 
     return { records, sections, loading, error, refetch: fetch } as const;
 }

@@ -35,7 +35,7 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
   const [isSaving, setIsSaving] = useState(false);
 
   const isEditing = editingAccount !== null;
-  const isBalanceValid = isValidBalanceInput(balanceField);
+  const isBalanceValid = balanceField.trim() === '' || isValidBalanceInput(balanceField);
   const canSave = name.trim() && isBalanceValid && !isSaving;
 
   const currencyOptions = React.useMemo(
@@ -60,7 +60,7 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
   const handleSave = async () => {
     if (!canSave) return;
 
-    const parsed = parseBalanceInput(balanceField);
+    const parsed = balanceField.trim() === '' ? 0 : parseBalanceInput(balanceField);
     if (!Number.isFinite(parsed)) return;
 
     setIsSaving(true);

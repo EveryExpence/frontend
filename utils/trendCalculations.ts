@@ -1,6 +1,7 @@
 import { SQLiteDatabase } from "expo-sqlite";
 import { getAllAccounts, getAccountBalance } from "@/data/accounts";
 import { getAllExpenseRecords } from "@/data/expenseRecords";
+import { fetchExchangeRates, convertAmountToUSD } from "./exchangeRates";
 
 export interface BalanceDataPoint {
     day: string;
@@ -12,7 +13,8 @@ export const calculateBalanceTrend = async (
     db: SQLiteDatabase,
     startDate: Date,
     endDate: Date,
-    accountId?: string
+    accountId?: string,
+    convertToUSD: boolean = false
 ): Promise<{ points: BalanceDataPoint[]; percentageChange: number; primaryCurrency: string }> => {
     const [allAccounts, allRecords] = await Promise.all([
         getAllAccounts(db),
@@ -27,10 +29,24 @@ export const calculateBalanceTrend = async (
         primaryCurrency = accounts[0].currency;
     }
 
+    if (convertToUSD) {
+        primaryCurrency = "USD";
+    }
+
+    let rates: Record<string, number> = {};
+    if (convertToUSD) {
+        rates = await fetchExchangeRates("USD");
+    }
+
     let currentBalance = 0;
     for (const acc of accounts) {
         const bal = await getAccountBalance(db, acc.id);
-        currentBalance += bal;
+        if (convertToUSD) {
+            const usdBal = convertAmountToUSD(bal, acc.currency, rates);
+            currentBalance += usdBal;
+        } else {
+            currentBalance += bal;
+        }
     }
 
     const sortedRecords = [...records]
@@ -41,6 +57,9 @@ export const calculateBalanceTrend = async (
             return dateB - dateA;
         });
 
+    const accountCurrencyMap: Record<string, string> = {};
+    accounts.forEach(a => { accountCurrencyMap[a.id] = a.currency });
+
     let tempBalance = currentBalance;
     let recordIdx = 0;
 
@@ -49,7 +68,13 @@ export const calculateBalanceTrend = async (
         const createdAt = sortedRecords[recordIdx].createdAt;
         const rDate = createdAt ? new Date(createdAt) : new Date(0);
         if (rDate > endOfPeriod) {
-            tempBalance -= sortedRecords[recordIdx].amount;
+            const accId = sortedRecords[recordIdx].accountId;
+            let amt = sortedRecords[recordIdx].amount;
+            if (convertToUSD) {
+                const currency = accountCurrencyMap[accId] ?? "PLN";
+                amt = convertAmountToUSD(amt, currency, rates);
+            }
+            tempBalance -= amt;
             recordIdx++;
         } else {
             break;
@@ -72,7 +97,13 @@ export const calculateBalanceTrend = async (
             const createdAt = sortedRecords[recordIdx].createdAt;
             const rDate = createdAt ? new Date(createdAt) : new Date(0);
             if (rDate > targetDate) {
-                tempBalance -= sortedRecords[recordIdx].amount;
+                const accId = sortedRecords[recordIdx].accountId;
+                let amt = sortedRecords[recordIdx].amount;
+                if (convertToUSD) {
+                    const currency = accountCurrencyMap[accId] ?? "PLN";
+                    amt = convertAmountToUSD(amt, currency, rates);
+                }
+                tempBalance -= amt;
                 recordIdx++;
             } else {
                 break;

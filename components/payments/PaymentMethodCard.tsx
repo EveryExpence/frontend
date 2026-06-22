@@ -6,6 +6,7 @@ import { Colors } from '@/constants/theme';
 export type PaymentMethodCardItem = {
   id: string;
   name: string;
+  icon?: string;
 };
 
 type PaymentMethodCardProps = {
@@ -25,7 +26,7 @@ export default function PaymentMethodCard({ item, onEdit, onDelete }: PaymentMet
     >
       <View className="flex-row items-center self-stretch min-w-0 flex-1">
         <MaterialCommunityIcons
-          name="cash-register"
+          name={(item.icon as any) || "cash-register"}
           size={48}
           color={colors.text}
           style={{ marginRight: 12 }}

@@ -4,13 +4,14 @@ import { nanoid } from 'nanoid'
 
 export const createCategory = async (db: SQLiteDatabase, categoryDTO: CategoryInputDTO) => {
     const stmt = await db.prepareAsync(`
-        INSERT INTO categories (id, name, type) VALUES ($id, $name, $type);
+        INSERT INTO categories (id, name, type, icon) VALUES ($id, $name, $type, $icon);
     `);
     await db.withExclusiveTransactionAsync(async () => {
         await stmt.executeAsync({
             $id: nanoid(),
             $name: categoryDTO.name,
             $type: categoryDTO.type,
+            $icon: categoryDTO.icon,
         });
     });
 };
@@ -24,6 +25,7 @@ export const updateCategory = async (db: SQLiteDatabase, id: string, categoryDTO
         UPDATE categories SET
             name = $name,
             type = $type,
+            icon = $icon,
             syncState = CASE
                 WHEN syncState = 'created' THEN 'created'
                 ELSE 'updated'
@@ -35,6 +37,7 @@ export const updateCategory = async (db: SQLiteDatabase, id: string, categoryDTO
             $id: id,
             $name: categoryDTO.name,
             $type: categoryDTO.type,
+            $icon: categoryDTO.icon,
         });
     });
 };
@@ -92,14 +95,15 @@ export const getAllLocalCategoryIds = async (db: SQLiteDatabase): Promise<string
 
 export const insertRemoteCategory = async (db: SQLiteDatabase, category: CategoryResponseDTO) => {
     const stmt = await db.prepareAsync(`
-        INSERT INTO categories (id, name, type, syncState) 
-        VALUES ($id, $name, $type, 'synced')
+        INSERT INTO categories (id, name, type, icon, syncState) 
+        VALUES ($id, $name, $type, $icon, 'synced')
     `);
     await db.withExclusiveTransactionAsync(async () => {
         await stmt.executeAsync({
             $id: category.id,
             $name: category.name,
             $type: category.type,
+            $icon: category.icon,
         });
     });
 };
@@ -109,6 +113,7 @@ export const updateRemoteCategory = async (db: SQLiteDatabase, category: Categor
         UPDATE categories SET 
             name = $name, 
             type = $type, 
+            icon = $icon,
             syncState = 'synced'
         WHERE id = $id AND syncState = 'synced'
     `);
@@ -117,6 +122,7 @@ export const updateRemoteCategory = async (db: SQLiteDatabase, category: Categor
             $id: category.id,
             $name: category.name,
             $type: category.type,
+            $icon: category.icon,
         });
     });
 };

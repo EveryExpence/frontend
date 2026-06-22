@@ -1,17 +1,17 @@
-import React, { useRef, useState, useCallback, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { useExpenseRecords } from '@/hooks/use-expense-records';
-import { Coordinates } from '@/types/data/location';
-import { useTranslation } from 'react-i18next';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { Colors } from '@/constants/theme';
-import * as Location from 'expo-location';
+import React, { useRef, useState, useCallback, useEffect } from "react";
+import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
+import { useExpenseRecords } from "@/hooks/use-expense-records";
+import { Coordinates } from "@/types/data/location";
+import { useTranslation } from "react-i18next";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Colors } from "@/constants/theme";
+import * as Location from "expo-location";
 
 let WebView: any = null;
 
 try {
-  ({ WebView } = require('react-native-webview'));
+  ({ WebView } = require("react-native-webview"));
 } catch {
   WebView = null;
 }
@@ -21,20 +21,23 @@ interface ExpenseMapWidgetProps {
   setScrollEnabled?: (enabled: boolean) => void;
 }
 
-const ExpenseMapWidgetComponent: React.FC<ExpenseMapWidgetProps> = ({ accountId, setScrollEnabled }) => {
+const ExpenseMapWidgetComponent: React.FC<ExpenseMapWidgetProps> = ({
+  accountId,
+  setScrollEnabled,
+}) => {
   const { records, loading, error } = useExpenseRecords(accountId);
   const { t } = useTranslation();
   const webViewRef = useRef<any>(null);
-  const scheme = useColorScheme() ?? 'light';
+  const scheme = useColorScheme() ?? "light";
   const colors = Colors[scheme];
   const [isFetching, setIsFetching] = useState(false);
 
   const locations = React.useMemo(() => {
     return records
-      .filter(r => r.location)
-      .map(r => {
+      .filter((r) => r.location)
+      .map((r) => {
         try {
-          const [lat, lng] = r.location!.split(';');
+          const [lat, lng] = r.location!.split(";");
           if (!lat || !lng) return null;
           return {
             id: r.id,
@@ -47,38 +50,52 @@ const ExpenseMapWidgetComponent: React.FC<ExpenseMapWidgetProps> = ({ accountId,
             coords: {
               latitude: parseFloat(lat),
               longitude: parseFloat(lng),
-            } as Coordinates
+            } as Coordinates,
           };
         } catch {
           return null;
         }
       })
-      .filter(l => l !== null) as { id: string, title: string, amount: number, currency: string, dateLabel: string, categoryName: string, paymentMethodName: string, coords: Coordinates }[];
+      .filter((l) => l !== null) as {
+      id: string;
+      title: string;
+      amount: number;
+      currency: string;
+      dateLabel: string;
+      categoryName: string;
+      paymentMethodName: string;
+      coords: Coordinates;
+    }[];
   }, [records]);
 
   const getCurrentLocation = useCallback(async () => {
     setIsFetching(true);
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') return;
+      if (status !== "granted") return;
 
       const { coords } = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced
+        accuracy: Location.Accuracy.Balanced,
       });
 
-      webViewRef.current?.injectJavaScript(`window.focusLocation(${coords.latitude}, ${coords.longitude}); true;`);
-    } catch {} finally {
+      webViewRef.current?.injectJavaScript(
+        `window.focusLocation(${coords.latitude}, ${coords.longitude}); true;`,
+      );
+    } catch {
+    } finally {
       setIsFetching(false);
     }
   }, []);
 
   useEffect(() => {
     if (webViewRef.current) {
-        if (locations.length > 0) {
-            webViewRef.current.injectJavaScript(`window.setMarkers(${JSON.stringify(locations)}); true;`);
-        } else {
-            webViewRef.current.injectJavaScript("window.clearMarkers(); true;");
-        }
+      if (locations.length > 0) {
+        webViewRef.current.injectJavaScript(
+          `window.setMarkers(${JSON.stringify(locations)}); true;`,
+        );
+      } else {
+        webViewRef.current.injectJavaScript("window.clearMarkers(); true;");
+      }
     }
   }, [locations]);
 
@@ -150,25 +167,27 @@ const ExpenseMapWidgetComponent: React.FC<ExpenseMapWidgetProps> = ({ accountId,
   `;
 
   const handleLoadEnd = () => {
-      if (locations.length > 0) {
-          webViewRef.current?.injectJavaScript(`window.setMarkers(${JSON.stringify(locations)}); true;`);
-      }
+    if (locations.length > 0) {
+      webViewRef.current?.injectJavaScript(
+        `window.setMarkers(${JSON.stringify(locations)}); true;`,
+      );
+    }
   };
-
-
 
   const onMessage = (event: any) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
-      if (data.type === 'touchstart') setScrollEnabled?.(false);
-      if (data.type === 'touchend') setScrollEnabled?.(true);
-    } catch { }
+      if (data.type === "touchstart") setScrollEnabled?.(false);
+      if (data.type === "touchend") setScrollEnabled?.(true);
+    } catch {}
   };
 
   return (
-    <View className="w-full mb-8">
-      <View className="flex-row justify-between items-center mb-2 px-1">
-        <Text className="text-[20px] text-theme-text font-bold">{t("dashboard.expense_locations", "Expense Map")}</Text>
+    <View className="rounded-xl bg-theme-background px-4 py-4 shadow-sm mb-4">
+      <View className="flex-row justify-between items-center mb-2">
+        <Text className="text-[20px] text-theme-text font-bold">
+          {t("dashboard.expense_locations", "Expense Map")}
+        </Text>
 
         <TouchableOpacity
           onPress={getCurrentLocation}
@@ -179,38 +198,50 @@ const ExpenseMapWidgetComponent: React.FC<ExpenseMapWidgetProps> = ({ accountId,
             <ActivityIndicator size="small" color={colors.text} />
           ) : (
             <>
-              <MaterialCommunityIcons name="crosshairs-gps" size={18} color={colors.text} />
-              <Text className="text-theme-text ml-2">{t("new_expense.get_current", "Get Current Location")}</Text>
+              <MaterialCommunityIcons
+                name="crosshairs-gps"
+                size={18}
+                color={colors.text}
+              />
+              <Text className="text-theme-text ml-2">
+                {t("new_expense.get_current", "Get Current Location")}
+              </Text>
             </>
           )}
         </TouchableOpacity>
       </View>
 
-      <View className={`w-full h-[400px] rounded-xl overflow-hidden bg-theme-surface border border-transparent ${!WebView ? 'items-center justify-center px-4' : ''}`}>
-          {WebView ? (
-              <WebView
-                  ref={webViewRef}
-                  style={{ flex: 1, width: '100%', height: '100%' }}
-                  originWhitelist={['*']}
-                  source={{ html: mapHtml }}
-                  onLoadEnd={handleLoadEnd}
-                  onMessage={onMessage}
-                  scrollEnabled={false}
-                  showsVerticalScrollIndicator={false}
-                  showsHorizontalScrollIndicator={false}
-              />
-          ) : (
-              <View className="items-center gap-3 justify-center flex-1">
-                  <MaterialCommunityIcons name="map-outline" size={34} color={colors.icon} />
-                  <Text className="text-center text-theme-text">
-                      {t("new_expense.map_unavailable", "Map unavailable")}
-                  </Text>
-              </View>
-          )}
+      <View
+        className={`w-full h-[400px] rounded-xl overflow-hidden bg-theme-surface border border-transparent ${!WebView ? "items-center justify-center px-4" : ""}`}
+      >
+        {WebView ? (
+          <WebView
+            ref={webViewRef}
+            style={{ flex: 1, width: "100%", height: "100%" }}
+            originWhitelist={["*"]}
+            source={{ html: mapHtml }}
+            onLoadEnd={handleLoadEnd}
+            onMessage={onMessage}
+            scrollEnabled={false}
+            showsVerticalScrollIndicator={false}
+            showsHorizontalScrollIndicator={false}
+          />
+        ) : (
+          <View className="items-center gap-3 justify-center flex-1">
+            <MaterialCommunityIcons
+              name="map-outline"
+              size={34}
+              color={colors.icon}
+            />
+            <Text className="text-center text-theme-text">
+              {t("new_expense.map_unavailable", "Map unavailable")}
+            </Text>
+          </View>
+        )}
       </View>
     </View>
   );
 };
 
-ExpenseMapWidgetComponent.displayName = 'ExpenseMapWidget';
+ExpenseMapWidgetComponent.displayName = "ExpenseMapWidget";
 export const ExpenseMapWidget = React.memo(ExpenseMapWidgetComponent);
