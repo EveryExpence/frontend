@@ -103,7 +103,7 @@ export const insertRemoteCategory = async (db: SQLiteDatabase, category: Categor
             $id: category.id,
             $name: category.name,
             $type: category.type,
-            $icon: category.icon,
+            $icon: category.icon || 'label-outline',
         });
     });
 };
@@ -122,7 +122,7 @@ export const updateRemoteCategory = async (db: SQLiteDatabase, category: Categor
             $id: category.id,
             $name: category.name,
             $type: category.type,
-            $icon: category.icon,
+            $icon: category.icon || 'label-outline',
         });
     });
 };
