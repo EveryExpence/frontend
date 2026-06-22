@@ -12,6 +12,7 @@ export const migrateDatabase = async (db: SQLiteDatabase) => {
             CREATE TABLE IF NOT EXISTS payment_methods (
                 id TEXT PRIMARY KEY NOT NULL,
                 name TEXT NOT NULL DEFAULT 'payment method',
+                icon TEXT NOT NULL DEFAULT 'cash',
                 syncState TEXT NOT NULL DEFAULT 'created'
             );
 
@@ -19,6 +20,7 @@ export const migrateDatabase = async (db: SQLiteDatabase) => {
                 id TEXT PRIMARY KEY NOT NULL,
                 name TEXT NOT NULL DEFAULT 'category',
                 type TEXT NOT NULL DEFAULT 'expense',
+                icon TEXT NOT NULL DEFAULT 'label-outline',
                 syncState TEXT NOT NULL DEFAULT 'created'
             );
 
@@ -52,29 +54,40 @@ export const migrateDatabase = async (db: SQLiteDatabase) => {
                 FOREIGN KEY(expense_record_id) REFERENCES expense_records(id)
             );
 
-            INSERT OR IGNORE INTO payment_methods (id, name, syncState) VALUES 
-            ('pm_cash', 'Cash', 'synced'),
-            ('pm_credit_card', 'Credit Card', 'synced'),
-            ('pm_debit_card', 'Debit Card', 'synced'),
-            ('pm_bank_transfer', 'Bank Transfer', 'synced'),
-            ('pm_check', 'Check', 'synced');
+            INSERT OR IGNORE INTO payment_methods (id, name, icon, syncState) VALUES 
+            ('pm_cash', 'Cash', 'cash', 'synced'),
+            ('pm_credit_card', 'Credit Card', 'credit-card', 'synced'),
+            ('pm_debit_card', 'Debit Card', 'credit-card-outline', 'synced'),
+            ('pm_bank_transfer', 'Bank Transfer', 'bank-transfer', 'synced'),
+            ('pm_check', 'Check', 'checkbook', 'synced');
 
-            INSERT OR IGNORE INTO categories (id, name, type, syncState) VALUES
-            ('cat_food', 'Food', 'EXPENSE', 'synced'),
-            ('cat_transport', 'Transport', 'EXPENSE', 'synced'),
-            ('cat_housing', 'Housing', 'EXPENSE', 'synced'),
-            ('cat_utilities', 'Utilities', 'EXPENSE', 'synced'),
-            ('cat_shopping', 'Shopping', 'EXPENSE', 'synced'),
-            ('cat_entertainment', 'Entertainment', 'EXPENSE', 'synced'),
-            ('cat_others_expense', 'Others', 'EXPENSE', 'synced'),
-            ('cat_salary', 'Salary', 'INCOME', 'synced'),
-            ('cat_business', 'Business', 'INCOME', 'synced'),
-            ('cat_investment', 'Investment', 'INCOME', 'synced'),
-            ('cat_gifts', 'Gifts', 'INCOME', 'synced'),
-            ('cat_others_income', 'Others', 'INCOME', 'synced');
+            INSERT OR IGNORE INTO categories (id, name, type, icon, syncState) VALUES
+            ('cat_food', 'Food', 'EXPENSE', 'food-fork-drink', 'synced'),
+            ('cat_transport', 'Transport', 'EXPENSE', 'car', 'synced'),
+            ('cat_housing', 'Housing', 'EXPENSE', 'home', 'synced'),
+            ('cat_utilities', 'Utilities', 'EXPENSE', 'lightning-bolt', 'synced'),
+            ('cat_shopping', 'Shopping', 'EXPENSE', 'cart', 'synced'),
+            ('cat_entertainment', 'Entertainment', 'EXPENSE', 'gamepad-variant', 'synced'),
+            ('cat_others_expense', 'Others', 'EXPENSE', 'dots-horizontal', 'synced'),
+            ('cat_salary', 'Salary', 'INCOME', 'cash-multiple', 'synced'),
+            ('cat_business', 'Business', 'INCOME', 'briefcase', 'synced'),
+            ('cat_investment', 'Investment', 'INCOME', 'chart-line', 'synced'),
+            ('cat_gifts', 'Gifts', 'INCOME', 'gift', 'synced'),
+            ('cat_others_income', 'Others', 'INCOME', 'dots-horizontal', 'synced');
+
+            INSERT OR IGNORE INTO accounts (id, name, currency, balance, syncState) VALUES
+            ('acc_main', 'Main Account', 'USD', 0, 'created');
         `);
     } catch (error) {
         console.error("Database migration failed:", error);
         throw new Error(`Database migration failed: ${error instanceof Error ? error.message : String(error)}`);
     }
+
+    try {
+        await db.execAsync("ALTER TABLE payment_methods ADD COLUMN icon TEXT NOT NULL DEFAULT 'cash';");
+    } catch (e) {}
+
+    try {
+        await db.execAsync("ALTER TABLE categories ADD COLUMN icon TEXT NOT NULL DEFAULT 'label-outline';");
+    } catch (e) {}
 }

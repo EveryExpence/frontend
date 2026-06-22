@@ -11,6 +11,8 @@ import { useTranslation } from "react-i18next";
 
 import { PolarChart, Pie } from "victory-native";
 import { CATEGORY_COLORS } from "@/constants/categoryColors";
+import { fetchExchangeRates, convertAmountToUSD } from "@/utils/exchangeRates";
+import { useAuth } from "@/context/authContext";
 
 export const IncomeInsightsWidget: React.FC<{ onShowMore?: () => void; accountId?: string }> = ({
   onShowMore, accountId
@@ -25,6 +27,9 @@ export const IncomeInsightsWidget: React.FC<{ onShowMore?: () => void; accountId
   const [categories, setCategories] = React.useState<Record<string, string>>(
     {},
   );
+  const [rates, setRates] = React.useState<Record<string, number>>({});
+  const { user } = useAuth();
+  const convertToUSD = !!user;
 
   React.useEffect(() => {
     let mounted = true;
@@ -50,10 +55,15 @@ export const IncomeInsightsWidget: React.FC<{ onShowMore?: () => void; accountId
         const local = await getAllExpenseRecords(db);
         let filteredLocal = local;
         if (accountId) {
-            filteredLocal = local.filter((r) => r.accountId === accountId);
+          filteredLocal = local.filter((r) => r.accountId === accountId);
         }
         if (mounted) {
           setRecordsRaw(filteredLocal);
+        }
+
+        if (convertToUSD) {
+          const fetchedRates = await fetchExchangeRates("USD");
+          if (mounted) setRates(fetchedRates);
         }
       } catch (e: any) {
         if (mounted) setError(e?.message ?? String(e));
@@ -72,14 +82,24 @@ export const IncomeInsightsWidget: React.FC<{ onShowMore?: () => void; accountId
       if (r.amount === undefined || r.amount === null) return;
       if (r.amount <= 0) return;
       const cat = r.categoryId ?? "uncategorized";
-      const currency = accounts[r.accountId] ?? "PLN";
-      const key = `${cat}_${currency}`;
+      const originalCurrency = accounts[r.accountId] ?? "PLN";
+
+      let amt = r.amount;
+      let currency = originalCurrency;
+      let key = `${cat}_${currency}`;
+
+      if (convertToUSD) {
+        amt = convertAmountToUSD(amt, originalCurrency, rates);
+        currency = "USD";
+        key = cat;
+      }
+
       const entry = map.get(key) ?? [];
-      entry.push({ amount: r.amount, currency, categoryId: cat });
+      entry.push({ amount: amt, currency, categoryId: cat });
       map.set(key, entry);
     });
     return map;
-  }, [recordsRaw, accounts]);
+  }, [recordsRaw, accounts, convertToUSD, rates]);
 
   const data = React.useMemo((): {
     label: string;
@@ -133,15 +153,24 @@ export const IncomeInsightsWidget: React.FC<{ onShowMore?: () => void; accountId
     recordsRaw.forEach((r) => {
       if (r.amount === undefined || r.amount === null) return;
       if (r.amount <= 0) return;
-      const currency = accounts[r.accountId] ?? "PLN";
+      const originalCurrency = accounts[r.accountId] ?? "PLN";
+
+      let amt = r.amount;
+      let currency = originalCurrency;
+
+      if (convertToUSD) {
+        amt = convertAmountToUSD(amt, originalCurrency, rates);
+        currency = "USD";
+      }
+
       const prev = map.get(currency) ?? 0;
-      map.set(currency, prev + r.amount);
+      map.set(currency, prev + amt);
     });
     return Array.from(map.entries())
       .sort((a, b) => b[1] - a[1])
       .map(([curr, amt]) => formatCurrency(amt, curr))
       .join(" | ");
-  }, [recordsRaw, accounts]);
+  }, [recordsRaw, accounts, convertToUSD, rates]);
 
   if (!loading && !error && data.length === 0) return null;
 

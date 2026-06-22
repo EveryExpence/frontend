@@ -4,9 +4,11 @@ import { getAllCategories } from "@/data/categories";
 import { getAllAccounts } from "@/data/accounts";
 import React from "react";
 import { formatCurrency } from "@/utils/formatCurrency";
+import { fetchExchangeRates, convertAmountToUSD } from "@/utils/exchangeRates";
 import { BalanceDataPoint, calculateBalanceTrend } from "@/utils/trendCalculations";
 import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from "@/context/authContext";
 
 export interface IncomeSource {
     categoryId: string;
@@ -34,16 +36,23 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date, accountId
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
     const { t } = useTranslation();
+    const { user } = useAuth();
+    const convertToUSD = !!user;
 
     const fetchData = React.useCallback(async () => {
         if (!db) return;
         try {
             setLoading(true);
 
-            const trendResult = await calculateBalanceTrend(db, startDate, endDate, accountId);
+            const trendResult = await calculateBalanceTrend(db, startDate, endDate, accountId, convertToUSD);
             setData(trendResult.points);
             setPercentageChange(trendResult.percentageChange);
-            setCurrency(trendResult.primaryCurrency);
+            setCurrency(convertToUSD ? "USD" : trendResult.primaryCurrency);
+
+            let rates: Record<string, number> = {};
+            if (convertToUSD) {
+                rates = await fetchExchangeRates("USD");
+            }
 
             const [categories, allRecords, accounts] = await Promise.all([
                 getAllCategories(db),
@@ -72,8 +81,16 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date, accountId
             incomeRecords.forEach(r => {
                 const catId = r.categoryId ?? "uncategorized";
                 const curr = accountCurrencyMap[r.accountId] ?? "PLN";
-                const existing = incomeGroupMap.get(catId) ?? { total: 0, currency: curr };
-                existing.total += r.amount;
+                let amt = r.amount;
+                let c = curr;
+
+                if (convertToUSD) {
+                    amt = convertAmountToUSD(amt, curr, rates);
+                    c = "USD";
+                }
+
+                const existing = incomeGroupMap.get(catId) ?? { total: 0, currency: c };
+                existing.total += amt;
                 incomeGroupMap.set(catId, existing);
             });
 
@@ -99,8 +116,16 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date, accountId
             spendingRecords.forEach(r => {
                 const catId = r.categoryId ?? "uncategorized";
                 const curr = accountCurrencyMap[r.accountId] ?? "PLN";
-                const existing = spendingGroupMap.get(catId) ?? { totalAbs: 0, currency: curr };
-                existing.totalAbs += Math.abs(r.amount);
+                let amt = Math.abs(r.amount);
+                let c = curr;
+
+                if (convertToUSD) {
+                    amt = convertAmountToUSD(amt, curr, rates);
+                    c = "USD";
+                }
+
+                const existing = spendingGroupMap.get(catId) ?? { totalAbs: 0, currency: c };
+                existing.totalAbs += amt;
                 spendingGroupMap.set(catId, existing);
             });
 
@@ -123,7 +148,7 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date, accountId
         } finally {
             setLoading(false);
         }
-    }, [db, startDate.getTime(), endDate.getTime(), accountId]);
+    }, [db, startDate.getTime(), endDate.getTime(), accountId, convertToUSD]);
 
     React.useEffect(() => {
         fetchData();

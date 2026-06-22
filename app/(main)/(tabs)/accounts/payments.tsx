@@ -39,6 +39,7 @@ export default function PaymentsScreen() {
 				data.map((paymentMethod) => ({
 					id: paymentMethod.id,
 					name: paymentMethod.name,
+					icon: paymentMethod.icon,
 				}))
 			);
 		} catch (e) {

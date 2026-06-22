@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { ScrollView, Text, TextInput, TouchableOpacity } from 'react-native';
 import { Colors } from '@/constants/theme';
 import CustomModal from '@/components/Modal';
+import IconPicker from '@/components/IconPicker';
 import { PaymentMethodCardItem } from '@/components/payments/PaymentMethodCard';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useTranslation } from 'react-i18next';
 
 export type PaymentMethodFormData = {
   name: string;
+  icon: string;
 };
 
 type Props = {
@@ -28,7 +30,13 @@ export default function PaymentMethodFormModal({
   const colors = Colors[scheme];
 
   const [name, setName] = useState('');
+  const [icon, setIcon] = useState('cash');
   const [isSaving, setIsSaving] = useState(false);
+
+  const PRESET_ICONS = [
+      "cash", "credit-card", "credit-card-outline", "bank-transfer", 
+      "checkbook", "wallet", "contactless-payment", "bitcoin", "cellphone-nfc"
+  ];
 
   const isEditing = editingPaymentMethod !== null;
   const canSave = name.trim() && !isSaving;
@@ -38,8 +46,10 @@ export default function PaymentMethodFormModal({
 
     if (editingPaymentMethod) {
       setName(editingPaymentMethod.name);
+      setIcon(editingPaymentMethod.icon || 'cash');
     } else {
       setName('');
+      setIcon('cash');
     }
   }, [visible, editingPaymentMethod]);
 
@@ -48,7 +58,7 @@ export default function PaymentMethodFormModal({
 
     setIsSaving(true);
     try {
-      await onSave({ name: name.trim() });
+      await onSave({ name: name.trim(), icon });
     } finally {
       setIsSaving(false);
     }
@@ -100,6 +110,15 @@ export default function PaymentMethodFormModal({
             borderRadius: 6,
             marginBottom: 12,
           }}
+        />
+
+        <Text className="text-lg text-theme-icon" style={{ marginBottom: 6 }}>
+          Icon
+        </Text>
+        <IconPicker 
+          icons={PRESET_ICONS}
+          selectedIcon={icon}
+          onSelect={setIcon}
         />
       </ScrollView>
     </CustomModal>

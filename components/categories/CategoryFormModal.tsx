@@ -3,6 +3,7 @@ import { ScrollView, Text, TextInput, TouchableOpacity } from 'react-native';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import { Colors } from '@/constants/theme';
 import CustomModal from '@/components/Modal';
+import IconPicker from '@/components/IconPicker';
 import { CategoryCardItem } from '@/components/categories/CategoryCard';
 import { categoryTypes } from '@/types/data/category';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -11,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 export type CategoryFormData = {
   name: string;
   type: 'expense' | 'income' | 'varies';
+  icon: string;
 };
 
 type Props = {
@@ -27,7 +29,14 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
 
   const [name, setName] = useState('');
   const [typeIndex, setTypeIndex] = useState(0);
+  const [icon, setIcon] = useState('label-outline');
   const [isSaving, setIsSaving] = useState(false);
+
+  const PRESET_ICONS = [
+      "food-fork-drink", "car", "home", "lightning-bolt", "cart", 
+      "gamepad-variant", "cash-multiple", "briefcase", "chart-line", 
+      "gift", "medical-bag", "school", "tag-outline", "label-outline", "dots-horizontal"
+  ];
 
   const isEditing = editingCategory !== null;
   const canSave = name.trim() && !isSaving;
@@ -38,9 +47,11 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
     if (editingCategory) {
       setName(editingCategory.name);
       setTypeIndex(Math.max(0, categoryTypes.indexOf(editingCategory.type.toLowerCase() as any)));
+      setIcon(editingCategory.icon || 'label-outline');
     } else {
       setName('');
       setTypeIndex(0);
+      setIcon('label-outline');
     }
   }, [visible, editingCategory]);
 
@@ -49,7 +60,7 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
 
     setIsSaving(true);
     try {
-      await onSave({ name: name.trim(), type: categoryTypes[typeIndex] });
+      await onSave({ name: name.trim(), type: categoryTypes[typeIndex], icon });
     } finally {
       setIsSaving(false);
     }
@@ -101,6 +112,15 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
             borderRadius: 6,
             marginBottom: 12,
           }}
+        />
+
+        <Text className="text-lg text-theme-icon" style={{ marginBottom: 6 }}>
+          Icon
+        </Text>
+        <IconPicker 
+          icons={PRESET_ICONS}
+          selectedIcon={icon}
+          onSelect={setIcon}
         />
 
         <Text className="text-lg text-theme-icon" style={{ marginBottom: 6 }}>

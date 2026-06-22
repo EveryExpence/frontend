@@ -50,10 +50,8 @@ const Dashboard = () => {
     }, [refetch]),
   );
 
-  const pages: ({ type: "total" } | AccountWithComputed)[] = [
-    { type: "total" },
-    ...accounts,
-  ];
+  const pages: ({ type: "total" } | AccountWithComputed)[] = 
+    accounts.length <= 1 ? accounts : [{ type: "total" }, ...accounts];
 
   React.useEffect(() => {
     Animated.spring(animatedIndex, {
@@ -127,39 +125,39 @@ const Dashboard = () => {
             />
 
             <TransactionHistoryWidget
-              accountId={pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
+              accountId={pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
               onSeeAllPress={() => {
-                const id = pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
+                const id = pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
                 router.push(id ? { pathname: "/records", params: { accountId: id } } : "/records");
               }}
             />
 
             <SpendingInsidesWidget
-              accountId={pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
+              accountId={pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
               onShowMore={() => {
-                const id = pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
+                const id = pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
                 router.push(id ? { pathname: "/spending-insights", params: { accountId: id } } : "/spending-insights");
               }}
             />
 
             <IncomeInsightsWidget
-              accountId={pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
+              accountId={pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
               onShowMore={() => {
-                const id = pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
+                const id = pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
                 router.push(id ? { pathname: "/income-insights", params: { accountId: id } } : "/income-insights");
               }}
             />
 
             <BalanceTrendWidget 
-              accountId={pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
+              accountId={pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
               onShowMore={() => {
-                const id = pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
+                const id = pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
                 router.push(id ? { pathname: "/balance-trend", params: { accountId: id } } : "/balance-trend");
               }}
             />
 
             <ExpenseMapWidget
-              accountId={pageIndex > 0 && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
+              accountId={pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
               setScrollEnabled={setScrollEnabled}
             />
           </ScrollView>

@@ -30,6 +30,7 @@ export interface Category {
     id: string;
     name: string;
     type: CategoryType;
+    icon: string;
     syncState: SyncState;
 }
 
@@ -37,9 +38,11 @@ export interface CategoryResponseDTO {
     id: string;
     name: string;
     type: CategoryType;
+    icon: string;
 }
 
 export interface CategoryInputDTO {
     name: string;
     type: CategoryType;
+    icon: string;
 }

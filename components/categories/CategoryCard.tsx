@@ -8,6 +8,7 @@ export type CategoryCardItem = {
   id: string;
   name: string;
   type: 'expense' | 'income' | 'varies';
+  icon?: string;
 };
 
 type CategoryCardProps = {
@@ -27,7 +28,7 @@ export default function CategoryCard({ item, onEdit, onDelete }: CategoryCardPro
     >
       <View className="flex-row items-center self-stretch min-w-0 flex-1">
         <MaterialCommunityIcons
-          name={getCategoryIcon(item.name)}
+          name={(item.icon as any) || getCategoryIcon(item.name)}
           size={48}
           color={colors.text}
           style={{ marginRight: 12 }}

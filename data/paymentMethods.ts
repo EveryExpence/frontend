@@ -4,12 +4,13 @@ import { nanoid } from 'nanoid'
 
 export const createPaymentMethod = async (db: SQLiteDatabase, paymentMethodDTO: PaymentMethodInputDTO) => {
     const stmt = await db.prepareAsync(`
-        INSERT INTO payment_methods (id, name) VALUES ($id, $name);
+        INSERT INTO payment_methods (id, name, icon) VALUES ($id, $name, $icon);
     `);
     await db.withExclusiveTransactionAsync(async () => {
         await stmt.executeAsync({
             $id: nanoid(),
             $name: paymentMethodDTO.name,
+            $icon: paymentMethodDTO.icon,
         });
     });
 };
@@ -22,6 +23,7 @@ export const updatePaymentMethod = async (db: SQLiteDatabase, id: string, paymen
     const stmt = await db.prepareAsync(`
         UPDATE payment_methods SET
             name = $name,
+            icon = $icon,
             syncState = CASE
                 WHEN syncState = 'created' THEN 'created'
                 ELSE 'updated'
@@ -32,6 +34,7 @@ export const updatePaymentMethod = async (db: SQLiteDatabase, id: string, paymen
         await stmt.executeAsync({
             $id: id,
             $name: paymentMethodDTO.name,
+            $icon: paymentMethodDTO.icon,
         });
     });
 };
@@ -89,13 +92,14 @@ export const getAllLocalPaymentMethodIds = async (db: SQLiteDatabase): Promise<s
 
 export const insertRemotePaymentMethod = async (db: SQLiteDatabase, paymentMethod: PaymentMethodResponseDTO) => {
     const stmt = await db.prepareAsync(`
-        INSERT INTO payment_methods (id, name, syncState) 
-        VALUES ($id, $name, 'synced')
+        INSERT INTO payment_methods (id, name, icon, syncState) 
+        VALUES ($id, $name, $icon, 'synced')
     `);
     await db.withExclusiveTransactionAsync(async () => {
         await stmt.executeAsync({
             $id: paymentMethod.id,
             $name: paymentMethod.name,
+            $icon: paymentMethod.icon,
         });
     });
 };
@@ -104,6 +108,7 @@ export const updateRemotePaymentMethod = async (db: SQLiteDatabase, paymentMetho
     const stmt = await db.prepareAsync(`
         UPDATE payment_methods SET 
             name = $name, 
+            icon = $icon,
             syncState = 'synced'
         WHERE id = $id AND syncState = 'synced'
     `);
@@ -111,6 +116,7 @@ export const updateRemotePaymentMethod = async (db: SQLiteDatabase, paymentMetho
         await stmt.executeAsync({
             $id: paymentMethod.id,
             $name: paymentMethod.name,
+            $icon: paymentMethod.icon,
         });
     });
 };
