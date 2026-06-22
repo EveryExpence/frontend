@@ -92,22 +92,22 @@ export const getAllLocalPaymentMethodIds = async (db: SQLiteDatabase): Promise<s
 
 export const insertRemotePaymentMethod = async (db: SQLiteDatabase, paymentMethod: PaymentMethodResponseDTO) => {
     const stmt = await db.prepareAsync(`
-        INSERT INTO payment_methods (id, name, icon, syncState) 
+        INSERT INTO payment_methods (id, name, icon, syncState)
         VALUES ($id, $name, $icon, 'synced')
     `);
     await db.withExclusiveTransactionAsync(async () => {
         await stmt.executeAsync({
             $id: paymentMethod.id,
             $name: paymentMethod.name,
-            $icon: paymentMethod.icon,
+            $icon: paymentMethod.icon ?? 'cash',
         });
     });
 };
 
 export const updateRemotePaymentMethod = async (db: SQLiteDatabase, paymentMethod: PaymentMethodResponseDTO) => {
     const stmt = await db.prepareAsync(`
-        UPDATE payment_methods SET 
-            name = $name, 
+        UPDATE payment_methods SET
+            name = $name,
             icon = $icon,
             syncState = 'synced'
         WHERE id = $id AND syncState = 'synced'
@@ -116,7 +116,7 @@ export const updateRemotePaymentMethod = async (db: SQLiteDatabase, paymentMetho
         await stmt.executeAsync({
             $id: paymentMethod.id,
             $name: paymentMethod.name,
-            $icon: paymentMethod.icon,
+            $icon: paymentMethod.icon ?? 'cash',
         });
     });
 };

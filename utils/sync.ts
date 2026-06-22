@@ -29,6 +29,7 @@ export const syncCategories = async (db: SQLiteDatabase) => {
                 body: JSON.stringify({
                     name: category.name,
                     type: category.type,
+                    icon: category.icon ?? 'label-outline',
                 }),
                 headers: { 'Content-Type': 'application/json' },
             });
@@ -43,6 +44,7 @@ export const syncCategories = async (db: SQLiteDatabase) => {
                     id: category.id,
                     name: category.name,
                     type: category.type,
+                    icon: category.icon ?? 'label-outline',
                 }),
                 headers: { 'Content-Type': 'application/json' },
             });
@@ -141,7 +143,7 @@ export const syncPaymentMethods = async (db: SQLiteDatabase) => {
         for (const item of updated) {
             const response = await apiFetch(updatePaymentMethodEndpoint(item.id), {
                 method: "PUT",
-                body: JSON.stringify({ name: item.name }),
+                body: JSON.stringify({ name: item.name, icon: item.icon ?? 'cash' }),
                 headers: { 'Content-Type': 'application/json' },
             });
             if (response.ok) synchedIds.push(item.id);
@@ -151,7 +153,7 @@ export const syncPaymentMethods = async (db: SQLiteDatabase) => {
         for (const item of created) {
             const response = await apiFetch(createPaymentMethodEndpoint, {
                 method: "POST",
-                body: JSON.stringify({ id: item.id, name: item.name }),
+                body: JSON.stringify({ id: item.id, name: item.name, icon: item.icon ?? 'cash' }),
                 headers: { 'Content-Type': 'application/json' },
             });
             if (response.ok) synchedIds.push(item.id);

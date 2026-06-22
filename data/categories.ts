@@ -95,7 +95,7 @@ export const getAllLocalCategoryIds = async (db: SQLiteDatabase): Promise<string
 
 export const insertRemoteCategory = async (db: SQLiteDatabase, category: CategoryResponseDTO) => {
     const stmt = await db.prepareAsync(`
-        INSERT INTO categories (id, name, type, icon, syncState) 
+        INSERT INTO categories (id, name, type, icon, syncState)
         VALUES ($id, $name, $type, $icon, 'synced')
     `);
     await db.withExclusiveTransactionAsync(async () => {
@@ -103,16 +103,16 @@ export const insertRemoteCategory = async (db: SQLiteDatabase, category: Categor
             $id: category.id,
             $name: category.name,
             $type: category.type,
-            $icon: category.icon,
+            $icon: category.icon ?? 'label-outline',
         });
     });
 };
 
 export const updateRemoteCategory = async (db: SQLiteDatabase, category: CategoryResponseDTO) => {
     const stmt = await db.prepareAsync(`
-        UPDATE categories SET 
-            name = $name, 
-            type = $type, 
+        UPDATE categories SET
+            name = $name,
+            type = $type,
             icon = $icon,
             syncState = 'synced'
         WHERE id = $id AND syncState = 'synced'
@@ -122,7 +122,7 @@ export const updateRemoteCategory = async (db: SQLiteDatabase, category: Categor
             $id: category.id,
             $name: category.name,
             $type: category.type,
-            $icon: category.icon,
+            $icon: category.icon ?? 'label-outline',
         });
     });
 };
