@@ -37,8 +37,8 @@ export default function AccountsSectionTabs() {
                     >
                         <Text
                             numberOfLines={1}
-                            className={`text-center text-[15px] font-semibold leading-5 ${isActive ? "text-theme-textLight" : "text-theme-textDark"}`}
-                            style={!isActive ? { color: colors.textDark } : undefined}
+                            className={`text-center text-[15px] font-semibold leading-5 ${isActive ? "text-theme-textLight" : "text-theme-text"}`}
+                            style={!isActive ? { opacity: 0.6 } : undefined}
                         >
                             {section.label}
                         </Text>
