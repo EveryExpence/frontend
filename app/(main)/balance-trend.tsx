@@ -159,7 +159,6 @@ const BalanceTrendDetailsScreen: React.FC = () => {
                   </Text>
                 </View>
               )}
-
             </View>
 
             <View className="bg-theme-surface rounded-xl p-4">
@@ -180,7 +179,10 @@ const BalanceTrendDetailsScreen: React.FC = () => {
                     <View className="flex-row items-center flex-1">
                       <View className="h-11 w-11 items-center justify-center rounded-full bg-theme-tint">
                         <MaterialCommunityIcons
-                          name={getCategoryIcon(source.categoryName)}
+                          name={
+                            (source.categoryIcon as any) ||
+                            getCategoryIcon(source.categoryName)
+                          }
                           size={20}
                           color={colors.textLight}
                         />
@@ -218,7 +220,10 @@ const BalanceTrendDetailsScreen: React.FC = () => {
                     <View className="flex-row items-center flex-1">
                       <View className="h-11 w-11 items-center justify-center rounded-full bg-theme-tint">
                         <MaterialCommunityIcons
-                          name={getCategoryIcon(source.categoryName)}
+                          name={
+                            (source.categoryIcon as any) ||
+                            getCategoryIcon(source.categoryName)
+                          }
                           size={20}
                           color={colors.textLight}
                         />

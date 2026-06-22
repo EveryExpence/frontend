@@ -8,8 +8,8 @@ export const formatCurrency = (value: number, currency: string) => {
             currency: currencyInfo.code,
             maximumFractionDigits: 2,
         }).format(value);
-        return `${formatted} (${currencyInfo.code})`;
+        return formatted;
     } catch {
-        return `${currencyInfo.symbol}${value.toFixed(2)} (${currencyInfo.code})`;
+        return `${currencyInfo.symbol}${value.toFixed(2)}`;
     }
 };

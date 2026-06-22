@@ -23,6 +23,7 @@ export interface CategoryExpenseItem {
 export interface CategoryGroup {
     categoryId: string;
     categoryName: string;
+    categoryIcon?: string;
     totalAmount: number;
     displayAmount: string;
     color: string;
@@ -83,7 +84,7 @@ export function useSpendingInsights(startDate: Date, endDate: Date, accountId?: 
 
             const groupMap = new Map<
                 string,
-                { records: ExpenseRecord[]; totalAbs: number; currency: string }
+                { records: ExpenseRecord[]; totalAbs: number; currency: string; categoryId: string }
             >();
 
             filtered.forEach((r) => {
@@ -100,7 +101,7 @@ export function useSpendingInsights(startDate: Date, endDate: Date, accountId?: 
                     key = catId;
                 }
 
-                const existing = groupMap.get(key) ?? {
+                const existing: { records: ExpenseRecord[]; totalAbs: number; currency: string; categoryId: string } = groupMap.get(key) ?? {
                     records: [],
                     totalAbs: 0,
                     currency,
@@ -146,6 +147,7 @@ export function useSpendingInsights(startDate: Date, endDate: Date, accountId?: 
                     return {
                         categoryId: key,
                         categoryName: convertToUSD ? catName : `${catName} (${data.currency})`,
+                        categoryIcon: categoryMap[data.categoryId]?.icon,
                         totalAmount: data.totalAbs,
                         displayAmount: formatCurrency(-data.totalAbs, data.currency),
                         color: CATEGORY_COLORS[idx % CATEGORY_COLORS.length],

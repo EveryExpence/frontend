@@ -3,6 +3,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { getAllExpenseRecords } from '@/data/expenseRecords';
 import { getAllAccounts } from '@/data/accounts';
 import { getAllCategories } from '@/data/categories';
+import { Category } from '@/types/data/category';
 import { getAllPaymentMethods } from '@/data/paymentMethods';
 import { formatCurrency } from '@/utils/formatCurrency';
 import { fetchExchangeRates, convertAmountToUSD } from '@/utils/exchangeRates';
@@ -18,6 +19,7 @@ export interface TransactionRecord {
     kind: 'income' | 'expense';
     dateLabel: string;
     categoryName: string;
+    categoryIcon?: string;
     paymentMethodName: string;
     location?: string;
 }
@@ -76,8 +78,8 @@ export function useExpenseRecords(accountId?: string) {
             const accountMap: Record<string, string> = {};
             accounts.forEach((a) => (accountMap[a.id] = a.currency));
 
-            const categoryMap: Record<string, string> = {};
-            categories.forEach((c) => (categoryMap[c.id] = c.name));
+            const categoryMap: Record<string, Category> = {};
+            categories.forEach((c) => (categoryMap[c.id] = c));
 
             const paymentMethodMap: Record<string, string> = {};
             paymentMethods.forEach((pm) => (paymentMethodMap[pm.id] = pm.name));
@@ -92,7 +94,8 @@ export function useExpenseRecords(accountId?: string) {
                     currency: accountMap[r.accountId] ?? 'PLN',
                     kind: r.amount >= 0 ? 'income' : 'expense',
                     dateLabel: formatDateLabel(r.createdAt),
-                    categoryName: categoryMap[r.categoryId] ?? t('records.uncategorized'),
+                    categoryName: categoryMap[r.categoryId]?.name ?? t('records.uncategorized'),
+                    categoryIcon: categoryMap[r.categoryId]?.icon,
                     paymentMethodName: paymentMethodMap[r.paymentMethodId] ?? t('common.other'),
                     location: r.location,
                 }));

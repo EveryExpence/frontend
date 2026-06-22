@@ -1,5 +1,13 @@
 import React from "react";
-import { ScrollView, Text, View, useColorScheme, Pressable, Alert, TouchableOpacity } from "react-native";
+import {
+  ScrollView,
+  Text,
+  View,
+  useColorScheme,
+  Pressable,
+  Alert,
+  TouchableOpacity,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -7,7 +15,11 @@ import { Colors } from "@/constants/theme";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { useExpenseRecords, TransactionRecord, TransactionSection } from "@/hooks/use-expense-records";
+import {
+  useExpenseRecords,
+  TransactionRecord,
+  TransactionSection,
+} from "@/hooks/use-expense-records";
 import { getCategoryIcon } from "@/types/data/category";
 import { useTranslation } from "react-i18next";
 import { useSQLiteContext } from "expo-sqlite";
@@ -16,7 +28,13 @@ import Toast from "react-native-toast-message";
 import { useSync } from "@/context/syncContext";
 import DeleteRecordModal from "@/components/records/DeleteRecordModal";
 
-function TransactionRow({ item, onDelete }: { item: TransactionRecord; onDelete: (item: TransactionRecord) => void }) {
+function TransactionRow({
+  item,
+  onDelete,
+}: {
+  item: TransactionRecord;
+  onDelete: (item: TransactionRecord) => void;
+}) {
   const scheme = useColorScheme() ?? "light";
   const colors = Colors[scheme];
   const router = useRouter();
@@ -29,7 +47,9 @@ function TransactionRow({ item, onDelete }: { item: TransactionRecord; onDelete:
       >
         <View className="h-10 w-10 items-center justify-center rounded-full bg-theme-tint">
           <MaterialCommunityIcons
-            name={getCategoryIcon(item.categoryName)}
+            name={
+              (item.categoryIcon as any) || getCategoryIcon(item.categoryName)
+            }
             size={20}
             color={colors.textLight}
           />
@@ -39,7 +59,10 @@ function TransactionRow({ item, onDelete }: { item: TransactionRecord; onDelete:
           <Text className="text-[18px] text-theme-text" numberOfLines={1}>
             {item.title}
           </Text>
-          <Text className="text-[13px] text-theme-text opacity-60" numberOfLines={1}>
+          <Text
+            className="text-[13px] text-theme-text opacity-60"
+            numberOfLines={1}
+          >
             {item.categoryName} • {item.paymentMethodName}
           </Text>
         </View>
@@ -78,7 +101,9 @@ function TransactionSectionCard({
   return (
     <View className="gap-3">
       <View className="flex-row items-end justify-between px-1">
-        <Text className="text-[22px] font-medium text-theme-text">{section.title}</Text>
+        <Text className="text-[22px] font-medium text-theme-text">
+          {section.title}
+        </Text>
         <Text className="text-[20px] text-theme-text">{section.summary}</Text>
       </View>
 
@@ -87,7 +112,9 @@ function TransactionSectionCard({
           {section.items.map((item: TransactionRecord, index: number) => (
             <View key={item.id}>
               <TransactionRow item={item} onDelete={onDelete} />
-              {index < section.items.length - 1 ? <Separator className="my-1" /> : null}
+              {index < section.items.length - 1 ? (
+                <Separator className="my-1" />
+              ) : null}
             </View>
           ))}
         </CardContent>
@@ -104,7 +131,8 @@ export default function RecordsScreen() {
   const { sections, loading, error, refetch } = useExpenseRecords(accountId);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [deleteModalVisible, setDeleteModalVisible] = React.useState(false);
-  const [recordToDelete, setRecordToDelete] = React.useState<TransactionRecord | null>(null);
+  const [recordToDelete, setRecordToDelete] =
+    React.useState<TransactionRecord | null>(null);
   const [isDeleting, setIsDeleting] = React.useState(false);
 
   const handleDeletePress = (item: TransactionRecord) => {
@@ -150,7 +178,11 @@ export default function RecordsScreen() {
     <SafeAreaView className="flex-1 bg-theme-background">
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 20, paddingBottom: 28 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingTop: 20,
+          paddingBottom: 28,
+        }}
       >
         <Text className="text-[36px] font-semibold leading-tight text-theme-text">
           {t("records.title")}
@@ -174,15 +206,27 @@ export default function RecordsScreen() {
         </View>
 
         <View className="mt-8 gap-6">
-          {loading && <Text className="text-theme-text text-center">{t("common.loading")}</Text>}
-          {error && <Text className="text-theme-error text-center">{error}</Text>}
+          {loading && (
+            <Text className="text-theme-text text-center">
+              {t("common.loading")}
+            </Text>
+          )}
+          {error && (
+            <Text className="text-theme-error text-center">{error}</Text>
+          )}
           {!loading && filteredSections.length === 0 && (
             <Text className="text-theme-text text-center opacity-60">
-              {searchQuery ? t("records.no_results") : t("records.no_transactions")}
+              {searchQuery
+                ? t("records.no_results")
+                : t("records.no_transactions")}
             </Text>
           )}
           {filteredSections.map((section: TransactionSection) => (
-            <TransactionSectionCard key={section.id} section={section} onDelete={handleDeletePress} />
+            <TransactionSectionCard
+              key={section.id}
+              section={section}
+              onDelete={handleDeletePress}
+            />
           ))}
         </View>
       </ScrollView>

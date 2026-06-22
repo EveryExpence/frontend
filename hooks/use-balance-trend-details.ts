@@ -2,6 +2,7 @@ import { useSQLiteContext } from "expo-sqlite";
 import { getAllExpenseRecords } from "@/data/expenseRecords";
 import { getAllCategories } from "@/data/categories";
 import { getAllAccounts } from "@/data/accounts";
+import { Category } from "@/types/data/category";
 import React from "react";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { fetchExchangeRates, convertAmountToUSD } from "@/utils/exchangeRates";
@@ -13,6 +14,7 @@ import { useAuth } from "@/context/authContext";
 export interface IncomeSource {
     categoryId: string;
     categoryName: string;
+    categoryIcon?: string;
     amount: number;
     displayAmount: string;
     currency: string;
@@ -21,6 +23,7 @@ export interface IncomeSource {
 export interface SpendingSource {
     categoryId: string;
     categoryName: string;
+    categoryIcon?: string;
     amount: number;
     displayAmount: string;
     currency: string;
@@ -59,11 +62,11 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date, accountId
                 getAllExpenseRecords(db),
                 getAllAccounts(db)
             ]);
-            
+
             const records = accountId ? allRecords.filter(r => r.accountId === accountId) : allRecords;
 
-            const categoryMap: Record<string, string> = {};
-            categories.forEach(c => categoryMap[c.id] = c.name);
+            const categoryMap: Record<string, Category> = {};
+            categories.forEach(c => categoryMap[c.id] = c);
 
             const accountCurrencyMap: Record<string, string> = {};
             accounts.forEach(a => accountCurrencyMap[a.id] = a.currency);
@@ -99,7 +102,8 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date, accountId
                 .slice(0, 3)
                 .map(([catId, d]) => ({
                     categoryId: catId,
-                    categoryName: categoryMap[catId] ?? "Other",
+                    categoryName: categoryMap[catId]?.name ?? "Other",
+                    categoryIcon: categoryMap[catId]?.icon,
                     amount: d.total,
                     displayAmount: formatCurrency(d.total, d.currency),
                     currency: d.currency
@@ -134,7 +138,8 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date, accountId
                 .slice(0, 3)
                 .map(([catId, d]) => ({
                     categoryId: catId,
-                    categoryName: categoryMap[catId] ?? "Other",
+                    categoryName: categoryMap[catId]?.name ?? "Other",
+                    categoryIcon: categoryMap[catId]?.icon,
                     amount: d.totalAbs,
                     displayAmount: formatCurrency(d.totalAbs, d.currency),
                     currency: d.currency

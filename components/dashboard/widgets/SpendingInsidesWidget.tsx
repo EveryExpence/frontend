@@ -14,9 +14,10 @@ import { CATEGORY_COLORS } from "@/constants/categoryColors";
 import { fetchExchangeRates, convertAmountToUSD } from "@/utils/exchangeRates";
 import { useAuth } from "@/context/authContext";
 
-export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void; accountId?: string }> = ({
-  onShowMore, accountId
-}) => {
+export const SpendingInsidesWidget: React.FC<{
+  onShowMore?: () => void;
+  accountId?: string;
+}> = ({ onShowMore, accountId }) => {
   const scheme = useColorScheme() ?? "light";
   const { t } = useTranslation();
   const [recordsRaw, setRecordsRaw] = React.useState<any[]>([]);
@@ -27,6 +28,9 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void; accountI
   const [categories, setCategories] = React.useState<Record<string, string>>(
     {},
   );
+  const [categoryIcons, setCategoryIcons] = React.useState<
+    Record<string, string>
+  >({});
   const [rates, setRates] = React.useState<Record<string, number>>({});
   const { user } = useAuth();
   const convertToUSD = !!user;
@@ -41,6 +45,9 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void; accountI
           const map: Record<string, string> = {};
           cats.forEach((c) => (map[c.id] = c.name));
           setCategories(map);
+          const iconMap: Record<string, string> = {};
+          cats.forEach((c) => (iconMap[c.id] = c.icon));
+          setCategoryIcons(iconMap);
         }
 
         const { getAllAccounts } = await import("@/data/accounts");
@@ -77,7 +84,10 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void; accountI
   }, [db, accountId]);
 
   const totalsByCategory = React.useMemo(() => {
-    const map = new Map<string, { amount: number; currency: string; categoryId: string }[]>();
+    const map = new Map<
+      string,
+      { amount: number; currency: string; categoryId: string }[]
+    >();
     recordsRaw.forEach((r) => {
       if (r.amount === undefined || r.amount === null) return;
       if (r.amount >= 0) return;
@@ -123,7 +133,10 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void; accountI
       const bTotal = b[1].reduce((s, e) => s + e.amount, 0);
       return bTotal - aTotal;
     });
-    const grandTotal = entries.reduce((acc, [, entry]) => acc + entry.reduce((s, e) => s + e.amount, 0), 0);
+    const grandTotal = entries.reduce(
+      (acc, [, entry]) => acc + entry.reduce((s, e) => s + e.amount, 0),
+      0,
+    );
 
     entries.forEach(([key, entries], idx) => {
       const catId = entries[0].categoryId;
@@ -134,7 +147,8 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void; accountI
         chartValue += amount;
       });
 
-      const percentage = grandTotal > 0 ? ((chartValue / grandTotal) * 100).toFixed(1) : "0.0";
+      const percentage =
+        grandTotal > 0 ? ((chartValue / grandTotal) * 100).toFixed(1) : "0.0";
       const displayAmount = `${percentage}%`;
       arr.push({
         label: `${label} (${primaryCurrency})`,
@@ -184,7 +198,9 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void; accountI
         <View style={{ width: 120, height: 120 }}>
           {data.length === 0 ? (
             <View className="flex-1 items-center justify-center">
-              <Text className="text-theme-text text-xs">{t("dashboard.no_expenses")}</Text>
+              <Text className="text-theme-text text-xs">
+                {t("dashboard.no_expenses")}
+              </Text>
             </View>
           ) : (
             <PolarChart<
@@ -207,28 +223,36 @@ export const SpendingInsidesWidget: React.FC<{ onShowMore?: () => void; accountI
           <Text className="text-theme-text text-[14px] font-semibold">
             {t("common.total")}:
           </Text>
-          <Text className="text-theme-text text-[16px] font-bold" numberOfLines={1}>
+          <Text
+            className="text-theme-text text-[16px] font-bold"
+            numberOfLines={1}
+          >
             {totalsByCurrency || "0"}
           </Text>
 
           <View className="mt-2">
             {data.slice(0, 3).map((d) => (
-              <View
-                key={d.label}
-                className="flex-row items-center py-0.5"
-              >
+              <View key={d.label} className="flex-row items-center py-0.5">
                 <View className="flex-row items-center flex-1 mr-2">
                   <MaterialCommunityIcons
-                    name={getCategoryIcon(d.label)}
+                    name={
+                      (categoryIcons[d.categoryId ?? ""] as any) ||
+                      getCategoryIcon(categories[d.categoryId ?? ""] ?? "")
+                    }
                     size={14}
                     color={d.color}
                   />
-                  <Text className="ml-1.5 text-theme-text text-sm flex-1" numberOfLines={1}>
+                  <Text
+                    className="ml-1.5 text-theme-text text-sm flex-1"
+                    numberOfLines={1}
+                  >
                     {d.label}
                   </Text>
                 </View>
 
-                <Text className="text-theme-text text-sm font-medium">{d.displayAmount}</Text>
+                <Text className="text-theme-text text-sm font-medium">
+                  {d.displayAmount}
+                </Text>
               </View>
             ))}
           </View>
