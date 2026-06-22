@@ -6,6 +6,7 @@ interface DashboardWidgetCardProps {
   actionLabel?: string;
   onActionPress?: () => void;
   children: ReactNode;
+  customAction?: ReactNode;
 }
 
 export const DashboardWidgetCard: React.FC<DashboardWidgetCardProps> = ({
@@ -13,9 +14,10 @@ export const DashboardWidgetCard: React.FC<DashboardWidgetCardProps> = ({
   actionLabel,
   onActionPress,
   children,
+  customAction,
 }) => {
   return (
-    <View className="rounded-xl bg-theme-surface px-4 py-4 shadow-sm mb-4">
+    <View className="rounded-xl bg-theme-background px-4 py-4 shadow-sm mb-4">
       <View className="flex-row items-center justify-between gap-3">
         <Text className="flex-1 text-[20px] font-semibold text-theme-text">
           {title}
@@ -32,6 +34,8 @@ export const DashboardWidgetCard: React.FC<DashboardWidgetCardProps> = ({
             </Text>
           </Pressable>
         ) : null}
+        
+        {customAction}
       </View>
 
       <View className="mt-4">{children}</View>

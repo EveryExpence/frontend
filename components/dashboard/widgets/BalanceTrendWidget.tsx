@@ -28,6 +28,10 @@ export const BalanceTrendWidget: React.FC<{ onShowMore?: () => void; accountId?:
     fontWeight: "normal",
   });
 
+  const isAllZero = React.useMemo(() => data.every((d) => d.balance === 0), [data]);
+
+  if (!loading && !error && (data.length === 0 || isAllZero)) return null;
+
   return (
     <DashboardWidgetCard
       title={t("dashboard.balance_trend")}

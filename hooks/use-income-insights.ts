@@ -8,11 +8,9 @@ import { Category } from "@/types/data/category";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { CATEGORY_COLORS } from "@/constants/categoryColors";
 import { fetchExchangeRates, convertAmountToUSD } from "@/utils/exchangeRates";
-import Toast from 'react-native-toast-message';
-import { useTranslation } from 'react-i18next';
 import { useAuth } from "@/context/authContext";
 
-export interface CategoryExpenseItem {
+export interface CategoryIncomeItem {
     id: string;
     description: string;
     amount: number;
@@ -28,10 +26,10 @@ export interface CategoryGroup {
     displayAmount: string;
     color: string;
     currency: string;
-    items: CategoryExpenseItem[];
+    items: CategoryIncomeItem[];
 }
 
-export function useSpendingInsights(startDate: Date, endDate: Date, accountId?: string) {
+export function useIncomeInsights(startDate: Date, endDate: Date, accountId?: string) {
     const db = useSQLiteContext();
     const [categoryGroups, setCategoryGroups] = React.useState<CategoryGroup[]>(
         [],
@@ -41,7 +39,6 @@ export function useSpendingInsights(startDate: Date, endDate: Date, accountId?: 
     );
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
-    const { t } = useTranslation();
     const { user } = useAuth();
     const convertToUSD = !!user;
 
@@ -73,7 +70,7 @@ export function useSpendingInsights(startDate: Date, endDate: Date, accountId?: 
 
             const filtered = allRecords.filter((r) => {
                 if (accountId && r.accountId !== accountId) return false;
-                if (r.amount >= 0) return false;
+                if (r.amount <= 0) return false; // Only income
                 if (!r.createdAt) return false;
                 const ts =
                     typeof r.createdAt === "number"
@@ -123,7 +120,7 @@ export function useSpendingInsights(startDate: Date, endDate: Date, accountId?: 
                     const prev = currencyTotals.get(data.currency) ?? 0;
                     currencyTotals.set(data.currency, prev + data.totalAbs);
 
-                    const items: CategoryExpenseItem[] = data.records
+                    const items: CategoryIncomeItem[] = data.records
                         .sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))
                         .map((r) => {
                             const originalCurrency = accountCurrencyMap[r.accountId] ?? "PLN";
@@ -138,7 +135,7 @@ export function useSpendingInsights(startDate: Date, endDate: Date, accountId?: 
                             return {
                                 id: r.id,
                                 description: r.description || "Payment",
-                                amount: -amt,
+                                amount: amt,
                                 currency,
                                 createdAt: r.createdAt,
                             };
@@ -149,7 +146,7 @@ export function useSpendingInsights(startDate: Date, endDate: Date, accountId?: 
                         categoryName: convertToUSD ? catName : `${catName} (${data.currency})`,
                         categoryIcon: categoryMap[data.categoryId]?.icon,
                         totalAmount: data.totalAbs,
-                        displayAmount: formatCurrency(-data.totalAbs, data.currency),
+                        displayAmount: formatCurrency(data.totalAbs, data.currency),
                         color: CATEGORY_COLORS[idx % CATEGORY_COLORS.length],
                         currency: data.currency,
                         items,
@@ -164,9 +161,7 @@ export function useSpendingInsights(startDate: Date, endDate: Date, accountId?: 
             setCategoryGroups(groups);
             setTotalDisplayLines(lines);
         } catch (e: any) {
-            const msg = e?.message ?? String(e);
-            setError(msg);
-            Toast.show({ type: "error", text1: t('dashboard.insights_load_failed'), text2: msg });
+            setError(e?.message ?? String(e));
         } finally {
             setLoading(false);
         }

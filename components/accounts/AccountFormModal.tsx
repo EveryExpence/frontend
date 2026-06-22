@@ -7,10 +7,9 @@ import CustomModal from '@/components/Modal';
 import { AccountCardItem } from '@/components/accounts/AccountCard';
 import { isValidBalanceInput, normalizeNumberInput, parseBalanceInput } from '@/utils/balance';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
-
-const CURRENCIES = ['USD', 'EUR', 'PLN', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD'];
-const DEFAULT_CURRENCY = CURRENCIES[0];
+import { CURRENCIES } from '@/constants/currencies';
 
 export type AccountFormData = {
   name: string;
@@ -32,15 +31,15 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
 
   const [name, setName] = useState('');
   const [balanceField, setBalanceField] = useState('');
-  const [currency, setCurrency] = useState(DEFAULT_CURRENCY);
+  const [currency, setCurrency] = useState('USD');
   const [isSaving, setIsSaving] = useState(false);
 
   const isEditing = editingAccount !== null;
-  const isBalanceValid = isValidBalanceInput(balanceField);
+  const isBalanceValid = balanceField.trim() === '' || isValidBalanceInput(balanceField);
   const canSave = name.trim() && isBalanceValid && !isSaving;
 
   const currencyOptions = React.useMemo(
-    () => CURRENCIES.map((c) => ({ label: c, value: c })),
+    () => CURRENCIES.map((c) => ({ label: `${c.code} (${c.symbol}) - ${c.name}`, value: c.code })),
     []
   );
 
@@ -50,23 +49,25 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
     if (editingAccount) {
       setName(editingAccount.name);
       setBalanceField(normalizeNumberInput(String(editingAccount.balance)));
-      setCurrency(editingAccount.currency ?? DEFAULT_CURRENCY);
+      setCurrency(editingAccount.currency ?? 'USD');
     } else {
       setName('');
       setBalanceField('');
-      setCurrency(DEFAULT_CURRENCY);
+      setCurrency('USD');
     }
   }, [visible, editingAccount]);
 
   const handleSave = async () => {
     if (!canSave) return;
 
-    const parsed = parseBalanceInput(balanceField);
+    const parsed = balanceField.trim() === '' ? 0 : parseBalanceInput(balanceField);
     if (!Number.isFinite(parsed)) return;
 
     setIsSaving(true);
     try {
       await onSave({ name: name.trim(), currency, balance: parsed });
+    } catch (error: any) {
+      Toast.show({ text1: error?.message || t('accounts.save_failed'), type: "error" });
     } finally {
       setIsSaving(false);
     }
@@ -81,7 +82,7 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
       title={isEditing ? t("accounts.edit_account") : t("accounts.add_account")}
       cancelAction={
         <TouchableOpacity onPress={onClose} style={{ padding: 10 }}>
-          <Text className="text-2xl text-theme-icon">{t("common.cancel")}</Text>
+          <Text className="text-lg text-theme-icon">{t("common.cancel")}</Text>
         </TouchableOpacity>
       }
       confirmAction={
@@ -96,16 +97,16 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
             opacity: canSave ? 1 : 0.5,
           }}
         >
-          <Text className="text-2xl" style={{ color: colors.textLight }}>
+          <Text className="text-lg font-medium" style={{ color: colors.textLight }}>
             {isSaving ? t("common.loading") : t("common.save")}
           </Text>
         </TouchableOpacity>
       }
     >
       <ScrollView keyboardShouldPersistTaps="handled">
-        <Text className="text-2xl text-theme-icon" style={{ marginBottom: 6 }}>{t("accounts.name")}</Text>
+        <Text className="text-lg text-theme-icon" style={{ marginBottom: 6 }}>{t("accounts.name")}</Text>
         <TextInput
-          className="text-2xl text-theme-text"
+          className="text-lg text-theme-text"
           value={name}
           onChangeText={setName}
           placeholder={t("accounts.enter_name_placeholder")}
@@ -118,9 +119,9 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
           }}
         />
 
-        <Text className="text-2xl text-theme-icon" style={{ marginBottom: 6 }}>{t("accounts.balance")}</Text>
+        <Text className="text-lg text-theme-icon" style={{ marginBottom: 6 }}>{t("accounts.balance")}</Text>
         <TextInput
-          className="text-2xl text-theme-text"
+          className="text-lg text-theme-text"
           value={balanceField}
           onChangeText={setBalanceField}
           keyboardType="decimal-pad"
@@ -140,7 +141,7 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
           </Text>
         )}
 
-        <Text className="text-2xl text-theme-icon">{t("accounts.currency")}</Text>
+        <Text className="text-lg text-theme-icon">{t("accounts.currency")}</Text>
         <Dropdown
           style={{
             backgroundColor: colors.background,

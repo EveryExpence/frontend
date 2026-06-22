@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { ScrollView, Text, TextInput, TouchableOpacity } from 'react-native';
 import { Colors } from '@/constants/theme';
 import CustomModal from '@/components/Modal';
+import IconPicker from '@/components/IconPicker';
 import { PaymentMethodCardItem } from '@/components/payments/PaymentMethodCard';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useTranslation } from 'react-i18next';
 
 export type PaymentMethodFormData = {
   name: string;
+  icon: string;
 };
 
 type Props = {
@@ -28,7 +30,13 @@ export default function PaymentMethodFormModal({
   const colors = Colors[scheme];
 
   const [name, setName] = useState('');
+  const [icon, setIcon] = useState('cash');
   const [isSaving, setIsSaving] = useState(false);
+
+  const PRESET_ICONS = [
+      "cash", "credit-card", "credit-card-outline", "bank-transfer", 
+      "checkbook", "wallet", "contactless-payment", "bitcoin", "cellphone-nfc"
+  ];
 
   const isEditing = editingPaymentMethod !== null;
   const canSave = name.trim() && !isSaving;
@@ -38,8 +46,10 @@ export default function PaymentMethodFormModal({
 
     if (editingPaymentMethod) {
       setName(editingPaymentMethod.name);
+      setIcon(editingPaymentMethod.icon || 'cash');
     } else {
       setName('');
+      setIcon('cash');
     }
   }, [visible, editingPaymentMethod]);
 
@@ -48,7 +58,7 @@ export default function PaymentMethodFormModal({
 
     setIsSaving(true);
     try {
-      await onSave({ name: name.trim() });
+      await onSave({ name: name.trim(), icon });
     } finally {
       setIsSaving(false);
     }
@@ -63,7 +73,7 @@ export default function PaymentMethodFormModal({
       title={isEditing ? t("payments.edit_payment_method") : t("payments.add_payment_method")}
       cancelAction={
         <TouchableOpacity onPress={onClose} style={{ padding: 10 }}>
-          <Text className="text-2xl text-theme-icon">{t("common.cancel")}</Text>
+          <Text className="text-lg text-theme-icon">{t("common.cancel")}</Text>
         </TouchableOpacity>
       }
       confirmAction={
@@ -78,18 +88,18 @@ export default function PaymentMethodFormModal({
             opacity: canSave ? 1 : 0.5,
           }}
         >
-          <Text className="text-2xl" style={{ color: colors.textLight }}>
+          <Text className="text-lg font-medium" style={{ color: colors.textLight }}>
             {isSaving ? t("common.loading") : t("common.save")}
           </Text>
         </TouchableOpacity>
       }
     >
       <ScrollView keyboardShouldPersistTaps="handled">
-        <Text className="text-2xl text-theme-icon" style={{ marginBottom: 6 }}>
+        <Text className="text-lg text-theme-icon" style={{ marginBottom: 6 }}>
           {t("payments.name")}
         </Text>
         <TextInput
-          className="text-2xl text-theme-text"
+          className="text-lg text-theme-text"
           value={name}
           onChangeText={setName}
           placeholder={t("payments.new_payment_method_placeholder")}
@@ -100,6 +110,15 @@ export default function PaymentMethodFormModal({
             borderRadius: 6,
             marginBottom: 12,
           }}
+        />
+
+        <Text className="text-lg text-theme-icon" style={{ marginBottom: 6 }}>
+          Icon
+        </Text>
+        <IconPicker 
+          icons={PRESET_ICONS}
+          selectedIcon={icon}
+          onSelect={setIcon}
         />
       </ScrollView>
     </CustomModal>

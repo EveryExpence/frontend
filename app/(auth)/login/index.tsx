@@ -83,11 +83,10 @@ const LoginScreen = () => {
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}
-              className={`p-4 text-xl border rounded-md text-theme-text ${
-                form.formState.errors.email
+              className={`p-4 text-xl border rounded-md text-theme-text ${form.formState.errors.email
                   ? "border-red-500"
                   : "border-theme-text"
-              }`}
+                }`}
             />
           )}
         />
@@ -106,11 +105,10 @@ const LoginScreen = () => {
           secureTextEntry
           placeholder={t("auth.enter_password")}
           placeholderTextColor={colors.text}
-          inputClassName={`w-full p-4 text-xl border rounded-md text-theme-text ${
-            form.formState.errors.password
+          inputClassName={`w-full p-4 text-xl border rounded-md text-theme-text ${form.formState.errors.password
               ? "border-red-500"
               : "border-theme-text"
-          }`}
+            }`}
         />
       </View>
 
@@ -119,9 +117,8 @@ const LoginScreen = () => {
           activeOpacity={0.8}
           onPress={form.handleSubmit(onSubmit)}
           disabled={!form.formState.isValid}
-          className={`w-full justify-start p-4 rounded-md bg-theme-tint ${
-            !form.formState.isValid ? "opacity-50" : "opacity-100"
-          }`}
+          className={`w-full justify-start p-4 rounded-md bg-theme-tint ${!form.formState.isValid ? "opacity-50" : "opacity-100"
+            }`}
         >
           <Text className="text-xl text-center text-theme-textLight">
             {t("auth.login")}

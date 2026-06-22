@@ -14,7 +14,7 @@ import { CATEGORY_COLORS } from "@/constants/categoryColors";
 import { fetchExchangeRates, convertAmountToUSD } from "@/utils/exchangeRates";
 import { useAuth } from "@/context/authContext";
 
-export const SpendingInsidesWidget: React.FC<{
+export const IncomeInsightsWidget: React.FC<{
   onShowMore?: () => void;
   accountId?: string;
 }> = ({ onShowMore, accountId }) => {
@@ -90,11 +90,11 @@ export const SpendingInsidesWidget: React.FC<{
     >();
     recordsRaw.forEach((r) => {
       if (r.amount === undefined || r.amount === null) return;
-      if (r.amount >= 0) return;
+      if (r.amount <= 0) return;
       const cat = r.categoryId ?? "uncategorized";
       const originalCurrency = accounts[r.accountId] ?? "PLN";
 
-      let amt = Math.abs(r.amount);
+      let amt = r.amount;
       let currency = originalCurrency;
       let key = `${cat}_${currency}`;
 
@@ -166,10 +166,10 @@ export const SpendingInsidesWidget: React.FC<{
     const map = new Map<string, number>();
     recordsRaw.forEach((r) => {
       if (r.amount === undefined || r.amount === null) return;
-      if (r.amount >= 0) return;
+      if (r.amount <= 0) return;
       const originalCurrency = accounts[r.accountId] ?? "PLN";
 
-      let amt = Math.abs(r.amount);
+      let amt = r.amount;
       let currency = originalCurrency;
 
       if (convertToUSD) {
@@ -190,7 +190,7 @@ export const SpendingInsidesWidget: React.FC<{
 
   return (
     <DashboardWidgetCard
-      title={t("dashboard.spending_insights")}
+      title={t("dashboard.income_insights", "Income Insights")}
       actionLabel={onShowMore ? t("common.see_all") : undefined}
       onActionPress={onShowMore}
     >
@@ -198,8 +198,8 @@ export const SpendingInsidesWidget: React.FC<{
         <View style={{ width: 120, height: 120 }}>
           {data.length === 0 ? (
             <View className="flex-1 items-center justify-center">
-              <Text className="text-theme-text text-xs">
-                {t("dashboard.no_expenses")}
+              <Text className="text-theme-text text-xs text-center">
+                {t("dashboard.no_income", "No income")}
               </Text>
             </View>
           ) : (
@@ -267,4 +267,4 @@ export const SpendingInsidesWidget: React.FC<{
   );
 };
 
-export default SpendingInsidesWidget;
+export default IncomeInsightsWidget;

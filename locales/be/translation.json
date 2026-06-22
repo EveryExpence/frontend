@@ -14,7 +14,8 @@
     "today": "Сёння",
     "yesterday": "Учора",
     "other": "Іншае",
-    "total": "Вынік"
+    "total": "Вынік",
+    "sync_error": "Памылка сінхранізацыі"
   },
   "dashboard": {
     "total_balance": "Агульны баланс",
@@ -23,7 +24,8 @@
     "spending_insights": "Аналіз выдаткаў",
     "major_spendings": "Асноўныя выдаткі",
     "no_expenses": "Выдаткаў пакуль няма",
-    "no_accounts": "Рахункаў няма"
+    "no_accounts": "Рахункаў няма",
+    "insights_load_failed": "Не ўдалося загрузіць аналіз выдаткаў"
   },
   "records": {
     "title": "Гісторыя транзакцый",
@@ -37,7 +39,9 @@
     "delete_confirm": "Выдаліць {{title}}?",
     "delete_success": "Транзакцыя выдалена",
     "delete_failed": "Не ўдалося выдаліць транзакцыю",
-    "uncategorized": "Без катэгорыі"
+    "uncategorized": "Без катэгорыі",
+    "load_failed": "Не ўдалося загрузіць гісторыю транзакцый",
+    "load_record_failed": "Не ўдалося загрузіць запіс"
   },
   "balance_trend": {
     "title": "Аналіз выдаткаў",
@@ -45,7 +49,9 @@
     "spending_sources": "Асноўныя крыніцы выдаткаў",
     "no_income": "Запісаў аб даходах за гэты перыяд не знойдзена.",
     "no_spending": "Запісаў аб выдатках за гэты перыяд не знойдзена.",
-    "no_data_period": "Няма дадзеных за гэты перыяд"
+    "no_data_period": "Няма дадзеных за гэты перыяд",
+    "load_failed": "Не ўдалося загрузіць трэнд балансу",
+    "load_details_failed": "Не ўдалося загрузіць дэталі трэнду"
   },
   "new_expense": {
     "title": "Новы выдаткі",
@@ -88,7 +94,8 @@
     "error_select_image": "Калі ласка, спачатку выберыце малюнак",
     "success_analysis_completed": "Аналіз чэка завершаны!",
     "error_size_limit": "Немагчыма прааналізаваць: перавышае 15 МБ",
-    "error_failed_analysis": "Не ўдалося прааналізаваць чэк"
+    "error_failed_analysis": "Не ўдалося прааналізаваць чэк",
+    "image_picker_failed": "Не ўдалося адкрыць галерэю малюнкаў"
   },
   "settings": {
     "title": "Налады",
@@ -108,7 +115,8 @@
     "daily_reminders": "Штодзённыя напамінкі",
     "security": "Бяспека",
     "reminder_title": "Сяброўскі Напамін 💰",
-    "reminder_body": "Не забудзьцеся дадаць свае выдаткі сёння!"
+    "reminder_body": "Не забудзьцеся дадаць свае выдаткі сёння!",
+    "password_update_success": "Пароль паспяхова абноўлены"
   },
   "auth": {
     "login": "Увайсці",
@@ -146,7 +154,8 @@
     "error_username_short": "Імя карыстальніка занадта кароткае",
     "error_username_long": "Імя карыстальніка занадта доўгае",
     "error_email_required": "Email абавязковы",
-    "error_email_long": "Email занадта доўгі"
+    "error_email_long": "Email занадта доўгі",
+    "logout_failed": "Памылка выхаду"
   },
   "tabs": {
     "dashboard": "Дашборд",
@@ -174,7 +183,8 @@
     "update_success": "Рахунак абноўлены",
     "create_success": "Рахунак створаны",
     "delete_success": "Рахунак выдалены",
-    "load_failed": "Не ўдалося загрузіць рахункі"
+    "load_failed": "Не ўдалося загрузіць рахункі",
+    "save_failed": "Не ўдалося захаваць рахунак"
   },
   "categories": {
     "no_categories": "Катэгорый пакуль няма",

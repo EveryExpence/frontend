@@ -8,10 +8,15 @@ const Index = () => {
 
   useEffect(() => {
     const checkFlag = async () => {
-      const isLoggedIn = await EncryptedStorage.getItem("loggedIn");
-      if (isLoggedIn !== null) {
-        router.replace("/dashboard");
-      } else {
+      try {
+        const isLoggedIn = await EncryptedStorage.getItem("loggedIn");
+        if (isLoggedIn !== null) {
+          router.replace("/dashboard");
+        } else {
+          router.replace("/login");
+        }
+      } catch (e) {
+        console.error("Storage error:", e);
         router.replace("/login");
       }
     }

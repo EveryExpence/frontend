@@ -4,6 +4,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
 import * as Location from 'expo-location';
 import { Coordinates } from '@/types/data/location';
+import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
 
 let WebView: any = null;
@@ -45,20 +46,31 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
       });
 
       if (isMapLoadedRef.current) {
-        webViewRef.current?.injectJavaScript(`
-          window.updateMapLocation(${coords.latitude}, ${coords.longitude});
-          window.setMarker(${coords.latitude}, ${coords.longitude});
-          true;
-        `);
+        if (disabled) {
+          webViewRef.current?.injectJavaScript(`window.updateMapLocation(${coords.latitude}, ${coords.longitude}); true;`);
+        } else {
+          webViewRef.current?.injectJavaScript(`
+            window.updateMapLocation(${coords.latitude}, ${coords.longitude});
+            window.setMarker(${coords.latitude}, ${coords.longitude});
+            true;
+          `);
+        }
+      }
+      
+      if (!disabled) {
+        setLocation({ latitude: coords.latitude, longitude: coords.longitude });
       }
 
       setLocation({ latitude: coords.latitude, longitude: coords.longitude });
-    } catch {
-      setErrorMsg(t("new_expense.error_failed_fetch_location"));
+    } catch (e: any) {
+      const fallback = t("new_expense.error_failed_fetch_location");
+      const msg = e?.message ?? fallback;
+      setErrorMsg(msg);
+      Toast.show({ text1: fallback, text2: msg, type: 'error' });
     } finally {
       setIsFetching(false);
     }
-  }, [setLocation]);
+  }, [setLocation, disabled, t]);
 
   useEffect(() => {
     if (!disabled) {
@@ -114,7 +126,9 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
         setLocation({ latitude: data.latitude, longitude: data.longitude });
         setErrorMsg(null);
       }
-    } catch { }
+    } catch (parseError) {
+      console.warn("Failed to parse WebView message:", parseError);
+    }
   };
 
   const handleLoadEnd = () => {
@@ -131,22 +145,20 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
     <View className="flex-row justify-between items-center mb-2">
     <Text className="text-2xl text-theme-text font-bold">{t("new_expense.location")}</Text>
 
-    {!disabled && (
-      <TouchableOpacity
+    <TouchableOpacity
       onPress={getCurrentLocation}
       className="flex-row items-center bg-theme-surface px-3 py-2 rounded-md"
       disabled={isFetching}
-      >
+    >
       {isFetching ? (
         <ActivityIndicator size="small" color={colors.text} />
       ) : (
         <>
-        <MaterialCommunityIcons name="crosshairs-gps" size={18} color={colors.text} />
-        <Text className="text-theme-text ml-2">{t("new_expense.get_current")}</Text>
+          <MaterialCommunityIcons name="crosshairs-gps" size={18} color={colors.text} />
+          <Text className="text-theme-text ml-2">{t("new_expense.get_current")}</Text>
         </>
       )}
-      </TouchableOpacity>
-    )}
+    </TouchableOpacity>
     </View>
 
     <View className={`w-full h-[400px] rounded-md overflow-hidden bg-theme-surface border border-transparent ${!WebView ? 'items-center justify-center px-4' : ''}`}>
@@ -173,7 +185,7 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
     )}
     </View>
 
-    <View className="flex-row justify-between mt-2">
+    <View className="flex-col mt-2 gap-1">
     <Text className="text-sm text-theme-text opacity-70">
     {location ? `${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}` : t("new_expense.no_location_selected")}
     </Text>

@@ -11,7 +11,10 @@ import Topbar from "@/components/Topbar";
 import ProfileIdentityCard from "@/components/settings/ProfileIdentityCard";
 import ProfileFormSection from "@/components/settings/ProfileFormSection";
 import ProfileActionButton from "@/components/settings/ProfileActionButton";
-import AvatarUrlModal from "@/components/settings/AvatarUrlModal";
+import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from 'expo-file-system/legacy';
+import { apiFetch } from "@/utils/apiFetch";
+import { uploadFileEndpoint } from "@/constants/endpoints";
 import type { ProfileForm } from "@/types/profile";
 import { useTranslation } from "react-i18next";
 
@@ -33,13 +36,6 @@ const ProfileScreen = () => {
   const [displayUserName, setDisplayUserName] = useState("")
   const [displayEmail, setDisplayEmail] = useState("")
   const [displayAvatarUrl, setDisplayAvatarUrl] = useState("")
-  const [isAvatarModalVisible, setIsAvatarModalVisible] = useState(false)
-  const [avatarDraft, setAvatarDraft] = useState("")
-
-  const isValidAvatarUrl = (value: string) => {
-    if (!value) return true;
-    return /^https?:\/\/\S+$/i.test(value);
-  }
 
   const loadUser = async () => {
     try{
@@ -87,7 +83,35 @@ const ProfileScreen = () => {
       ];
 
       if (avatarUrl && avatarUrl !== user?.avatarUrl) {
-        updateRequests.push(updateUserAvatar(token, avatarUrl));
+        if (avatarUrl.startsWith('file://')) {
+          const formData = new FormData();
+          formData.append('file', {
+            uri: avatarUrl,
+            name: 'avatar.jpg',
+            type: 'image/jpeg'
+          } as any);
+
+          const uploadRes = await apiFetch(uploadFileEndpoint, {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (uploadRes.ok) {
+            const data = await uploadRes.json();
+            const base = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8080';
+            const domain = base.split('/api')[0];
+            const absoluteUrl = domain + data.url;
+            updateRequests.push(updateUserAvatar(token, absoluteUrl));
+            await EncryptedStorage.removeItem("avatarSyncState");
+          } else {
+            const errText = await uploadRes.text().catch(() => "no body");
+            console.error("Failed to upload avatar, keeping it unsynced. Status:", uploadRes.status, "Body:", errText);
+            // If we fail to upload, we can throw or just let it stay unsynced.
+            // But we shouldn't fail the whole profile update.
+          }
+        } else {
+          updateRequests.push(updateUserAvatar(token, avatarUrl));
+        }
       }
 
       await Promise.all(updateRequests);
@@ -133,10 +157,36 @@ const ProfileScreen = () => {
           displayAvatarUrl={displayAvatarUrl}
           isEditing={isEditing}
           isSaving={isSaving}
-          onEditAvatar={() => {
-            const currentValue = getValues("avatarUrl") || displayAvatarUrl;
-            setAvatarDraft(currentValue);
-            setIsAvatarModalVisible(true);
+          onEditAvatar={async () => {
+            let result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ['images'],
+              allowsEditing: true,
+              aspect: [1, 1],
+              quality: 0.8,
+            });
+
+            if (!result.canceled && result.assets && result.assets.length > 0) {
+              const asset = result.assets[0];
+              const fileName = `avatar_${Date.now()}.jpg`;
+              const newUri = FileSystem.documentDirectory + fileName;
+              
+              const oldUri = getValues("avatarUrl") || displayAvatarUrl;
+              if (oldUri?.startsWith('file://')) {
+                try {
+                  await FileSystem.deleteAsync(oldUri);
+                } catch (e) {}
+              }
+
+              await FileSystem.copyAsync({
+                from: asset.uri,
+                to: newUri
+              });
+
+              setValue("avatarUrl", newUri);
+              setDisplayAvatarUrl(newUri);
+              await EncryptedStorage.setItem("localAvatarUrl", newUri);
+              await EncryptedStorage.setItem("avatarSyncState", "updated");
+            }
           }}
         />
 
@@ -170,25 +220,6 @@ const ProfileScreen = () => {
           }}
         />
       </ScrollView>
-
-      <AvatarUrlModal
-        visible={isAvatarModalVisible}
-        avatarDraft={avatarDraft}
-        onChangeDraft={setAvatarDraft}
-        onCancel={() => setIsAvatarModalVisible(false)}
-        onSave={() => {
-          const trimmed = avatarDraft.trim();
-          if (!isValidAvatarUrl(trimmed)) {
-            Toast.show({ text1: "Invalid URL format", type: "error" });
-            return;
-          }
-
-          setValue("avatarUrl", trimmed);
-          setDisplayAvatarUrl(trimmed);
-          setIsAvatarModalVisible(false);
-        }}
-      />
-
     </KeyboardAvoidingView>
   );
 };

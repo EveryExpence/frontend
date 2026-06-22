@@ -14,7 +14,8 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "other": "Other",
-    "total": "Total"
+    "total": "Total",
+    "sync_error": "Sync Error"
   },
   "dashboard": {
     "total_balance": "Total Balance",
@@ -23,7 +24,8 @@
     "spending_insights": "Spending Insights",
     "major_spendings": "Major Spendings",
     "no_expenses": "No expenses yet",
-    "no_accounts": "No accounts"
+    "no_accounts": "No accounts",
+    "insights_load_failed": "Failed to load spending insights"
   },
   "records": {
     "title": "Transaction History",
@@ -37,7 +39,9 @@
     "delete_confirm": "Delete {{title}}?",
     "delete_success": "Transaction deleted",
     "delete_failed": "Failed to delete transaction",
-    "uncategorized": "Uncategorized"
+    "uncategorized": "Uncategorized",
+    "load_failed": "Failed to load expense records",
+    "load_record_failed": "Failed to load record"
   },
   "balance_trend": {
     "title": "Spending Insights",
@@ -45,7 +49,9 @@
     "spending_sources": "Major sources of spending",
     "no_income": "No income records found for this period.",
     "no_spending": "No spending records found for this period.",
-    "no_data_period": "No data for this period"
+    "no_data_period": "No data for this period",
+    "load_failed": "Failed to load balance trend",
+    "load_details_failed": "Failed to load trend details"
   },
   "new_expense": {
     "title": "New Expense",
@@ -88,7 +94,8 @@
     "error_select_image": "Please select an image first",
     "success_analysis_completed": "Receipt analysis completed!",
     "error_size_limit": "Cannot analyze: exceeds 15MB",
-    "error_failed_analysis": "Failed to analyze receipt"
+    "error_failed_analysis": "Failed to analyze receipt",
+    "image_picker_failed": "Failed to open image picker"
   },
   "settings": {
     "title": "Settings",
@@ -108,7 +115,8 @@
     "daily_reminders": "Daily Reminders",
     "security": "Security",
     "reminder_title": "Friendly Reminder 💰",
-    "reminder_body": "Don't forget to add your expenses for today!"
+    "reminder_body": "Don't forget to add your expenses for today!",
+    "password_update_success": "Password updated successfully"
   },
   "auth": {
     "login": "Login",
@@ -146,7 +154,8 @@
     "error_username_short": "Username is too short",
     "error_username_long": "Username is too long",
     "error_email_required": "Email is required",
-    "error_email_long": "Email is too long"
+    "error_email_long": "Email is too long",
+    "logout_failed": "Logout failed"
   },
   "tabs": {
     "dashboard": "Dashboard",
@@ -174,7 +183,8 @@
     "update_success": "Account updated",
     "create_success": "Account created",
     "delete_success": "Account deleted",
-    "load_failed": "Failed to load accounts"
+    "load_failed": "Failed to load accounts",
+    "save_failed": "Failed to save account"
   },
   "categories": {
     "no_categories": "No categories yet",

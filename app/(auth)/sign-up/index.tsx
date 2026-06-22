@@ -11,25 +11,25 @@ import ControlledInputField from '@/components/ControlledInputField';
 import { useTranslation } from 'react-i18next';
 
 export const formSchema = z.object({
-  email: z.email("Must be a valid email"),
-  password: z
-    .string()
-    .nonempty("Password is required")
-    .min(8, "Must be at least 8 character long")
-    .max(64, "Must be shorter than 64 characters")
-    .regex(/[a-z]/, "Must include at least 1 lowercase character")
-    .regex(/[A-Z]/, "Must include at least 1 uppercase character")
-    .regex(/[0-9]/, "Must include at least 1 digit")
-    .regex(/[^a-zA-Z0-9]/, "Must include at least 1 special character"),
-  passwordConfirmation: z.string(),
+    email: z.email("Must be a valid email"),
+    password: z
+        .string()
+        .nonempty("Password is required")
+        .min(8, "Must be at least 8 character long")
+        .max(64, "Must be shorter than 64 characters")
+        .regex(/[a-z]/, "Must include at least 1 lowercase character")
+        .regex(/[A-Z]/, "Must include at least 1 uppercase character")
+        .regex(/[0-9]/, "Must include at least 1 digit")
+        .regex(/[^a-zA-Z0-9]/, "Must include at least 1 special character"),
+    passwordConfirmation: z.string(),
 }).superRefine(({ password, passwordConfirmation }, ctx) => {
-  if (password !== passwordConfirmation) {
-    ctx.addIssue({
-      code: "custom",
-      message: "Passwords do not match",
-      path: ["passwordConfirmation"],
-    })
-  }
+    if (password !== passwordConfirmation) {
+        ctx.addIssue({
+            code: "custom",
+            message: "Passwords do not match",
+            path: ["passwordConfirmation"],
+        })
+    }
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -92,9 +92,8 @@ const SignUpScreen = () => {
                             value={value}
                             onChangeText={onChange}
                             onBlur={onBlur}
-                            className={`p-4 text-xl border rounded-md text-theme-text ${
-                                form.formState.errors.email ? 'border-red-500' : 'border-theme-text'
-                            }`}
+                            className={`p-4 text-xl border rounded-md text-theme-text ${form.formState.errors.email ? 'border-red-500' : 'border-theme-text'
+                                }`}
                         />
                     )}
                 />
@@ -113,9 +112,8 @@ const SignUpScreen = () => {
                     secureTextEntry
                     placeholder={t("auth.enter_password")}
                     placeholderTextColor={colors.text}
-                    inputClassName={`w-full p-4 text-xl border rounded-md text-theme-text ${
-                        form.formState.errors.password ? 'border-red-500' : 'border-theme-text'
-                    }`}
+                    inputClassName={`w-full p-4 text-xl border rounded-md text-theme-text ${form.formState.errors.password ? 'border-red-500' : 'border-theme-text'
+                        }`}
                 />
             </View>
 
@@ -127,9 +125,8 @@ const SignUpScreen = () => {
                     secureTextEntry
                     placeholder={t("auth.confirm_new_password")}
                     placeholderTextColor={colors.text}
-                    inputClassName={`w-full p-4 text-xl border rounded-md text-theme-text ${
-                        form.formState.errors.passwordConfirmation ? 'border-red-500' : 'border-theme-text'
-                    }`}
+                    inputClassName={`w-full p-4 text-xl border rounded-md text-theme-text ${form.formState.errors.passwordConfirmation ? 'border-red-500' : 'border-theme-text'
+                        }`}
                 />
             </View>
 
@@ -138,16 +135,15 @@ const SignUpScreen = () => {
                     activeOpacity={0.8}
                     onPress={form.handleSubmit(onSubmit)}
                     disabled={!form.formState.isValid}
-                    className={`w-full justify-start p-4 rounded-md bg-theme-tint ${
-                        !form.formState.isValid ? 'opacity-50' : 'opacity-100'
-                    }`}
+                    className={`w-full justify-start p-4 rounded-md bg-theme-tint ${!form.formState.isValid ? 'opacity-50' : 'opacity-100'
+                        }`}
                 >
                     <Text className="text-xl text-center text-theme-textLight">
                         {t("auth.sign_up")}
                     </Text>
                 </TouchableOpacity>
             </View>
-            
+
             <View className="relative h-0 w-full">
                 <View className="absolute top-4 gap-2 w-full">
                     <Text

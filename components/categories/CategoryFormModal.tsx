@@ -3,6 +3,7 @@ import { ScrollView, Text, TextInput, TouchableOpacity } from 'react-native';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import { Colors } from '@/constants/theme';
 import CustomModal from '@/components/Modal';
+import IconPicker from '@/components/IconPicker';
 import { CategoryCardItem } from '@/components/categories/CategoryCard';
 import { categoryTypes } from '@/types/data/category';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -11,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 export type CategoryFormData = {
   name: string;
   type: 'expense' | 'income' | 'varies';
+  icon: string;
 };
 
 type Props = {
@@ -27,7 +29,14 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
 
   const [name, setName] = useState('');
   const [typeIndex, setTypeIndex] = useState(0);
+  const [icon, setIcon] = useState('label-outline');
   const [isSaving, setIsSaving] = useState(false);
+
+  const PRESET_ICONS = [
+      "food-fork-drink", "car", "home", "lightning-bolt", "cart", 
+      "gamepad-variant", "cash-multiple", "briefcase", "chart-line", 
+      "gift", "medical-bag", "school", "tag-outline", "label-outline", "dots-horizontal"
+  ];
 
   const isEditing = editingCategory !== null;
   const canSave = name.trim() && !isSaving;
@@ -38,9 +47,11 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
     if (editingCategory) {
       setName(editingCategory.name);
       setTypeIndex(Math.max(0, categoryTypes.indexOf(editingCategory.type.toLowerCase() as any)));
+      setIcon(editingCategory.icon || 'label-outline');
     } else {
       setName('');
       setTypeIndex(0);
+      setIcon('label-outline');
     }
   }, [visible, editingCategory]);
 
@@ -49,7 +60,7 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
 
     setIsSaving(true);
     try {
-      await onSave({ name: name.trim(), type: categoryTypes[typeIndex] });
+      await onSave({ name: name.trim(), type: categoryTypes[typeIndex], icon });
     } finally {
       setIsSaving(false);
     }
@@ -64,7 +75,7 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
       title={isEditing ? t("categories.edit_category") : t("categories.add_category")}
       cancelAction={
         <TouchableOpacity onPress={onClose} style={{ padding: 10 }}>
-          <Text className="text-2xl text-theme-icon">{t("common.cancel")}</Text>
+          <Text className="text-lg text-theme-icon">{t("common.cancel")}</Text>
         </TouchableOpacity>
       }
       confirmAction={
@@ -79,18 +90,18 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
             opacity: canSave ? 1 : 0.5,
           }}
         >
-          <Text className="text-2xl" style={{ color: colors.textLight }}>
+          <Text className="text-lg font-medium" style={{ color: colors.textLight }}>
             {isSaving ? t("common.loading") : t("common.save")}
           </Text>
         </TouchableOpacity>
       }
     >
       <ScrollView keyboardShouldPersistTaps="handled">
-        <Text className="text-2xl text-theme-icon" style={{ marginBottom: 6 }}>
+        <Text className="text-lg text-theme-icon" style={{ marginBottom: 6 }}>
           {t("categories.name")}
         </Text>
         <TextInput
-          className="text-2xl text-theme-text"
+          className="text-lg text-theme-text"
           value={name}
           onChangeText={setName}
           placeholder={t("categories.new_category_placeholder")}
@@ -103,7 +114,16 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
           }}
         />
 
-        <Text className="text-2xl text-theme-icon" style={{ marginBottom: 6 }}>
+        <Text className="text-lg text-theme-icon" style={{ marginBottom: 6 }}>
+          Icon
+        </Text>
+        <IconPicker 
+          icons={PRESET_ICONS}
+          selectedIcon={icon}
+          onSelect={setIcon}
+        />
+
+        <Text className="text-lg text-theme-icon" style={{ marginBottom: 6 }}>
           {t("categories.type")}
         </Text>
         <SegmentedControl
