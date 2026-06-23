@@ -167,7 +167,7 @@ const SettingsScreen = () => {
             </Text>
             {i18n.language === "en" && <MaterialCommunityIcons name="check" size={24} color={Colors.light.textLight} />}
           </TouchableOpacity>
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => changeLanguage("pl")}
             className={`flex-row justify-between items-center p-4 rounded-md ${i18n.language === "pl" ? "bg-theme-tint" : "bg-theme-background"}`}
           >
@@ -175,15 +175,6 @@ const SettingsScreen = () => {
               {t("settings.polish")}
             </Text>
             {i18n.language === "pl" && <MaterialCommunityIcons name="check" size={24} color={Colors.light.textLight} />}
-          </TouchableOpacity>
-          <TouchableOpacity 
-            onPress={() => changeLanguage("be")}
-            className={`flex-row justify-between items-center p-4 rounded-md ${i18n.language === "be" ? "bg-theme-tint" : "bg-theme-background"}`}
-          >
-            <Text className={`text-xl ${i18n.language === "be" ? "text-theme-textLight font-bold" : "text-theme-text"}`}>
-              {t("settings.belarusian")}
-            </Text>
-            {i18n.language === "be" && <MaterialCommunityIcons name="check" size={24} color={Colors.light.textLight} />}
           </TouchableOpacity>
         </View>
       </CustomModal>
