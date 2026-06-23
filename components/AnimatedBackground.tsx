@@ -23,6 +23,22 @@ type BgConfig = {
 };
 
 const BACKGROUNDS: Partial<Record<AppTheme, BgConfig>> = {
+  dark: {
+    uri: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstatic.vecteezy.com%2Fsystem%2Fresources%2Fpreviews%2F013%2F630%2F281%2Flarge_2x%2Finteresting-gradient-design-blue-black-free-photo.jpg&f=1&nofb=1&ipt=945abd112d6fff9ef02f5358f4c8cae7b5f84f013175111beb7e6e8a92a67198",
+    overlayColor: "rgba(0, 0, 0, 0.4)",
+    duration: 22000,
+    scaleDelta: 0.12,
+    panX: 10,
+    panY: 8,
+  },
+  light: {
+    uri: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fimg.magnific.com%2Fpremium-vector%2Fabstract-gradient-background-white-blue_884160-5573.jpg&f=1&nofb=1&ipt=ce6f6e756193d3ed5c62a0f15f8825b324db4b6097a53dd64c5a2f89ba1819c4",
+    overlayColor: "rgba(255, 255, 255, 0.4)",
+    duration: 22000,
+    scaleDelta: 0.12,
+    panX: -10,
+    panY: -8,
+  },
   pride: {
     uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Vista_de_la_Marcha_del_orgullo_LGBT_CDMX_2019_-_53.jpg/1280px-Vista_de_la_Marcha_del_orgullo_LGBT_CDMX_2019_-_53.jpg",
     overlayColor: "rgba(26, 26, 46, 0.50)",
