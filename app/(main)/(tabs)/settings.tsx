@@ -97,9 +97,9 @@ const SettingsScreen = () => {
   };
 
   return (
-    <SafeAreaView>
+    <SafeAreaView className="flex-1 bg-theme-background">
       <Topbar title={t("settings.title")} />
-      <ScrollView className="px-4">
+      <ScrollView className="flex-1 px-4">
         <Text className="text-2xl font-bold text-theme-text" selectable={false}>
           {t("settings.profile")}
         </Text>
