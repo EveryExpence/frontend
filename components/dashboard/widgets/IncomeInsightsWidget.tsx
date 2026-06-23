@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { PolarChart, Pie } from "victory-native";
 import { CATEGORY_COLORS } from "@/constants/categoryColors";
 import { fetchExchangeRates, convertAmount } from "@/utils/exchangeRates";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 export const IncomeInsightsWidget: React.FC<{
   onShowMore?: () => void;
@@ -221,19 +222,21 @@ export const IncomeInsightsWidget: React.FC<{
               </Text>
             </View>
           ) : (
-            <PolarChart<
-              { label: string; value: number; color: string },
-              "label",
-              "value",
-              "color"
-            >
-              data={data}
-              labelKey={"label"}
-              valueKey={"value"}
-              colorKey={"color"}
-            >
-              <Pie.Chart innerRadius="70%" />
-            </PolarChart>
+            <Animated.View entering={FadeInDown.delay(100).springify().mass(0.6).damping(14)} style={{ flex: 1 }}>
+              <PolarChart<
+                { label: string; value: number; color: string },
+                "label",
+                "value",
+                "color"
+              >
+                data={data}
+                labelKey={"label"}
+                valueKey={"value"}
+                colorKey={"color"}
+              >
+                <Pie.Chart innerRadius="70%" />
+              </PolarChart>
+            </Animated.View>
           )}
         </View>
 
@@ -249,8 +252,8 @@ export const IncomeInsightsWidget: React.FC<{
           </Text>
 
           <View className="mt-2">
-            {data.slice(0, 3).map((d) => (
-              <View key={d.label} className="flex-row items-center py-0.5">
+            {data.slice(0, 3).map((d, index) => (
+              <Animated.View key={d.label} entering={FadeInDown.delay(200 + index * 100).springify().mass(0.6).damping(14)} className="flex-row items-center py-0.5">
                 <View className="flex-row items-center flex-1 mr-2">
                   <MaterialCommunityIcons
                     name={
@@ -271,7 +274,7 @@ export const IncomeInsightsWidget: React.FC<{
                 <Text className="text-theme-text text-sm font-medium">
                   {d.displayAmount}
                 </Text>
-              </View>
+              </Animated.View>
             ))}
           </View>
         </View>

@@ -195,7 +195,7 @@ export default function RecordsScreen() {
 
   const filteredSections = React.useMemo(() => {
     let result = sections;
-    if (searchQuery.trim()) {
+    if (searchQuery.trim() || filterCategory || filterAccount || filterPayment) {
       const query = searchQuery.toLowerCase();
       result = result
         .map((section) => ({

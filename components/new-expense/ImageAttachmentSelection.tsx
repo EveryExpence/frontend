@@ -16,6 +16,12 @@ const ImageAttachmentSelection = ({ images, setImages, isEditing = true }: Props
     const { t } = useTranslation();
     const pickImage = async () => {
         try {
+            const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (permissionResult?.granted === false) {
+                Toast.show({ text1: t('new_expense.image_picker_failed'), text2: "Permission to access camera roll is required!", type: "error" });
+                return;
+            }
+
             let result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ['images'],
                 allowsMultipleSelection: true,
@@ -70,9 +76,9 @@ const ImageAttachmentSelection = ({ images, setImages, isEditing = true }: Props
                             {isEditing && (
                                 <TouchableOpacity
                                     onPress={() => removeImage(index)}
-                                    className="absolute top-1.5 right-1.5 bg-theme-tint rounded-full p-1"
+                                    className="absolute top-1 right-1 bg-theme-tint rounded-full w-7 h-7 items-center justify-center shadow-sm"
                                 >
-                                    <MaterialIcons name="close" size={16} color="white" />
+                                    <MaterialIcons name="close" size={18} color="white" />
                                 </TouchableOpacity>
                             )}
                         </View>
