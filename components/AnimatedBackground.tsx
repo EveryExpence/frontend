@@ -40,7 +40,7 @@ const BACKGROUNDS: Partial<Record<AppTheme, BgConfig>> = {
     panY: -8,
   },
   pride: {
-    uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Vista_de_la_Marcha_del_orgullo_LGBT_CDMX_2019_-_53.jpg/1280px-Vista_de_la_Marcha_del_orgullo_LGBT_CDMX_2019_-_53.jpg",
+    uri: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2Fc4%2Fae%2F76%2Fc4ae761160957bce7c44e568a26eac1c.jpg%3Fnii%3Dt&f=1&nofb=1&ipt=4d9a5e3d2acccff80789f3ff3e64c743db68dfb52521020c4fce84abfc96d8e6",
     overlayColor: "rgba(26, 26, 46, 0.50)",
     duration: 20000,
     scaleDelta: 0.15,
