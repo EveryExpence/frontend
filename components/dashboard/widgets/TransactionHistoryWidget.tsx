@@ -16,6 +16,7 @@ interface TransactionHistoryWidgetProps {
   records?: TransactionRecord[];
   onSeeAllPress: () => void;
   accountId?: string;
+  scope?: "total" | "account";
 }
 
 export const TransactionHistoryRow = ({
@@ -66,12 +67,12 @@ export const TransactionHistoryRow = ({
 
 export const TransactionHistoryWidget: React.FC<
   TransactionHistoryWidgetProps
-> = ({ records: propRecords, onSeeAllPress, accountId }) => {
+> = ({ records: propRecords, onSeeAllPress, accountId, scope = "account" }) => {
   const {
     records: localRecords,
     loading,
     error,
-  } = useExpenseRecords(accountId);
+  } = useExpenseRecords(accountId, scope);
   const { t } = useTranslation();
 
   const toShow =

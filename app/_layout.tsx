@@ -5,6 +5,7 @@ import './global.css'
 import '@/locales/i18n'
 import { AuthProvider } from '@/context/authContext'
 import { ThemeProvider } from '@/context/themeContext'
+import { BaseCurrencyProvider } from '@/context/baseCurrencyContext'
 import CustomizedToast from '@/components/Toast'
 import { SQLiteProvider } from 'expo-sqlite';
 import { migrateDatabase } from '@/data/init'
@@ -34,14 +35,16 @@ const RootLayout = () => {
       >
         <ThemeProvider>
           <AuthProvider>
-            <SQLiteProvider
-              databaseName="app.db"
-              onInit={migrateDatabase}
-            >
-              <SyncProvider>
-                <Slot />
-              </SyncProvider>
-            </SQLiteProvider>
+            <BaseCurrencyProvider>
+              <SQLiteProvider
+                databaseName="app.db"
+                onInit={migrateDatabase}
+              >
+                <SyncProvider>
+                  <Slot />
+                </SyncProvider>
+              </SQLiteProvider>
+            </BaseCurrencyProvider>
           </AuthProvider>
         </ThemeProvider>
         <CustomizedToast />

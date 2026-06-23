@@ -21,6 +21,7 @@
   },
   "dashboard": {
     "total_balance": "Агульны баланс",
+    "combined_from_n_currencies": "Аб'яднана з {{count}} валют у {{currency}}",
     "transaction_history": "Гісторыя транзакцый",
     "balance_trend": "Трэнд балансу",
     "spending_insights": "Аналіз выдаткаў",
@@ -105,6 +106,10 @@
     "appearance": "Знешні выгляд",
     "language": "Мова",
     "dark_mode": "Цёмны рэжым",
+    "base_currency": "Базавая валюта",
+    "select_base_currency": "Выберыце базавую валюту",
+    "base_currency_hint": "Выкарыстоўваецца для аб'яднання балансаў на галоўным экране і ў віджэтах.",
+    "base_currency_updated": "Базавая валюта ўсталявана на {{currency}}",
     "change_password": "Змяніць пароль",
     "logout": "Выхад",
     "profile_update_success": "Профіль паспяхова зменены",

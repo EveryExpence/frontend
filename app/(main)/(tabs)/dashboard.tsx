@@ -74,6 +74,14 @@ const Dashboard = () => {
     setPageIndex(newIndex);
   };
 
+  const activePage = pages[pageIndex];
+  const isTotalScope = !!activePage && "type" in activePage;
+  const activeAccountId =
+    activePage && "id" in activePage ? activePage.id : undefined;
+  const widgetScope: "total" | "account" = isTotalScope
+    ? "total"
+    : "account";
+
   const renderPage = ({ item }: { item: any }) => {
     if (item.type === "total") {
       return <TotalBalancePage totalsByCurrency={totalsByCurrency} />;
@@ -144,40 +152,26 @@ const Dashboard = () => {
             />
 
             <TransactionHistoryWidget
-              accountId={
-                pages[pageIndex] && "id" in pages[pageIndex]
-                  ? pages[pageIndex].id
-                  : undefined
-              }
+              accountId={activeAccountId}
+              scope={widgetScope}
               onSeeAllPress={() => {
-                const id =
-                  pages[pageIndex] && "id" in pages[pageIndex]
-                    ? pages[pageIndex].id
-                    : undefined;
                 router.push(
-                  id
-                    ? { pathname: "/records", params: { accountId: id } }
+                  activeAccountId
+                    ? { pathname: "/records", params: { accountId: activeAccountId } }
                     : "/records",
                 );
               }}
             />
 
             <SpendingInsidesWidget
-              accountId={
-                pages[pageIndex] && "id" in pages[pageIndex]
-                  ? pages[pageIndex].id
-                  : undefined
-              }
+              accountId={activeAccountId}
+              scope={widgetScope}
               onShowMore={() => {
-                const id =
-                  pages[pageIndex] && "id" in pages[pageIndex]
-                    ? pages[pageIndex].id
-                    : undefined;
                 router.push(
-                  id
+                  activeAccountId
                     ? {
                         pathname: "/spending-insights",
-                        params: { accountId: id },
+                        params: { accountId: activeAccountId },
                       }
                     : "/spending-insights",
                 );
@@ -185,21 +179,14 @@ const Dashboard = () => {
             />
 
             <IncomeInsightsWidget
-              accountId={
-                pages[pageIndex] && "id" in pages[pageIndex]
-                  ? pages[pageIndex].id
-                  : undefined
-              }
+              accountId={activeAccountId}
+              scope={widgetScope}
               onShowMore={() => {
-                const id =
-                  pages[pageIndex] && "id" in pages[pageIndex]
-                    ? pages[pageIndex].id
-                    : undefined;
                 router.push(
-                  id
+                  activeAccountId
                     ? {
                         pathname: "/income-insights",
-                        params: { accountId: id },
+                        params: { accountId: activeAccountId },
                       }
                     : "/income-insights",
                 );
@@ -207,19 +194,11 @@ const Dashboard = () => {
             />
 
             <BalanceTrendWidget
-              accountId={
-                pages[pageIndex] && "id" in pages[pageIndex]
-                  ? pages[pageIndex].id
-                  : undefined
-              }
+              accountId={activeAccountId}
               onShowMore={() => {
-                const id =
-                  pages[pageIndex] && "id" in pages[pageIndex]
-                    ? pages[pageIndex].id
-                    : undefined;
                 router.push(
-                  id
-                    ? { pathname: "/balance-trend", params: { accountId: id } }
+                  activeAccountId
+                    ? { pathname: "/balance-trend", params: { accountId: activeAccountId } }
                     : "/balance-trend",
                 );
               }}

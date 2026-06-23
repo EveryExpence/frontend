@@ -27,7 +27,8 @@
     "major_spendings": "Major Spendings",
     "no_expenses": "No expenses yet",
     "no_accounts": "No accounts",
-    "insights_load_failed": "Failed to load spending insights"
+    "insights_load_failed": "Failed to load spending insights",
+    "combined_from_n_currencies": "Combined from {{count}} currencies into {{currency}}"
   },
   "records": {
     "title": "Transaction History",
@@ -105,6 +106,10 @@
     "appearance": "Appearance",
     "language": "Language",
     "dark_mode": "Dark Mode",
+    "base_currency": "Base Currency",
+    "select_base_currency": "Select Base Currency",
+    "base_currency_hint": "Used to combine balances on the dashboard and totals in widgets.",
+    "base_currency_updated": "Base currency set to {{currency}}",
     "change_password": "Change Password",
     "logout": "Logout",
     "profile_update_success": "Changed profile successfully",

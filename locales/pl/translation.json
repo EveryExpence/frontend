@@ -21,6 +21,7 @@
   },
   "dashboard": {
     "total_balance": "Całkowite Saldo",
+    "combined_from_n_currencies": "Połączono z {{count}} walut na {{currency}}",
     "transaction_history": "Historia Transakcji",
     "balance_trend": "Trend Salda",
     "spending_insights": "Wnioski o Wydatkach",
@@ -105,6 +106,10 @@
     "appearance": "Wygląd",
     "language": "Język",
     "dark_mode": "Tryb Ciemny",
+    "base_currency": "Waluta Bazowa",
+    "select_base_currency": "Wybierz Walutę Bazową",
+    "base_currency_hint": "Służy do łączenia sald na pulpicie i sum w widżetach.",
+    "base_currency_updated": "Waluta bazowa ustawiona na {{currency}}",
     "change_password": "Zmień Hasło",
     "logout": "Wyloguj",
     "profile_update_success": "Pomyślnie zmieniono profil",

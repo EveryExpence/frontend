@@ -7,8 +7,8 @@ import { ExpenseRecord } from "@/types/data/expenseRecord";
 import { Category } from "@/types/data/category";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { CATEGORY_COLORS } from "@/constants/categoryColors";
-import { fetchExchangeRates, convertAmountToUSD } from "@/utils/exchangeRates";
-import { useAuth } from "@/context/authContext";
+import { fetchExchangeRates, convertAmount } from "@/utils/exchangeRates";
+import { useBaseCurrency } from "@/context/baseCurrencyContext";
 
 export interface CategoryIncomeItem {
     id: string;
@@ -39,8 +39,8 @@ export function useIncomeInsights(startDate: Date, endDate: Date, accountId?: st
     );
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
-    const { user } = useAuth();
-    const convertToUSD = !!user;
+    const { baseCurrency } = useBaseCurrency();
+    const shouldConvert = !accountId;
 
     const fetch = React.useCallback(async () => {
         if (!db) return;
@@ -61,8 +61,8 @@ export function useIncomeInsights(startDate: Date, endDate: Date, accountId?: st
             allAccounts.forEach((a) => (accountCurrencyMap[a.id] = a.currency));
 
             let rates: Record<string, number> = {};
-            if (convertToUSD) {
-                rates = await fetchExchangeRates("USD");
+            if (shouldConvert) {
+                rates = await fetchExchangeRates(baseCurrency);
             }
 
             const startTs = startDate.getTime();
@@ -92,9 +92,9 @@ export function useIncomeInsights(startDate: Date, endDate: Date, accountId?: st
                 let currency = originalCurrency;
                 let key = `${catId}_${currency}`;
 
-                if (convertToUSD) {
-                    amt = convertAmountToUSD(amt, originalCurrency, rates);
-                    currency = "USD";
+                if (shouldConvert) {
+                    amt = convertAmount(amt, originalCurrency, baseCurrency, rates);
+                    currency = baseCurrency;
                     key = catId;
                 }
 
@@ -127,9 +127,9 @@ export function useIncomeInsights(startDate: Date, endDate: Date, accountId?: st
                             let amt = Math.abs(r.amount);
                             let currency = originalCurrency;
 
-                            if (convertToUSD) {
-                                amt = convertAmountToUSD(amt, originalCurrency, rates);
-                                currency = "USD";
+                            if (shouldConvert) {
+                                amt = convertAmount(amt, originalCurrency, baseCurrency, rates);
+                                currency = baseCurrency;
                             }
 
                             return {
@@ -143,7 +143,7 @@ export function useIncomeInsights(startDate: Date, endDate: Date, accountId?: st
 
                     return {
                         categoryId: key,
-                        categoryName: convertToUSD ? catName : `${catName} (${data.currency})`,
+                        categoryName: shouldConvert ? catName : `${catName} (${data.currency})`,
                         categoryIcon: categoryMap[data.categoryId]?.icon,
                         totalAmount: data.totalAbs,
                         displayAmount: formatCurrency(data.totalAbs, data.currency),
@@ -165,7 +165,7 @@ export function useIncomeInsights(startDate: Date, endDate: Date, accountId?: st
         } finally {
             setLoading(false);
         }
-    }, [db, startDate.getTime(), endDate.getTime(), accountId, convertToUSD]);
+    }, [db, startDate.getTime(), endDate.getTime(), accountId, shouldConvert, baseCurrency]);
 
     React.useEffect(() => {
         fetch();
