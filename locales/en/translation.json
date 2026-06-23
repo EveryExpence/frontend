@@ -15,7 +15,9 @@
     "yesterday": "Yesterday",
     "other": "Other",
     "total": "Total",
-    "sync_error": "Sync Error"
+    "sync_error": "Sync Error",
+    "sync_success": "Synced successfully",
+    "sync_offline": "You are offline"
   },
   "dashboard": {
     "total_balance": "Total Balance",

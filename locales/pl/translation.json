@@ -15,7 +15,9 @@
     "yesterday": "Wczoraj",
     "other": "Inne",
     "total": "Suma",
-    "sync_error": "Błąd synchronizacji"
+    "sync_error": "Błąd synchronizacji",
+    "sync_success": "Zsynchronizowano pomyślnie",
+    "sync_offline": "Brak połączenia z internetem"
   },
   "dashboard": {
     "total_balance": "Całkowite Saldo",

@@ -5,6 +5,7 @@ import {
   Dimensions,
   ActivityIndicator,
   Animated,
+  RefreshControl,
   ScrollView,
   Text,
 } from "react-native";
@@ -27,6 +28,7 @@ import IncomeInsightsWidget from "@/components/dashboard/widgets/IncomeInsightsW
 import BalanceTrendWidget from "@/components/dashboard/widgets/BalanceTrendWidget";
 import { ExpenseMapWidget } from "@/components/dashboard/widgets/ExpenseMapWidget";
 import { useTranslation } from "react-i18next";
+import { useSync } from "@/context/syncContext";
 
 const { width } = Dimensions.get("window");
 
@@ -40,6 +42,7 @@ const Dashboard = () => {
 
   const { accounts, loading, error, totalsByCurrency, refetch } =
     useAccountsData();
+  const { triggerSync, isSyncing } = useSync();
   const [pageIndex, setPageIndex] = React.useState(0);
   const [scrollEnabled, setScrollEnabled] = React.useState(true);
   const animatedIndex = React.useRef(new Animated.Value(0)).current;
@@ -50,7 +53,12 @@ const Dashboard = () => {
     }, [refetch]),
   );
 
-  const pages: ({ type: "total" } | AccountWithComputed)[] = 
+  const onRefresh = useCallback(async () => {
+    await triggerSync();
+    await refetch();
+  }, [triggerSync, refetch]);
+
+  const pages: ({ type: "total" } | AccountWithComputed)[] =
     accounts.length <= 1 ? accounts : [{ type: "total" }, ...accounts];
 
   React.useEffect(() => {
@@ -88,7 +96,9 @@ const Dashboard = () => {
           </View>
         ) : error ? (
           <View className="p-4">
-            <Text className="text-theme-text">{t("common.error")}: {error}</Text>
+            <Text className="text-theme-text">
+              {t("common.error")}: {error}
+            </Text>
           </View>
         ) : (
           <ScrollView
@@ -100,6 +110,15 @@ const Dashboard = () => {
               paddingTop: Math.max(insets.top, 8),
               paddingBottom: 50 + insets.bottom,
             }}
+            refreshControl={
+              <RefreshControl
+                refreshing={isSyncing}
+                onRefresh={onRefresh}
+                tintColor={Colors[colorScheme].tint}
+                colors={[Colors[colorScheme].tint]}
+                progressBackgroundColor={Colors[colorScheme].surface}
+              />
+            }
           >
             <FlatList
               style={{ flexGrow: 0, marginHorizontal: -16 }}
@@ -125,39 +144,93 @@ const Dashboard = () => {
             />
 
             <TransactionHistoryWidget
-              accountId={pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
+              accountId={
+                pages[pageIndex] && "id" in pages[pageIndex]
+                  ? pages[pageIndex].id
+                  : undefined
+              }
               onSeeAllPress={() => {
-                const id = pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
-                router.push(id ? { pathname: "/records", params: { accountId: id } } : "/records");
+                const id =
+                  pages[pageIndex] && "id" in pages[pageIndex]
+                    ? pages[pageIndex].id
+                    : undefined;
+                router.push(
+                  id
+                    ? { pathname: "/records", params: { accountId: id } }
+                    : "/records",
+                );
               }}
             />
 
             <SpendingInsidesWidget
-              accountId={pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
+              accountId={
+                pages[pageIndex] && "id" in pages[pageIndex]
+                  ? pages[pageIndex].id
+                  : undefined
+              }
               onShowMore={() => {
-                const id = pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
-                router.push(id ? { pathname: "/spending-insights", params: { accountId: id } } : "/spending-insights");
+                const id =
+                  pages[pageIndex] && "id" in pages[pageIndex]
+                    ? pages[pageIndex].id
+                    : undefined;
+                router.push(
+                  id
+                    ? {
+                        pathname: "/spending-insights",
+                        params: { accountId: id },
+                      }
+                    : "/spending-insights",
+                );
               }}
             />
 
             <IncomeInsightsWidget
-              accountId={pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
+              accountId={
+                pages[pageIndex] && "id" in pages[pageIndex]
+                  ? pages[pageIndex].id
+                  : undefined
+              }
               onShowMore={() => {
-                const id = pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
-                router.push(id ? { pathname: "/income-insights", params: { accountId: id } } : "/income-insights");
+                const id =
+                  pages[pageIndex] && "id" in pages[pageIndex]
+                    ? pages[pageIndex].id
+                    : undefined;
+                router.push(
+                  id
+                    ? {
+                        pathname: "/income-insights",
+                        params: { accountId: id },
+                      }
+                    : "/income-insights",
+                );
               }}
             />
 
-            <BalanceTrendWidget 
-              accountId={pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
+            <BalanceTrendWidget
+              accountId={
+                pages[pageIndex] && "id" in pages[pageIndex]
+                  ? pages[pageIndex].id
+                  : undefined
+              }
               onShowMore={() => {
-                const id = pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
-                router.push(id ? { pathname: "/balance-trend", params: { accountId: id } } : "/balance-trend");
+                const id =
+                  pages[pageIndex] && "id" in pages[pageIndex]
+                    ? pages[pageIndex].id
+                    : undefined;
+                router.push(
+                  id
+                    ? { pathname: "/balance-trend", params: { accountId: id } }
+                    : "/balance-trend",
+                );
               }}
             />
 
             <ExpenseMapWidget
-              accountId={pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
+              accountId={
+                pages[pageIndex] && "id" in pages[pageIndex]
+                  ? pages[pageIndex].id
+                  : undefined
+              }
               setScrollEnabled={setScrollEnabled}
             />
           </ScrollView>
