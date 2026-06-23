@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { ActivityIndicator, FlatList, Text, TouchableOpacity, View, useColorScheme } from 'react-native';
+import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -21,12 +21,14 @@ import { useFocusEffect } from 'expo-router';
 import { useSync } from '@/context/syncContext';
 import { useTranslation } from 'react-i18next';
 
+import { useTheme } from '@/context/themeContext';
+
 export default function AccountsScreen() {
   const { t } = useTranslation();
   const { triggerSync } = useSync();
   const db = useSQLiteContext();
-  const scheme = useColorScheme() ?? 'light';
-  const colors = Colors[scheme];
+  const { theme } = useTheme();
+  const colors = Colors[theme];
 
   const { accounts: rawAccounts, loading: isLoading, refetch: loadAccounts } = useAccountsData();
 
@@ -102,7 +104,7 @@ export default function AccountsScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-theme-background">
+    <SafeAreaView className="flex-1 bg-transparent">
       <Topbar title={t("accounts.title")} />
       <View className="px-4 pt-2">
         <AccountsSectionTabs />

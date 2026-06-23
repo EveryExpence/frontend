@@ -169,7 +169,7 @@ export default function RecordDetailsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-theme-background">
+      <SafeAreaView className="flex-1 bg-transparent">
         <Topbar title={t("records.record_details")} />
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color={colors.tint} />
@@ -179,7 +179,7 @@ export default function RecordDetailsScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-theme-background">
+    <SafeAreaView className="flex-1 bg-transparent">
       <Topbar title={t("records.record_details")} />
       <ScrollView className="px-4 mt-4" scrollEnabled={scrollEnabled} showsVerticalScrollIndicator={false}>
         {!isEditing ? (

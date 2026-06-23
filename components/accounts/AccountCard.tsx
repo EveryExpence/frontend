@@ -1,7 +1,8 @@
-import { Text, TouchableOpacity, View, useColorScheme } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Animated, { FadeInDown, Layout } from 'react-native-reanimated';
 import { Colors } from '@/constants/theme';
+import { useTheme } from '@/context/themeContext';
 import { getAccountIconName } from '@/utils/accountIcon';
 
 export type AccountCardItem = {
@@ -25,8 +26,8 @@ export default function AccountCard({
   onEdit,
   onDelete,
 }: AccountCardProps) {
-  const scheme = useColorScheme() ?? 'light';
-  const colors = Colors[scheme];
+  const { theme } = useTheme();
+  const colors = Colors[theme];
   const accountIcon = getAccountIconName(item.id);
 
   return (

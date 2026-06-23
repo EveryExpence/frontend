@@ -1,7 +1,8 @@
 import { Colors } from "@/constants/theme";
 import { usePathname, useRouter } from "expo-router";
-import { Pressable, Text, useColorScheme, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
+import { useTheme } from "@/context/themeContext";
 
 type SectionKey = "accounts" | "payments" | "categories";
 type SectionPath =
@@ -13,8 +14,8 @@ export default function AccountsSectionTabs() {
     const { t } = useTranslation();
     const router = useRouter()
     const pathname = usePathname();
-    const scheme = useColorScheme() ?? "light";
-    const colors = Colors[scheme];
+    const { theme } = useTheme();
+    const colors = Colors[theme];
 
     const sections: Array<{ key: SectionKey; label: string; path: SectionPath }> = [
         { key: "accounts", label: t("tabs.accounts"), path: "/accounts" },

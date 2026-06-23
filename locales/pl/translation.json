@@ -106,6 +106,7 @@
     "appearance": "Wygląd",
     "language": "Język",
     "dark_mode": "Tryb Ciemny",
+    "theme": "Motyw",
     "base_currency": "Waluta Bazowa",
     "select_base_currency": "Wybierz Walutę Bazową",
     "base_currency_hint": "Służy do łączenia sald na pulpicie i sum w widżetach.",

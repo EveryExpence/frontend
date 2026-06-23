@@ -228,7 +228,7 @@ export default function RecordsScreen() {
   }, [sections, searchQuery, sortBy, filterCategory, filterAccount, filterPayment]);
 
   return (
-    <SafeAreaView className="flex-1 bg-theme-background">
+    <SafeAreaView className="flex-1 bg-transparent">
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{

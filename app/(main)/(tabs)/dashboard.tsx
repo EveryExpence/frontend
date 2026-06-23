@@ -37,7 +37,7 @@ type AccountWithComputed = Account & { computedBalance: number };
 
 const Dashboard = () => {
   const { t } = useTranslation();
-  const colorScheme: "light" | "dark" = useColorScheme() ?? "light";
+  const colorScheme = useColorScheme() ?? "light";
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -128,13 +128,8 @@ const Dashboard = () => {
   };
 
   return (
-    <LinearGradient
-      colors={[Colors[colorScheme].surface, Colors[colorScheme].tint]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      className="flex flex-1"
-    >
-      <SafeAreaView className="flex flex-1">
+    <View className="flex flex-1 bg-transparent">
+      <SafeAreaView className="flex flex-1 bg-transparent">
         {loading ? (
           <View className="flex-1 justify-center items-center">
             <ActivityIndicator size="large" color={Colors[colorScheme].tint} />
@@ -255,7 +250,7 @@ const Dashboard = () => {
           </ScrollView>
         )}
       </SafeAreaView>
-    </LinearGradient>
+    </View>
   );
 };
 

@@ -5,6 +5,7 @@ import './global.css'
 import '@/locales/i18n'
 import { AuthProvider } from '@/context/authContext'
 import { ThemeProvider } from '@/context/themeContext'
+import AnimatedBackground from '@/components/AnimatedBackground'
 import CustomizedToast from '@/components/Toast'
 import { SQLiteProvider } from 'expo-sqlite';
 import { migrateDatabase } from '@/data/init'
@@ -35,6 +36,7 @@ const RootLayout = () => {
           className="bg-theme-background"
         >
           <ThemeProvider>
+            <AnimatedBackground />
             <AuthProvider>
                 <SQLiteProvider
                   databaseName="app.db"
@@ -45,8 +47,8 @@ const RootLayout = () => {
                   </SyncProvider>
                 </SQLiteProvider>
             </AuthProvider>
+            <CustomizedToast />
           </ThemeProvider>
-          <CustomizedToast />
         </View>
       </SafeAreaProvider>
     </GestureHandlerRootView>

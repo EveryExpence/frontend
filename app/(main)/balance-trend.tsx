@@ -69,7 +69,7 @@ const BalanceTrendDetailsScreen: React.FC = () => {
   const isPositive = percentageChange >= 0;
 
   return (
-    <SafeAreaView className="flex-1 bg-theme-background">
+    <SafeAreaView className="flex-1 bg-transparent">
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{

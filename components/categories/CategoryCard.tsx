@@ -1,9 +1,10 @@
 import React from 'react';
-import { Text, TouchableOpacity, View, useColorScheme } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Colors } from '@/constants/theme';
 import { getCategoryIcon } from '@/types/data/category';
+import { useTheme } from '@/context/themeContext';
 
 export type CategoryCardItem = {
   id: string;
@@ -20,8 +21,8 @@ type CategoryCardProps = {
 };
 
 export default function CategoryCard({ item, index = 0, onEdit, onDelete }: CategoryCardProps) {
-  const scheme = useColorScheme() ?? 'light';
-  const colors = Colors[scheme];
+  const { theme } = useTheme();
+  const colors = Colors[theme];
 
   return (
     <Animated.View entering={FadeInDown.delay(index * 100).springify().mass(0.6).damping(14)}>
