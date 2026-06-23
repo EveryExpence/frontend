@@ -34,7 +34,7 @@ export default function AccountsSectionTabs() {
                         className={`flex-1 rounded-xl px-2.5 py-2.5 ${isActive ? "bg-theme-tint" : "bg-transparent"}`}
                         accessibilityRole="button"
                         accessibilityState={{ selected: isActive }}
-                        onPress={() => router.push(section.path)}
+                        onPress={() => router.replace(section.path)}
                     >
                         <Text
                             numberOfLines={1}
