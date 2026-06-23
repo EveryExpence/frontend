@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text, TouchableOpacity, View, useColorScheme } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Colors } from '@/constants/theme';
 
 export type PaymentMethodCardItem = {
@@ -11,19 +12,21 @@ export type PaymentMethodCardItem = {
 
 type PaymentMethodCardProps = {
   item: PaymentMethodCardItem;
+  index?: number;
   onEdit?: () => void;
   onDelete?: () => void;
 };
 
-export default function PaymentMethodCard({ item, onEdit, onDelete }: PaymentMethodCardProps) {
+export default function PaymentMethodCard({ item, index = 0, onEdit, onDelete }: PaymentMethodCardProps) {
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
 
   return (
-    <View
-      className="mb-6 flex-row items-center justify-between rounded-md px-4 py-4"
-      style={{ backgroundColor: colors.surface }}
-    >
+    <Animated.View entering={FadeInDown.delay(index * 100).springify().mass(0.6).damping(14)}>
+      <View
+        className="mb-6 flex-row items-center justify-between rounded-md px-4 py-4"
+        style={{ backgroundColor: colors.surface }}
+      >
       <View className="flex-row items-center self-stretch min-w-0 flex-1">
         <MaterialCommunityIcons
           name={(item.icon as any) || "cash-register"}
@@ -55,6 +58,7 @@ export default function PaymentMethodCard({ item, onEdit, onDelete }: PaymentMet
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+      </View>
+    </Animated.View>
   );
 }

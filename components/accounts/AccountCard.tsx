@@ -1,6 +1,6 @@
-import React from 'react';
 import { Text, TouchableOpacity, View, useColorScheme } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import Animated, { FadeInDown, Layout } from 'react-native-reanimated';
 import { Colors } from '@/constants/theme';
 import { getAccountIconName } from '@/utils/accountIcon';
 
@@ -8,17 +8,20 @@ export type AccountCardItem = {
   id: string;
   name: string;
   balance: string;
+  initialBalance?: string;
   currency: string;
 };
 
 type AccountCardProps = {
   item: AccountCardItem;
+  index?: number;
   onEdit?: () => void;
   onDelete?: () => void;
 };
 
 export default function AccountCard({
   item,
+  index = 0,
   onEdit,
   onDelete,
 }: AccountCardProps) {
@@ -27,10 +30,11 @@ export default function AccountCard({
   const accountIcon = getAccountIconName(item.id);
 
   return (
-    <View
-      className="mb-6 flex-row items-center justify-between px-4 py-4 rounded-md"
-      style={{ backgroundColor: colors.surface }}
-    >
+    <Animated.View entering={FadeInDown.delay(index * 100).springify().mass(0.6).damping(14)}>
+      <View
+        className="mb-6 flex-row items-center justify-between px-4 py-4 rounded-md"
+        style={{ backgroundColor: colors.surface }}
+      >
       <View className="flex-row items-center self-stretch flex-1 min-w-0">
         <MaterialCommunityIcons
           name={accountIcon}
@@ -48,7 +52,9 @@ export default function AccountCard({
           >
             {item.name}
           </Text>
-          <Text className="text-2xl" style={{ color: colors.text }}>{item.balance}</Text>
+          <Text className="text-xl" style={{ color: colors.text }}>
+            {item.balance} {item.initialBalance && <Text className="text-lg opacity-60">({item.initialBalance})</Text>}
+          </Text>
         </View>
       </View>
 
@@ -72,7 +78,8 @@ export default function AccountCard({
             <MaterialCommunityIcons name="delete-outline" size={32} color={colors.text} />
           </TouchableOpacity>
         </View>
+        </View>
       </View>
-    </View>
+    </Animated.View>
   );
 }

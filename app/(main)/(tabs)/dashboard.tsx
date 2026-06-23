@@ -8,6 +8,7 @@ import {
   RefreshControl,
   ScrollView,
   Text,
+  LayoutAnimation,
 } from "react-native";
 import {
   SafeAreaView,
@@ -46,6 +47,32 @@ const Dashboard = () => {
   const [pageIndex, setPageIndex] = React.useState(0);
   const [scrollEnabled, setScrollEnabled] = React.useState(true);
   const animatedIndex = React.useRef(new Animated.Value(0)).current;
+  const flatListRef = React.useRef<FlatList>(null);
+  const [listHeight, setListHeight] = React.useState<number | null>(null);
+  const pageHeights = React.useRef<{ [key: string]: number }>({}).current;
+
+  const pages: ({ type: "total" } | AccountWithComputed)[] =
+    accounts.length <= 1 ? accounts : [{ type: "total" }, ...accounts];
+
+  React.useEffect(() => {
+    if (pages.length > 0 && pageIndex >= pages.length) {
+      setPageIndex(pages.length - 1);
+    }
+  }, [pages.length, pageIndex]);
+
+  React.useEffect(() => {
+    Animated.spring(animatedIndex, {
+      toValue: pageIndex,
+      useNativeDriver: false,
+      speed: 8,
+    }).start();
+
+    const currentKey = pages[pageIndex] && ("type" in pages[pageIndex] ? "total" : pages[pageIndex].id);
+    if (currentKey && pageHeights[currentKey]) {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setListHeight(pageHeights[currentKey]);
+    }
+  }, [pageIndex, animatedIndex, pages]);
 
   useFocusEffect(
     useCallback(() => {
@@ -58,21 +85,13 @@ const Dashboard = () => {
     await refetch();
   }, [triggerSync, refetch]);
 
-  const pages: ({ type: "total" } | AccountWithComputed)[] =
-    accounts.length <= 1 ? accounts : [{ type: "total" }, ...accounts];
+  const onViewableItemsChanged = React.useRef(({ viewableItems }: any) => {
+    if (viewableItems && viewableItems.length > 0 && viewableItems[0].index !== null) {
+      setPageIndex(viewableItems[0].index);
+    }
+  }).current;
 
-  React.useEffect(() => {
-    Animated.spring(animatedIndex, {
-      toValue: pageIndex,
-      useNativeDriver: false,
-      speed: 8,
-    }).start();
-  }, [pageIndex, animatedIndex]);
-
-  const onMomentumScrollEnd = (e: any) => {
-    const newIndex = Math.round(e.nativeEvent.contentOffset.x / width);
-    setPageIndex(newIndex);
-  };
+  const viewabilityConfig = React.useRef({ itemVisiblePercentThreshold: 50 }).current;
 
   const activePage = pages[pageIndex];
   const isTotalScope = !!activePage && "type" in activePage;
@@ -83,11 +102,29 @@ const Dashboard = () => {
     : "account";
 
   const renderPage = ({ item }: { item: any }) => {
-    if (item.type === "total") {
-      return <TotalBalancePage totalsByCurrency={totalsByCurrency} />;
-    }
-
-    return <AccountPage account={item} />;
+    const isTotal = item.type === "total";
+    const key = isTotal ? "total" : item.id;
+    
+    return (
+      <View 
+        onLayout={(e) => {
+          const height = e.nativeEvent.layout.height;
+          pageHeights[key] = height;
+          if (pages[pageIndex] && ("type" in pages[pageIndex] ? "total" : pages[pageIndex].id) === key) {
+             if (listHeight !== height) {
+               LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+               setListHeight(height);
+             }
+          }
+        }}
+      >
+        {isTotal ? (
+          <TotalBalancePage totalsByCurrency={totalsByCurrency} />
+        ) : (
+          <AccountPage account={item} />
+        )}
+      </View>
+    );
   };
 
   return (
@@ -129,14 +166,17 @@ const Dashboard = () => {
             }
           >
             <FlatList
-              style={{ flexGrow: 0, marginHorizontal: -16 }}
-              contentContainerStyle={{ flexGrow: 0 }}
+              ref={flatListRef}
+              initialScrollIndex={pageIndex}
+              style={{ flexGrow: 0, marginHorizontal: -16, height: listHeight ?? undefined }}
+              contentContainerStyle={{ flexGrow: 0, alignItems: 'flex-start' }}
               data={pages}
               keyExtractor={(i) => ("type" in i ? "total" : i.id)}
               horizontal
               pagingEnabled
               showsHorizontalScrollIndicator={false}
-              onMomentumScrollEnd={onMomentumScrollEnd}
+              onViewableItemsChanged={onViewableItemsChanged}
+              viewabilityConfig={viewabilityConfig}
               renderItem={renderPage}
               getItemLayout={(_, index) => ({
                 length: width,

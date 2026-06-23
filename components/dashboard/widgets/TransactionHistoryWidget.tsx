@@ -11,6 +11,7 @@ import {
 } from "@/hooks/use-expense-records";
 import { getCategoryIcon } from "@/types/data/category";
 import { useTranslation } from "react-i18next";
+import Animated, { FadeInDown, Layout } from "react-native-reanimated";
 
 interface TransactionHistoryWidgetProps {
   records?: TransactionRecord[];
@@ -30,21 +31,22 @@ export const TransactionHistoryRow = ({
   const router = useRouter();
 
   return (
-    <TouchableOpacity
-      className="flex-row items-center justify-between py-1"
-      onPress={() => router.push(`/record-details/${record.id}`)}
-    >
-      <View className="flex-1 flex-row items-center">
-        <View className="h-11 w-11 items-center justify-center rounded-full bg-theme-tint">
-          <MaterialCommunityIcons
-            name={
-              (record.categoryIcon as any) ||
-              getCategoryIcon(record.categoryName)
-            }
-            size={20}
-            color={colors.textLight}
-          />
-        </View>
+    <Animated.View entering={FadeInDown.springify().mass(0.5).damping(12)}>
+      <TouchableOpacity
+        className="flex-row items-center justify-between py-1"
+        onPress={() => router.push(`/record-details/${record.id}`)}
+      >
+        <View className="flex-1 flex-row items-center">
+          <View className="h-11 w-11 items-center justify-center rounded-full bg-theme-tint">
+            <MaterialCommunityIcons
+              name={
+                (record.categoryIcon as any) ||
+                getCategoryIcon(record.categoryName)
+              }
+              size={20}
+              color={colors.textLight}
+            />
+          </View>
 
           <View className="ml-3 flex-1">
             <Text
@@ -77,6 +79,7 @@ export const TransactionHistoryRow = ({
           )}
         </View>
       </TouchableOpacity>
+    </Animated.View>
   );
 };
 

@@ -124,9 +124,10 @@ export default function PaymentsScreen() {
 						showsVerticalScrollIndicator={false}
 						contentContainerStyle={{ paddingBottom: 24 }}
 						ListEmptyComponent={<Text className="pt-4 text-lg text-theme-icon mb-4">{t("payments.no_payments")}</Text>}
-						renderItem={({ item }) => (
+						renderItem={({ item, index }) => (
 							<PaymentMethodCard
 								item={item}
+								index={index}
 								onEdit={() => openEdit(item)}
 								onDelete={() => openDelete(item)}
 							/>

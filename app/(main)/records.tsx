@@ -28,6 +28,8 @@ import { deleteExpenseRecord } from "@/data/expenseRecords";
 import Toast from "react-native-toast-message";
 import { useSync } from "@/context/syncContext";
 import DeleteRecordModal from "@/components/records/DeleteRecordModal";
+import Animated, { FadeInDown, FadeInUp, Layout } from "react-native-reanimated";
+import CustomModal from "@/components/Modal";
 
 import { Swipeable } from "react-native-gesture-handler";
 
@@ -60,63 +62,67 @@ function TransactionRow({
   };
 
   return (
-    <Swipeable ref={swipeableRef} renderLeftActions={renderLeftActions}>
-      <Pressable
-        onPress={() => router.push(`/record-details/${item.id}`)}
-        className="flex-row items-center justify-between py-1.5 bg-theme-surface active:opacity-70"
-      >
-        <View className="flex-row items-center gap-3 flex-1 pr-3">
-          <View className="h-10 w-10 items-center justify-center rounded-full bg-theme-tint">
-            <MaterialCommunityIcons
-              name={
-                (item.categoryIcon as any) || getCategoryIcon(item.categoryName)
-              }
-              size={20}
-              color={colors.textLight}
-            />
+    <Animated.View entering={FadeInDown.springify().mass(0.5).damping(12)}>
+      <Swipeable ref={swipeableRef} renderLeftActions={renderLeftActions}>
+        <Pressable
+          onPress={() => router.push(`/record-details/${item.id}`)}
+          className="flex-row items-center justify-between py-1.5 bg-theme-surface active:opacity-70"
+        >
+          <View className="flex-row items-center gap-3 flex-1 pr-3">
+            <View className="h-10 w-10 items-center justify-center rounded-full bg-theme-tint">
+              <MaterialCommunityIcons
+                name={
+                  (item.categoryIcon as any) || getCategoryIcon(item.categoryName)
+                }
+                size={20}
+                color={colors.textLight}
+              />
+            </View>
+
+            <View className="flex-1">
+              <Text className="text-[18px] text-theme-text" numberOfLines={1}>
+                {item.title}
+              </Text>
+              <Text
+                className="text-[13px] text-theme-text opacity-60 mt-0.5"
+                numberOfLines={1}
+              >
+                {(item as any).createdAtTime ? new Date((item as any).createdAtTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' • ' : ''}{item.title === item.categoryName ? item.paymentMethodName : `${item.categoryName} • ${item.paymentMethodName}`}
+              </Text>
+            </View>
           </View>
 
-          <View className="flex-1">
-            <Text className="text-[18px] text-theme-text" numberOfLines={1}>
-              {item.title}
-            </Text>
+          <View className="items-end">
             <Text
-              className="text-[13px] text-theme-text opacity-60 mt-0.5"
-              numberOfLines={1}
+              className={`text-[18px] ${item.kind === "income" ? "text-theme-success" : "text-theme-text"}`}
             >
-              {(item as any).createdAtTime ? new Date((item as any).createdAtTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' • ' : ''}{item.title === item.categoryName ? item.paymentMethodName : `${item.categoryName} • ${item.paymentMethodName}`}
+              {item.kind === "income" ? "+" : "-"}{formatCurrency(item.amount, item.currency)}
             </Text>
+            {item.changeRate !== undefined && (
+              <Text
+                className={`text-[13px] ${item.changeRate >= 0 ? "text-[#208c05]" : "text-red-600"}`}
+              >
+                {item.changeRate >= 0 ? "+" : "-"}{Math.abs(item.changeRate).toFixed(1)}%
+              </Text>
+            )}
           </View>
-        </View>
-
-        <View className="items-end">
-          <Text
-            className={`text-[18px] ${item.kind === "income" ? "text-theme-success" : "text-theme-text"}`}
-          >
-            {item.kind === "income" ? "+" : "-"}{formatCurrency(item.amount, item.currency)}
-          </Text>
-          {item.changeRate !== undefined && (
-            <Text
-              className={`text-[13px] ${item.changeRate >= 0 ? "text-[#208c05]" : "text-red-600"}`}
-            >
-              {item.changeRate >= 0 ? "+" : "-"}{Math.abs(item.changeRate).toFixed(1)}%
-            </Text>
-          )}
-        </View>
-      </Pressable>
-    </Swipeable>
+        </Pressable>
+      </Swipeable>
+    </Animated.View>
   );
 }
 
 function TransactionSectionCard({
   section,
+  index,
   onDelete,
 }: {
   section: TransactionSection;
+  index: number;
   onDelete: (item: TransactionRecord) => void;
 }) {
   return (
-    <View className="gap-3">
+    <Animated.View entering={FadeInUp.delay(index * 100).springify().mass(0.6).damping(14)} className="gap-3">
       <View className="flex-row items-end justify-between px-1">
         <Text className="text-[22px] font-medium text-theme-text">
           {section.title}
@@ -138,12 +144,13 @@ function TransactionSectionCard({
           ))}
         </CardContent>
       </Card>
-    </View>
+    </Animated.View>
   );
 }
 
 export default function RecordsScreen() {
   const { t } = useTranslation();
+  const scheme = useColorScheme() ?? "light";
   const { accountId } = useLocalSearchParams<{ accountId?: string }>();
   const db = useSQLiteContext();
   const { triggerSync } = useSync();
@@ -158,6 +165,7 @@ export default function RecordsScreen() {
   const availableAccounts = React.useMemo(() => Array.from(new Set(records.map(r => (r as any).accountName))), [records]);
   const availablePayments = React.useMemo(() => Array.from(new Set(records.map(r => r.paymentMethodName))), [records]);
 
+  const [isFilterModalVisible, setIsFilterModalVisible] = React.useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = React.useState(false);
   const [recordToDelete, setRecordToDelete] =
     React.useState<TransactionRecord | null>(null);
@@ -234,19 +242,27 @@ export default function RecordsScreen() {
         </Text>
 
         <View className="mt-5">
-          <View className="relative">
-            <MaterialCommunityIcons
-              name="magnify"
-              size={22}
-              className="absolute left-3 top-3 z-10 text-theme-icon"
-            />
-            <Input
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholder={t("records.search_placeholder")}
-              editable={true}
-              className="pl-11"
-            />
+          <View className="flex-row items-center gap-2">
+            <View className="relative flex-1">
+              <MaterialCommunityIcons
+                name="magnify"
+                size={22}
+                className="absolute left-3 top-3 z-10 text-theme-icon"
+              />
+              <Input
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder={t("records.search_placeholder")}
+                editable={true}
+                className="pl-11"
+              />
+            </View>
+            <TouchableOpacity
+              onPress={() => setIsFilterModalVisible(true)}
+              className={`p-3 rounded-md ${filterCategory || filterAccount || filterPayment ? "bg-theme-tint" : "bg-theme-surface"}`}
+            >
+              <MaterialCommunityIcons name="filter-variant" size={24} color={filterCategory || filterAccount || filterPayment ? Colors[scheme].textLight : Colors[scheme].icon} />
+            </TouchableOpacity>
           </View>
           <View className="flex-row gap-2 mt-3 items-center">
             <MaterialCommunityIcons name="sort" size={20} className="text-theme-text opacity-60" />
@@ -260,41 +276,6 @@ export default function RecordsScreen() {
               <Text className={`${sortBy === 'amount_asc' ? 'text-white' : 'text-theme-text'}`}>Lowest</Text>
             </TouchableOpacity>
           </View>
-
-          {availableAccounts.length > 1 && (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-2" contentContainerStyle={{ gap: 8, paddingRight: 16 }}>
-              <TouchableOpacity onPress={() => setFilterAccount(null)} className={`px-3 py-1 rounded-full ${!filterAccount ? 'bg-theme-tint' : 'bg-theme-surface border border-theme-tint/20'}`}>
-                <Text className={!filterAccount ? 'text-white' : 'text-theme-text opacity-80'}>All Accounts</Text>
-              </TouchableOpacity>
-              {availableAccounts.map(a => (
-                <TouchableOpacity key={a} onPress={() => setFilterAccount(a)} className={`px-3 py-1 rounded-full ${filterAccount === a ? 'bg-theme-tint' : 'bg-theme-surface border border-theme-tint/20'}`}>
-                  <Text className={filterAccount === a ? 'text-white' : 'text-theme-text opacity-80'}>{a}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          )}
-
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-2" contentContainerStyle={{ gap: 8, paddingRight: 16 }}>
-            <TouchableOpacity onPress={() => setFilterCategory(null)} className={`px-3 py-1 rounded-full ${!filterCategory ? 'bg-theme-tint' : 'bg-theme-surface border border-theme-tint/20'}`}>
-              <Text className={!filterCategory ? 'text-white' : 'text-theme-text opacity-80'}>All Categories</Text>
-            </TouchableOpacity>
-            {availableCategories.map(c => (
-              <TouchableOpacity key={c} onPress={() => setFilterCategory(c)} className={`px-3 py-1 rounded-full ${filterCategory === c ? 'bg-theme-tint' : 'bg-theme-surface border border-theme-tint/20'}`}>
-                <Text className={filterCategory === c ? 'text-white' : 'text-theme-text opacity-80'}>{c}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-2" contentContainerStyle={{ gap: 8, paddingRight: 16 }}>
-            <TouchableOpacity onPress={() => setFilterPayment(null)} className={`px-3 py-1 rounded-full ${!filterPayment ? 'bg-theme-tint' : 'bg-theme-surface border border-theme-tint/20'}`}>
-              <Text className={!filterPayment ? 'text-white' : 'text-theme-text opacity-80'}>All Methods</Text>
-            </TouchableOpacity>
-            {availablePayments.map(p => (
-              <TouchableOpacity key={p} onPress={() => setFilterPayment(p)} className={`px-3 py-1 rounded-full ${filterPayment === p ? 'bg-theme-tint' : 'bg-theme-surface border border-theme-tint/20'}`}>
-                <Text className={filterPayment === p ? 'text-white' : 'text-theme-text opacity-80'}>{p}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
         </View>
 
         <View className="mt-8 gap-6">
@@ -313,10 +294,11 @@ export default function RecordsScreen() {
                 : t("records.no_transactions")}
             </Text>
           )}
-          {filteredSections.map((section: TransactionSection) => (
+          {filteredSections.map((section: TransactionSection, i: number) => (
             <TransactionSectionCard
               key={section.id}
               section={section}
+              index={i}
               onDelete={handleDeletePress}
             />
           ))}
@@ -333,6 +315,59 @@ export default function RecordsScreen() {
         }}
         onConfirm={confirmDelete}
       />
+
+      <CustomModal
+        isVisible={isFilterModalVisible}
+        setIsVisible={setIsFilterModalVisible}
+        title="Filter Transactions"
+        showCloseIcon={true}
+      >
+        <ScrollView className="max-h-[60vh] w-full mt-2" showsVerticalScrollIndicator={false}>
+          {availableAccounts.length > 1 && (
+            <View className="mb-6">
+              <Text className="text-lg font-bold text-theme-text mb-3">Accounts</Text>
+              <View className="flex-row flex-wrap gap-2">
+                <TouchableOpacity onPress={() => setFilterAccount(null)} className={`px-4 py-2 rounded-full border border-theme-tint/20 ${!filterAccount ? 'bg-theme-tint' : 'bg-transparent'}`}>
+                  <Text className={!filterAccount ? 'text-white font-bold' : 'text-theme-text opacity-80'}>All Accounts</Text>
+                </TouchableOpacity>
+                {availableAccounts.map(a => (
+                  <TouchableOpacity key={a} onPress={() => setFilterAccount(a)} className={`px-4 py-2 rounded-full border border-theme-tint/20 ${filterAccount === a ? 'bg-theme-tint' : 'bg-transparent'}`}>
+                    <Text className={filterAccount === a ? 'text-white font-bold' : 'text-theme-text opacity-80'}>{a}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          )}
+
+          <View className="mb-6">
+            <Text className="text-lg font-bold text-theme-text mb-3">Categories</Text>
+            <View className="flex-row flex-wrap gap-2">
+              <TouchableOpacity onPress={() => setFilterCategory(null)} className={`px-4 py-2 rounded-full border border-theme-tint/20 ${!filterCategory ? 'bg-theme-tint' : 'bg-transparent'}`}>
+                <Text className={!filterCategory ? 'text-white font-bold' : 'text-theme-text opacity-80'}>All Categories</Text>
+              </TouchableOpacity>
+              {availableCategories.map(c => (
+                <TouchableOpacity key={c} onPress={() => setFilterCategory(c)} className={`px-4 py-2 rounded-full border border-theme-tint/20 ${filterCategory === c ? 'bg-theme-tint' : 'bg-transparent'}`}>
+                  <Text className={filterCategory === c ? 'text-white font-bold' : 'text-theme-text opacity-80'}>{c}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          <View className="mb-6">
+            <Text className="text-lg font-bold text-theme-text mb-3">Payment Methods</Text>
+            <View className="flex-row flex-wrap gap-2">
+              <TouchableOpacity onPress={() => setFilterPayment(null)} className={`px-4 py-2 rounded-full border border-theme-tint/20 ${!filterPayment ? 'bg-theme-tint' : 'bg-transparent'}`}>
+                <Text className={!filterPayment ? 'text-white font-bold' : 'text-theme-text opacity-80'}>All Methods</Text>
+              </TouchableOpacity>
+              {availablePayments.map(p => (
+                <TouchableOpacity key={p} onPress={() => setFilterPayment(p)} className={`px-4 py-2 rounded-full border border-theme-tint/20 ${filterPayment === p ? 'bg-theme-tint' : 'bg-transparent'}`}>
+                  <Text className={filterPayment === p ? 'text-white font-bold' : 'text-theme-text opacity-80'}>{p}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </ScrollView>
+      </CustomModal>
     </SafeAreaView>
   );
 }

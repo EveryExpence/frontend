@@ -150,9 +150,10 @@ export default function CategoriesScreen() {
                 {t("categories.no_categories")}
               </Text>
             }
-            renderItem={({ item }) => (
+            renderItem={({ item, index }) => (
               <CategoryCard
                 item={item}
+                index={index}
                 onEdit={() => openEdit(item)}
                 onDelete={() => openDelete(item)}
               />

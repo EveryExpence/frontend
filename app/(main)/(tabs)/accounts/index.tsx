@@ -5,12 +5,12 @@ import Toast from 'react-native-toast-message';
 import { useSQLiteContext } from 'expo-sqlite';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
-import {
-  createAccount,
+  import { createAccount,
   deleteAccount,
   getAllAccounts,
   updateAccount,
 } from '@/data/accounts';
+import { useAccountsData } from '@/hooks/use-account-data';
 import AccountCard, { AccountCardItem } from '@/components/accounts/AccountCard';
 import AccountFormModal, { AccountFormData } from '@/components/accounts/AccountFormModal';
 import DeleteAccountModal from '@/components/accounts/DeleteAccountModal';
@@ -28,8 +28,15 @@ export default function AccountsScreen() {
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
 
-  const [accounts, setAccounts] = useState<AccountCardItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { accounts: rawAccounts, loading: isLoading, refetch: loadAccounts } = useAccountsData();
+
+  const accounts: AccountCardItem[] = React.useMemo(() => rawAccounts.map((a: any) => ({
+    id: a.id,
+    name: a.name,
+    balance: formatBalance(a.computedBalance),
+    initialBalance: formatBalance(a.balance),
+    currency: a.currency,
+  })), [rawAccounts]);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<AccountCardItem | null>(null);
@@ -37,26 +44,6 @@ export default function AccountsScreen() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState<AccountCardItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const loadAccounts = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const data = await getAllAccounts(db);
-      setAccounts(
-        data.map((a) => ({
-          id: a.id,
-          name: a.name,
-          balance: formatBalance(a.balance),
-          currency: a.currency,
-        }))
-      );
-    } catch (e) {
-      setAccounts([]);
-      Toast.show({ text1: `${t("accounts.load_failed")}: ${e}`, type: 'error' });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [db]);
 
   useFocusEffect(
     useCallback(() => {
@@ -132,9 +119,10 @@ export default function AccountsScreen() {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 24 }}
             ListEmptyComponent={<Text className="pt-4 text-lg text-theme-icon mb-4">{t("accounts.no_accounts")}</Text>}
-            renderItem={({ item }) => (
+            renderItem={({ item, index }) => (
               <AccountCard
                 item={item}
+                index={index}
                 onEdit={() => openEdit(item)}
                 onDelete={() => openDelete(item)}
               />
