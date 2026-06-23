@@ -99,7 +99,7 @@ export const insertRemotePaymentMethod = async (db: SQLiteDatabase, paymentMetho
         await stmt.executeAsync({
             $id: paymentMethod.id,
             $name: paymentMethod.name,
-            $icon: paymentMethod.icon,
+            $icon: paymentMethod.icon || 'cash',
         });
     });
 };
@@ -116,7 +116,7 @@ export const updateRemotePaymentMethod = async (db: SQLiteDatabase, paymentMetho
         await stmt.executeAsync({
             $id: paymentMethod.id,
             $name: paymentMethod.name,
-            $icon: paymentMethod.icon,
+            $icon: paymentMethod.icon || 'cash',
         });
     });
 };
