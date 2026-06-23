@@ -12,7 +12,6 @@ import { useTranslation } from "react-i18next";
 import { PolarChart, Pie } from "victory-native";
 import { CATEGORY_COLORS } from "@/constants/categoryColors";
 import { fetchExchangeRates, convertAmount } from "@/utils/exchangeRates";
-import { useBaseCurrency } from "@/context/baseCurrencyContext";
 
 export const SpendingInsidesWidget: React.FC<{
   onShowMore?: () => void;
@@ -33,7 +32,7 @@ export const SpendingInsidesWidget: React.FC<{
     Record<string, string>
   >({});
   const [rates, setRates] = React.useState<Record<string, number>>({});
-  const { baseCurrency } = useBaseCurrency();
+  const baseCurrency = "USD";
 
   const isTotalScope = scope === "total";
 
@@ -105,6 +104,8 @@ export const SpendingInsidesWidget: React.FC<{
     [baseCurrency, rates],
   );
 
+  const canConvert = Object.keys(rates).length > 1;
+
   const totalsByCategory = React.useMemo(() => {
     const map = new Map<
       string,
@@ -118,7 +119,7 @@ export const SpendingInsidesWidget: React.FC<{
 
       let amt = Math.abs(r.amount);
       let displayCurrency = originalCurrency;
-      if (isTotalScope) {
+      if (isTotalScope && canConvert) {
         amt = toBaseAmount(amt, originalCurrency);
         displayCurrency = baseCurrency;
       }
@@ -129,7 +130,7 @@ export const SpendingInsidesWidget: React.FC<{
       map.set(key, entry);
     });
     return map;
-  }, [recordsRaw, accounts, isTotalScope, toBaseAmount, baseCurrency]);
+  }, [recordsRaw, accounts, isTotalScope, toBaseAmount, baseCurrency, canConvert]);
 
   const data = React.useMemo((): {
     label: string;
@@ -171,7 +172,7 @@ export const SpendingInsidesWidget: React.FC<{
         grandTotal > 0 ? ((chartValue / grandTotal) * 100).toFixed(1) : "0.0";
       const displayAmount = `${percentage}%`;
       arr.push({
-        label: `${label} (${displayCurrency})`,
+        label: (isTotalScope && canConvert) ? label : `${label} (${displayCurrency})`,
         value: chartValue,
         color: CATEGORY_COLORS[idx % CATEGORY_COLORS.length],
         categoryId: catId,
@@ -190,7 +191,7 @@ export const SpendingInsidesWidget: React.FC<{
       const originalCurrency = accounts[r.accountId] ?? baseCurrency;
       let amt = Math.abs(r.amount);
       let displayCurrency = originalCurrency;
-      if (isTotalScope) {
+      if (isTotalScope && canConvert) {
         amt = toBaseAmount(amt, originalCurrency);
         displayCurrency = baseCurrency;
       }
@@ -201,7 +202,7 @@ export const SpendingInsidesWidget: React.FC<{
       .sort((a, b) => b[1] - a[1])
       .map(([curr, amt]) => formatCurrency(amt, curr))
       .join(" | ");
-  }, [recordsRaw, accounts, isTotalScope, toBaseAmount, baseCurrency]);
+  }, [recordsRaw, accounts, isTotalScope, toBaseAmount, baseCurrency, canConvert]);
 
   if (!loading && !error && data.length === 0) return null;
 

@@ -10,6 +10,7 @@ import { PaymentMethod } from "@/types/data/paymentMethod";
 import { Coordinates } from "@/types/data/location";
 
 import { getExpenseRecordById, updateExpenseRecord } from "@/data/expenseRecords";
+import { getAttachmentsForExpense, saveAttachments, deleteAttachmentsForExpense } from "@/data/attachments";
 import { getAllAccounts } from "@/data/accounts";
 import { getAllCategories } from "@/data/categories";
 import { getAllPaymentMethods } from "@/data/paymentMethods";
@@ -22,10 +23,12 @@ import PaymentMethodSelection from "@/components/new-expense/PaymentMethodSelect
 import DateTimeSelection from "@/components/new-expense/DateTimeSelection";
 import DescriptionInput from "@/components/new-expense/DescriptionInput";
 import LocationSelection from "@/components/new-expense/LocationMap";
+import ImageAttachmentSelection from "@/components/new-expense/ImageAttachmentSelection";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useSync } from "@/context/syncContext";
 import { useTranslation } from "react-i18next";
+import * as FileSystem from 'expo-file-system/legacy';
 
 import Toast from "react-native-toast-message";
 
@@ -52,6 +55,8 @@ export default function RecordDetailsScreen() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [isEditing, setIsEditing] = useState(false);
+  const [recordType, setRecordType] = useState<"expense" | "income">("expense");
+  const [images, setImages] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchRecord = async () => {
@@ -86,6 +91,22 @@ export default function RecordDetailsScreen() {
             });
           }
         }
+        
+        setRecordType(record.amount >= 0 ? "income" : "expense");
+
+        const atts = await getAttachmentsForExpense(db, record.id);
+        const uris = [];
+        for (const att of atts) {
+          const filename = FileSystem.cacheDirectory + 'att_' + att.id + '.jpg';
+          let binary = '';
+          for (let i = 0; i < att.content.length; i++) {
+            binary += String.fromCharCode(att.content[i]);
+          }
+          const base64 = btoa(binary);
+          await FileSystem.writeAsStringAsync(filename, base64, { encoding: 'base64' });
+          uris.push(filename);
+        }
+        setImages(uris);
       } catch (err: any) {
         console.error("Failed to load record:", err);
         const msg = err?.message ?? String(err);
@@ -112,7 +133,7 @@ export default function RecordDetailsScreen() {
 
     try {
       const amountValue =
-        selectedCategory.type?.toLowerCase() === "income"
+        recordType === "income"
           ? Math.abs(parseFloat(amount))
           : -Math.abs(parseFloat(amount));
 
@@ -130,6 +151,10 @@ export default function RecordDetailsScreen() {
         location: locationString ? locationString : undefined,
         createdAt: selectedDateTime.getTime(),
       });
+      await deleteAttachmentsForExpense(db, id as string);
+      if (images.length > 0) {
+        await saveAttachments(db, id as string, images);
+      }
       Toast.show({ text1: t("records.update_success"), type: "success" });
       setIsEditing(false);
       triggerSync();
@@ -153,6 +178,39 @@ export default function RecordDetailsScreen() {
     <SafeAreaView className="flex-1 bg-theme-background">
       <Topbar title={t("records.record_details")} />
       <ScrollView className="px-4 mt-4" scrollEnabled={scrollEnabled}>
+        <View className="flex-row bg-theme-surface p-1.5 rounded-lg mb-6">
+          <TouchableOpacity
+            className={`flex-1 py-3 rounded-md items-center justify-center ${recordType === "expense" ? "bg-theme-tint" : ""
+              }`}
+            activeOpacity={0.8}
+            onPress={() => isEditing && setRecordType("expense")}
+            disabled={!isEditing}
+          >
+            <Text
+              className={`text-lg font-bold ${recordType === "expense" ? "text-theme-textLight" : "text-theme-text"
+                }`}
+              style={recordType !== "expense" ? { opacity: 0.6 } : {}}
+            >
+              {t("new_expense.expense", "Expense")}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            className={`flex-1 py-3 rounded-md items-center justify-center ${recordType === "income" ? "bg-theme-tint" : ""
+              }`}
+            activeOpacity={0.8}
+            onPress={() => isEditing && setRecordType("income")}
+            disabled={!isEditing}
+          >
+            <Text
+              className={`text-lg font-bold ${recordType === "income" ? "text-theme-textLight" : "text-theme-text"
+                }`}
+              style={recordType !== "income" ? { opacity: 0.6 } : {}}
+            >
+              {t("new_expense.income", "Income")}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         <AccountSelection
           selectedAccount={selectedAccount}
           setSelectedAccount={setSelectedAccount}
@@ -170,6 +228,7 @@ export default function RecordDetailsScreen() {
         <CategorySelection
           selectedCategory={selectedCategory}
           setSelectedCategory={setSelectedCategory}
+          typeFilter={recordType}
           disabled={!isEditing}
         />
 
@@ -198,6 +257,10 @@ export default function RecordDetailsScreen() {
             setScrollEnabled={setScrollEnabled}
             disabled={!isEditing}
           />
+        )}
+
+        {(isEditing || images.length > 0) && (
+          <ImageAttachmentSelection images={images} setImages={setImages} isEditing={isEditing} />
         )}
 
         <View className="mt-8 mb-10">

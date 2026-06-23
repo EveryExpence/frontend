@@ -46,22 +46,37 @@ export const TransactionHistoryRow = ({
           />
         </View>
 
-        <View className="ml-3 flex-1">
-          <Text
-            className="text-[18px] font-medium text-theme-text"
-            numberOfLines={1}
-          >
-            {record.title}
-          </Text>
+          <View className="ml-3 flex-1">
+            <Text
+              className="text-[18px] font-medium text-theme-text"
+              numberOfLines={1}
+            >
+              {record.title}
+            </Text>
+            <Text
+              className="text-[13px] text-theme-text opacity-60"
+              numberOfLines={1}
+            >
+              {record.title === record.categoryName ? record.paymentMethodName : `${record.categoryName} • ${record.paymentMethodName}`}
+            </Text>
+          </View>
         </View>
-      </View>
 
-      <Text
-        className={`text-[18px] font-medium ${record.kind === "income" ? "text-theme-success" : "text-theme-text"}`}
-      >
-        {formatCurrency(record.amount, record.currency)}
-      </Text>
-    </TouchableOpacity>
+        <View className="items-end">
+          <Text
+            className={`text-[18px] font-medium ${record.kind === "income" ? "text-theme-success" : "text-theme-text"}`}
+          >
+            {record.kind === "income" ? "+" : "-"}{formatCurrency(record.amount, record.currency)}
+          </Text>
+          {record.changeRate !== undefined && (
+            <Text
+              className={`text-[13px] ${record.changeRate >= 0 ? "text-[#208c05]" : "text-red-600"}`}
+            >
+              {record.changeRate >= 0 ? "+" : "-"}{Math.abs(record.changeRate).toFixed(1)}%
+            </Text>
+          )}
+        </View>
+      </TouchableOpacity>
   );
 };
 

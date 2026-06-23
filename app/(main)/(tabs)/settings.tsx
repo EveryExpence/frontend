@@ -9,12 +9,10 @@ import SettingsToggleRow from "@/components/settings/SettingsToggleRow";
 import SettingsActionRow from "@/components/settings/SettingsActionRow";
 import Topbar from "@/components/Topbar";
 import { useTheme } from "@/context/themeContext";
-import { useBaseCurrency } from "@/context/baseCurrencyContext";
 import Toast from 'react-native-toast-message';
 import { scheduleDailyReminder, cancelDailyReminder, checkNotificationStatus } from "@/utils/notifications";
 import { useTranslation } from "react-i18next";
 import CustomModal from "@/components/Modal";
-import SettingsBaseCurrencyModal from "@/components/settings/SettingsBaseCurrencyModal";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Colors } from "@/constants/theme";
 import { getCurrencyInfo } from "@/constants/currencies";
@@ -25,7 +23,6 @@ const SettingsScreen = () => {
   const router = useRouter();
   const { logout, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const { baseCurrency, setBaseCurrency } = useBaseCurrency();
   const { t, i18n } = useTranslation();
 
   useEffect(() => {
@@ -96,13 +93,6 @@ const SettingsScreen = () => {
             iconName="language-outline"
             currentValue={currentLanguageName()}
             onPress={() => setIsLanguageModalVisible(true)}
-          />
-          <Divider />
-          <SettingsPreferenceRow
-            title={t("settings.base_currency")}
-            iconName="cash-outline"
-            currentValue={getCurrencyInfo(baseCurrency).code}
-            onPress={() => setIsBaseCurrencyModalVisible(true)}
           />
           <Divider />
           <SettingsPreferenceRow
@@ -190,21 +180,6 @@ const SettingsScreen = () => {
           </TouchableOpacity>
         </View>
       </CustomModal>
-
-      <SettingsBaseCurrencyModal
-        isVisible={isBaseCurrencyModalVisible}
-        setIsVisible={setIsBaseCurrencyModalVisible}
-        baseCurrency={baseCurrency}
-        onSelect={(code) => {
-          void setBaseCurrency(code);
-          Toast.show({
-            type: "success",
-            text1: t("settings.base_currency_updated", {
-              currency: getCurrencyInfo(code).code,
-            }),
-          });
-        }}
-      />
     </SafeAreaView>
   );
 };

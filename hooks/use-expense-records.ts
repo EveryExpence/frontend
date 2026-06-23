@@ -6,10 +6,8 @@ import { getAllCategories } from '@/data/categories';
 import { Category } from '@/types/data/category';
 import { getAllPaymentMethods } from '@/data/paymentMethods';
 import { formatCurrency } from '@/utils/formatCurrency';
-import { fetchExchangeRates, convertAmount } from '@/utils/exchangeRates';
 import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
-import { useBaseCurrency } from '@/context/baseCurrencyContext';
 
 export interface TransactionRecord {
     id: string;
@@ -22,6 +20,10 @@ export interface TransactionRecord {
     categoryIcon?: string;
     paymentMethodName: string;
     location?: string;
+    changeRate?: number;
+    createdAtTime: number;
+    accountId: string;
+    accountName: string;
 }
 
 export interface TransactionSection {
@@ -35,10 +37,9 @@ export function useExpenseRecords(accountId?: string, scope: 'total' | 'account'
     const db = useSQLiteContext();
     const { t } = useTranslation();
     const [records, setRecords] = React.useState<TransactionRecord[]>([]);
-    const [rates, setRates] = React.useState<Record<string, number>>({});
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
-    const { baseCurrency } = useBaseCurrency();
+    const [exchangeRates, setExchangeRates] = React.useState<Record<string, number>>({});
     const isTotalScope = scope === 'total';
 
     const formatDateLabel = React.useCallback((ts?: number) => {
@@ -66,28 +67,8 @@ export function useExpenseRecords(accountId?: string, scope: 'total' | 'account'
                 getAllPaymentMethods(db)
             ]);
 
-            const accountMap: Record<string, string> = {};
-            accounts.forEach((a) => (accountMap[a.id] = a.currency));
-
-            let displayRates: Record<string, number> = {};
-            if (isTotalScope) {
-                const distinctCurrencies = new Set(
-                    local.map((r) => accountMap[r.accountId]).filter((c): c is string => Boolean(c)),
-                );
-                const needsConversion =
-                    distinctCurrencies.size > 0 &&
-                    Array.from(distinctCurrencies).some(
-                        (c) => c.toUpperCase() !== baseCurrency.toUpperCase(),
-                    );
-                if (needsConversion) {
-                    displayRates = await fetchExchangeRates(baseCurrency);
-                    setRates(displayRates);
-                } else {
-                    setRates({});
-                }
-            } else {
-                setRates({});
-            }
+            const accountMap: Record<string, { currency: string; name: string }> = {};
+            accounts.forEach((a) => (accountMap[a.id] = { currency: a.currency, name: a.name }));
 
             if (!isTotalScope && accountId) {
                 local = local.filter(r => r.accountId === accountId);
@@ -99,37 +80,63 @@ export function useExpenseRecords(accountId?: string, scope: 'total' | 'account'
             const paymentMethodMap: Record<string, string> = {};
             paymentMethods.forEach((pm) => (paymentMethodMap[pm.id] = pm.name));
 
-            const mapped: TransactionRecord[] = local
+            const { fetchExchangeRates, convertAmount } = await import('@/utils/exchangeRates');
+            const rates = await fetchExchangeRates('USD');
+            setExchangeRates(rates);
+            const canConvert = Object.keys(rates).length > 1;
+
+            let mapped = local
                 .slice()
-                .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
+                .sort((a, b) => {
+                    const timeA = typeof a.createdAt === 'number' ? a.createdAt : new Date(a.createdAt || 0).getTime();
+                    const timeB = typeof b.createdAt === 'number' ? b.createdAt : new Date(b.createdAt || 0).getTime();
+                    return timeA - timeB;
+                })
                 .map((r) => {
-                    const originalCurrency = accountMap[r.accountId] ?? baseCurrency;
-                    let displayAmount = r.amount;
-                    let displayCurrency = originalCurrency;
-                    if (isTotalScope) {
-                        displayAmount = convertAmount(
-                            r.amount,
-                            originalCurrency,
-                            baseCurrency,
-                            displayRates,
-                        );
-                        displayCurrency = baseCurrency;
-                    }
+                    const originalCurrency = accountMap[r.accountId]?.currency ?? "PLN";
+                    const accountName = accountMap[r.accountId]?.name ?? "Account";
+                    const categoryName = categoryMap[r.categoryId]?.name ?? t('records.uncategorized');
                     return {
                         id: r.id,
-                        title: r.description || 'Payment',
-                        amount: displayAmount,
-                        currency: displayCurrency,
+                        title: r.description || categoryName,
+                        amount: r.amount,
+                        currency: originalCurrency,
                         kind: r.amount >= 0 ? 'income' : 'expense',
                         dateLabel: formatDateLabel(r.createdAt),
-                        categoryName: categoryMap[r.categoryId]?.name ?? t('records.uncategorized'),
+                        categoryName,
                         categoryIcon: categoryMap[r.categoryId]?.icon,
                         paymentMethodName: paymentMethodMap[r.paymentMethodId] ?? t('common.other'),
                         location: r.location,
+                        createdAtTime: typeof r.createdAt === 'number' ? r.createdAt : new Date(r.createdAt || 0).getTime(),
+                        accountId: r.accountId,
+                        accountName: accountName
                     };
                 });
 
-            setRecords(mapped);
+            let runningBalanceUSD = 0;
+            for (const acc of accounts) {
+                if (!accountId || acc.id === accountId) {
+                    runningBalanceUSD += canConvert ? convertAmount(acc.balance, acc.currency, 'USD', rates) : acc.balance;
+                }
+            }
+
+            for (let i = 0; i < mapped.length; i++) {
+                const r = mapped[i];
+                const amtUSD = canConvert ? convertAmount(r.amount, r.currency, 'USD', rates) : r.amount;
+                
+                let changeRate: number | undefined = undefined;
+                if (Math.abs(runningBalanceUSD) > 0.01) {
+                    changeRate = (amtUSD / Math.abs(runningBalanceUSD)) * 100;
+                }
+                
+                (r as any).changeRate = changeRate;
+                r.amount = Math.abs(r.amount);
+                runningBalanceUSD += amtUSD;
+            }
+
+            mapped.sort((a, b) => b.createdAtTime - a.createdAtTime);
+
+            setRecords(mapped as TransactionRecord[]);
         } catch (e: any) {
             const msg = e?.message ?? String(e);
             setError(msg);
@@ -137,7 +144,7 @@ export function useExpenseRecords(accountId?: string, scope: 'total' | 'account'
         } finally {
             setLoading(false);
         }
-    }, [db, accountId, isTotalScope, baseCurrency]);
+    }, [db, accountId, isTotalScope]);
 
     React.useEffect(() => {
         fetch();
@@ -152,23 +159,30 @@ export function useExpenseRecords(accountId?: string, scope: 'total' | 'account'
             map.set(key, arr);
         });
 
+        const { convertAmount } = require('@/utils/exchangeRates');
+        const canConvert = Object.keys(exchangeRates).length > 1;
+
         return Array.from(map.entries()).map(([title, items], idx) => {
-            const totals: Record<string, number> = {};
+            let totalUSD = 0;
             items.forEach((it) => {
-                totals[it.currency] = (totals[it.currency] || 0) + it.amount;
+                let amt = it.kind === 'income' ? it.amount : -it.amount;
+                if (canConvert) {
+                    totalUSD += convertAmount(amt, it.currency, 'USD', exchangeRates);
+                } else {
+                    totalUSD += amt;
+                }
             });
-            const summary = Object.entries(totals)
-                .map(([curr, sum]) => formatCurrency(sum, curr))
-                .join(' | ');
+            const summary = formatCurrency(Math.abs(totalUSD), canConvert ? 'USD' : (items[0]?.currency ?? 'USD'));
+            const summaryPrefix = totalUSD >= 0 ? '+' : '-';
 
             return {
                 id: `section-${idx}`,
                 title,
-                summary,
+                summary: summaryPrefix + summary,
                 items,
             };
         });
-    }, [records, t]);
+    }, [records, t, exchangeRates]);
 
     return { records, sections, loading, error, refetch: fetch } as const;
 }

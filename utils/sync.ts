@@ -116,12 +116,14 @@ export const syncAccounts = async (db: SQLiteDatabase) => {
             throw new Error("Failed to fetch accounts from server");
         }
         const remote: AccountResponseDTO[] = await response.json();
-        const localIds = await getAllLocalAccountIds(db);
         const remoteIds = remote.map(c => c.id);
-
-        const idsToDeleteLocally = localIds.filter(id => !remoteIds.includes(id));
+        const localItems = await db.getAllAsync<{ id: string, syncState: string }>("SELECT id, syncState FROM accounts");
+        const idsToDeleteLocally = localItems
+            .filter(a => a.syncState === 'synced' && !remoteIds.includes(a.id))
+            .map(a => a.id);
         if (idsToDeleteLocally.length > 0) await deleteAccountBatch(db, idsToDeleteLocally);
 
+        const localIds = localItems.map(a => a.id);
         for (const remoteItem of remote) {
             if (!localIds.includes(remoteItem.id)) await insertRemoteAccount(db, remoteItem);
             else await updateRemoteAccount(db, remoteItem);
@@ -170,12 +172,14 @@ export const syncPaymentMethods = async (db: SQLiteDatabase) => {
             throw new Error("Failed to fetch payment methods from server");
         }
         const remote: PaymentMethodResponseDTO[] = await response.json();
-        const localIds = await getAllLocalPaymentMethodIds(db);
         const remoteIds = remote.map(c => c.id);
-
-        const idsToDeleteLocally = localIds.filter(id => !remoteIds.includes(id));
+        const localItems = await db.getAllAsync<{ id: string, syncState: string }>("SELECT id, syncState FROM payment_methods");
+        const idsToDeleteLocally = localItems
+            .filter(a => a.syncState === 'synced' && !remoteIds.includes(a.id))
+            .map(a => a.id);
         if (idsToDeleteLocally.length > 0) await deletePaymentMethodBatch(db, idsToDeleteLocally);
 
+        const localIds = localItems.map(a => a.id);
         for (const remoteItem of remote) {
             if (!localIds.includes(remoteItem.id)) await insertRemotePaymentMethod(db, remoteItem);
             else await updateRemotePaymentMethod(db, remoteItem);
@@ -336,12 +340,14 @@ export const syncExpenseRecords = async (db: SQLiteDatabase) => {
             throw new Error("Failed to fetch expense records from server");
         }
         const remote: ExpenseRecordResponseDTO[] = await response.json();
-        const localIds = await getAllLocalExpenseRecordIds(db);
         const remoteIds = remote.map(c => c.id);
-
-        const idsToDeleteLocally = localIds.filter(id => !remoteIds.includes(id));
+        const localItems = await db.getAllAsync<{ id: string, syncState: string }>("SELECT id, syncState FROM expense_records");
+        const idsToDeleteLocally = localItems
+            .filter(a => a.syncState === 'synced' && !remoteIds.includes(a.id))
+            .map(a => a.id);
         if (idsToDeleteLocally.length > 0) await deleteExpenseRecordBatch(db, idsToDeleteLocally);
 
+        const localIds = localItems.map(a => a.id);
         for (const remoteItem of remote) {
             if (!localIds.includes(remoteItem.id)) await insertRemoteExpenseRecord(db, remoteItem);
             else await updateRemoteExpenseRecord(db, remoteItem);

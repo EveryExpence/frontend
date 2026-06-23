@@ -74,10 +74,16 @@ export const migrateDatabase = async (db: SQLiteDatabase) => {
             ('cat_investment', 'Investment', 'INCOME', 'chart-line', 'synced'),
             ('cat_gifts', 'Gifts', 'INCOME', 'gift', 'synced'),
             ('cat_others_income', 'Others', 'INCOME', 'dots-horizontal', 'synced');
-
-            INSERT OR IGNORE INTO accounts (id, name, currency, balance, syncState) VALUES
-            ('acc_main', 'Main Account', 'USD', 0, 'created');
         `);
+
+        const accounts = await db.getAllAsync<{id: string}>("SELECT id FROM accounts LIMIT 1");
+        if (accounts.length === 0) {
+            const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+            await db.execAsync(`INSERT INTO accounts (id, name, currency, balance, syncState) VALUES ('${uuid}', 'Main Account', 'USD', 0, 'created');`);
+        }
     } catch (error) {
         console.error("Database migration failed:", error);
         throw new Error(`Database migration failed: ${error instanceof Error ? error.message : String(error)}`);

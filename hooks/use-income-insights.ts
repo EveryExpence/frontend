@@ -8,7 +8,6 @@ import { Category } from "@/types/data/category";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { CATEGORY_COLORS } from "@/constants/categoryColors";
 import { fetchExchangeRates, convertAmount } from "@/utils/exchangeRates";
-import { useBaseCurrency } from "@/context/baseCurrencyContext";
 
 export interface CategoryIncomeItem {
     id: string;
@@ -39,7 +38,7 @@ export function useIncomeInsights(startDate: Date, endDate: Date, accountId?: st
     );
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
-    const { baseCurrency } = useBaseCurrency();
+    const baseCurrency = "USD";
     const shouldConvert = !accountId;
 
     const fetch = React.useCallback(async () => {
@@ -60,9 +59,11 @@ export function useIncomeInsights(startDate: Date, endDate: Date, accountId?: st
             const accountCurrencyMap: Record<string, string> = {};
             allAccounts.forEach((a) => (accountCurrencyMap[a.id] = a.currency));
 
+            let canConvert = false;
             let rates: Record<string, number> = {};
             if (shouldConvert) {
                 rates = await fetchExchangeRates(baseCurrency);
+                canConvert = Object.keys(rates).length > 1;
             }
 
             const startTs = startDate.getTime();
@@ -92,7 +93,7 @@ export function useIncomeInsights(startDate: Date, endDate: Date, accountId?: st
                 let currency = originalCurrency;
                 let key = `${catId}_${currency}`;
 
-                if (shouldConvert) {
+                if (shouldConvert && canConvert) {
                     amt = convertAmount(amt, originalCurrency, baseCurrency, rates);
                     currency = baseCurrency;
                     key = catId;
@@ -127,7 +128,7 @@ export function useIncomeInsights(startDate: Date, endDate: Date, accountId?: st
                             let amt = Math.abs(r.amount);
                             let currency = originalCurrency;
 
-                            if (shouldConvert) {
+                            if (shouldConvert && canConvert) {
                                 amt = convertAmount(amt, originalCurrency, baseCurrency, rates);
                                 currency = baseCurrency;
                             }
@@ -143,7 +144,7 @@ export function useIncomeInsights(startDate: Date, endDate: Date, accountId?: st
 
                     return {
                         categoryId: key,
-                        categoryName: shouldConvert ? catName : `${catName} (${data.currency})`,
+                        categoryName: (shouldConvert && canConvert) ? catName : `${catName} (${data.currency})`,
                         categoryIcon: categoryMap[data.categoryId]?.icon,
                         totalAmount: data.totalAbs,
                         displayAmount: formatCurrency(data.totalAbs, data.currency),

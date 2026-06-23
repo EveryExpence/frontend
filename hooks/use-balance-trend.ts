@@ -3,7 +3,6 @@ import React from "react";
 import { BalanceDataPoint, calculateBalanceTrend } from "@/utils/trendCalculations";
 import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
-import { useBaseCurrency } from "@/context/baseCurrencyContext";
 import { fetchExchangeRates } from "@/utils/exchangeRates";
 
 export const useBalanceTrend = (accountId?: string) => {
@@ -14,7 +13,7 @@ export const useBalanceTrend = (accountId?: string) => {
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
     const { t } = useTranslation();
-    const { baseCurrency } = useBaseCurrency();
+    const baseCurrency = "USD";
     const shouldConvert = !accountId;
 
     const fetchTrend = React.useCallback(async () => {

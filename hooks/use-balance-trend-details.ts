@@ -9,7 +9,6 @@ import { fetchExchangeRates, convertAmount } from "@/utils/exchangeRates";
 import { BalanceDataPoint, calculateBalanceTrend } from "@/utils/trendCalculations";
 import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
-import { useBaseCurrency } from "@/context/baseCurrencyContext";
 
 export interface IncomeSource {
     categoryId: string;
@@ -39,7 +38,7 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date, accountId
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
     const { t } = useTranslation();
-    const { baseCurrency } = useBaseCurrency();
+    const baseCurrency = "USD";
     const shouldConvert = !accountId;
 
     const fetchData = React.useCallback(async () => {
@@ -47,19 +46,21 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date, accountId
         try {
             setLoading(true);
 
+            let canConvert = false;
             let rates: Record<string, number> = {};
             if (shouldConvert) {
                 rates = await fetchExchangeRates(baseCurrency);
+                canConvert = Object.keys(rates).length > 1;
             }
 
             const trendResult = await calculateBalanceTrend(db, startDate, endDate, accountId, {
-                shouldConvert,
+                shouldConvert: shouldConvert && canConvert,
                 baseCurrency,
                 rates
             });
             setData(trendResult.points);
             setPercentageChange(trendResult.percentageChange);
-            setCurrency(shouldConvert ? baseCurrency : trendResult.primaryCurrency);
+            setCurrency((shouldConvert && canConvert) ? baseCurrency : trendResult.primaryCurrency);
 
             const [categories, allRecords, accounts] = await Promise.all([
                 getAllCategories(db),
@@ -91,7 +92,7 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date, accountId
                 let amt = r.amount;
                 let c = curr;
 
-                if (shouldConvert) {
+                if (shouldConvert && canConvert) {
                     amt = convertAmount(amt, curr, baseCurrency, rates);
                     c = baseCurrency;
                 }
@@ -127,7 +128,7 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date, accountId
                 let amt = Math.abs(r.amount);
                 let c = curr;
 
-                if (shouldConvert) {
+                if (shouldConvert && canConvert) {
                     amt = convertAmount(amt, curr, baseCurrency, rates);
                     c = baseCurrency;
                 }
