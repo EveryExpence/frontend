@@ -5,11 +5,10 @@ import { getAllAccounts } from "@/data/accounts";
 import { Category } from "@/types/data/category";
 import React from "react";
 import { formatCurrency } from "@/utils/formatCurrency";
-import { fetchExchangeRates, convertAmountToUSD } from "@/utils/exchangeRates";
+import { fetchExchangeRates, convertAmount } from "@/utils/exchangeRates";
 import { BalanceDataPoint, calculateBalanceTrend } from "@/utils/trendCalculations";
 import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from "@/context/authContext";
 
 export interface IncomeSource {
     categoryId: string;
@@ -39,23 +38,29 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date, accountId
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
     const { t } = useTranslation();
-    const { user } = useAuth();
-    const convertToUSD = !!user;
+    const baseCurrency = "USD";
+    const shouldConvert = !accountId;
 
     const fetchData = React.useCallback(async () => {
         if (!db) return;
         try {
             setLoading(true);
 
-            const trendResult = await calculateBalanceTrend(db, startDate, endDate, accountId, convertToUSD);
+            let canConvert = false;
+            let rates: Record<string, number> = {};
+            if (shouldConvert) {
+                rates = await fetchExchangeRates(baseCurrency);
+                canConvert = Object.keys(rates).length > 1;
+            }
+
+            const trendResult = await calculateBalanceTrend(db, startDate, endDate, accountId, {
+                shouldConvert: shouldConvert && canConvert,
+                baseCurrency,
+                rates
+            });
             setData(trendResult.points);
             setPercentageChange(trendResult.percentageChange);
-            setCurrency(convertToUSD ? "USD" : trendResult.primaryCurrency);
-
-            let rates: Record<string, number> = {};
-            if (convertToUSD) {
-                rates = await fetchExchangeRates("USD");
-            }
+            setCurrency((shouldConvert && canConvert) ? baseCurrency : trendResult.primaryCurrency);
 
             const [categories, allRecords, accounts] = await Promise.all([
                 getAllCategories(db),
@@ -87,9 +92,9 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date, accountId
                 let amt = r.amount;
                 let c = curr;
 
-                if (convertToUSD) {
-                    amt = convertAmountToUSD(amt, curr, rates);
-                    c = "USD";
+                if (shouldConvert && canConvert) {
+                    amt = convertAmount(amt, curr, baseCurrency, rates);
+                    c = baseCurrency;
                 }
 
                 const existing = incomeGroupMap.get(catId) ?? { total: 0, currency: c };
@@ -123,9 +128,9 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date, accountId
                 let amt = Math.abs(r.amount);
                 let c = curr;
 
-                if (convertToUSD) {
-                    amt = convertAmountToUSD(amt, curr, rates);
-                    c = "USD";
+                if (shouldConvert && canConvert) {
+                    amt = convertAmount(amt, curr, baseCurrency, rates);
+                    c = baseCurrency;
                 }
 
                 const existing = spendingGroupMap.get(catId) ?? { totalAbs: 0, currency: c };
@@ -153,7 +158,7 @@ export const useBalanceTrendDetails = (startDate: Date, endDate: Date, accountId
         } finally {
             setLoading(false);
         }
-    }, [db, startDate.getTime(), endDate.getTime(), accountId, convertToUSD]);
+    }, [db, startDate.getTime(), endDate.getTime(), accountId, shouldConvert, baseCurrency]);
 
     React.useEffect(() => {
         fetchData();

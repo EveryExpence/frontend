@@ -11,13 +11,14 @@ import { useTranslation } from "react-i18next";
 
 import { PolarChart, Pie } from "victory-native";
 import { CATEGORY_COLORS } from "@/constants/categoryColors";
-import { fetchExchangeRates, convertAmountToUSD } from "@/utils/exchangeRates";
-import { useAuth } from "@/context/authContext";
+import { fetchExchangeRates, convertAmount } from "@/utils/exchangeRates";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 export const SpendingInsidesWidget: React.FC<{
   onShowMore?: () => void;
   accountId?: string;
-}> = ({ onShowMore, accountId }) => {
+  scope?: "total" | "account";
+}> = ({ onShowMore, accountId, scope = "account" }) => {
   const scheme = useColorScheme() ?? "light";
   const { t } = useTranslation();
   const [recordsRaw, setRecordsRaw] = React.useState<any[]>([]);
@@ -32,8 +33,9 @@ export const SpendingInsidesWidget: React.FC<{
     Record<string, string>
   >({});
   const [rates, setRates] = React.useState<Record<string, number>>({});
-  const { user } = useAuth();
-  const convertToUSD = !!user;
+  const baseCurrency = "USD";
+
+  const isTotalScope = scope === "total";
 
   React.useEffect(() => {
     let mounted = true;
@@ -41,36 +43,50 @@ export const SpendingInsidesWidget: React.FC<{
       if (!db) return;
       try {
         const cats = await getAllCategories(db);
-        if (mounted) {
-          const map: Record<string, string> = {};
-          cats.forEach((c) => (map[c.id] = c.name));
-          setCategories(map);
-          const iconMap: Record<string, string> = {};
-          cats.forEach((c) => (iconMap[c.id] = c.icon));
-          setCategoryIcons(iconMap);
-        }
+        const accMap: Record<string, string> = {};
+        const iconMap: Record<string, string> = {};
+        const catMap: Record<string, string> = {};
+        cats.forEach((c) => {
+          catMap[c.id] = c.name;
+          iconMap[c.id] = c.icon;
+        });
 
         const { getAllAccounts } = await import("@/data/accounts");
         const accts = await getAllAccounts(db);
-        if (mounted) {
-          const accMap: Record<string, string> = {};
-          accts.forEach((a) => (accMap[a.id] = a.currency));
-          setAccounts(accMap);
-        }
+        accts.forEach((a) => (accMap[a.id] = a.currency));
 
         setLoading(true);
         const local = await getAllExpenseRecords(db);
         let filteredLocal = local;
-        if (accountId) {
+        if (!isTotalScope && accountId) {
           filteredLocal = local.filter((r) => r.accountId === accountId);
         }
-        if (mounted) {
-          setRecordsRaw(filteredLocal);
-        }
 
-        if (convertToUSD) {
-          const fetchedRates = await fetchExchangeRates("USD");
-          if (mounted) setRates(fetchedRates);
+        if (!mounted) return;
+        setAccounts(accMap);
+        setCategories(catMap);
+        setCategoryIcons(iconMap);
+        setRecordsRaw(filteredLocal);
+
+        if (isTotalScope) {
+          const distinctCurrencies = new Set(
+            filteredLocal
+              .map((r) => accMap[r.accountId])
+              .filter((c): c is string => Boolean(c)),
+          );
+          const needsConversion =
+            distinctCurrencies.size > 0 &&
+            Array.from(distinctCurrencies).some(
+              (c) => c.toUpperCase() !== baseCurrency.toUpperCase(),
+            );
+          if (needsConversion) {
+            const fetchedRates = await fetchExchangeRates(baseCurrency);
+            if (mounted) setRates(fetchedRates);
+          } else {
+            setRates({});
+          }
+        } else {
+          setRates({});
         }
       } catch (e: any) {
         if (mounted) setError(e?.message ?? String(e));
@@ -81,7 +97,15 @@ export const SpendingInsidesWidget: React.FC<{
     return () => {
       mounted = false;
     };
-  }, [db, accountId]);
+  }, [db, accountId, isTotalScope, baseCurrency]);
+
+  const toBaseAmount = React.useCallback(
+    (amount: number, currency: string) =>
+      convertAmount(amount, currency, baseCurrency, rates),
+    [baseCurrency, rates],
+  );
+
+  const canConvert = Object.keys(rates).length > 1;
 
   const totalsByCategory = React.useMemo(() => {
     const map = new Map<
@@ -92,24 +116,22 @@ export const SpendingInsidesWidget: React.FC<{
       if (r.amount === undefined || r.amount === null) return;
       if (r.amount >= 0) return;
       const cat = r.categoryId ?? "uncategorized";
-      const originalCurrency = accounts[r.accountId] ?? "PLN";
+      const originalCurrency = accounts[r.accountId] ?? baseCurrency;
 
       let amt = Math.abs(r.amount);
-      let currency = originalCurrency;
-      let key = `${cat}_${currency}`;
-
-      if (convertToUSD) {
-        amt = convertAmountToUSD(amt, originalCurrency, rates);
-        currency = "USD";
-        key = cat;
+      let displayCurrency = originalCurrency;
+      if (isTotalScope && canConvert) {
+        amt = toBaseAmount(amt, originalCurrency);
+        displayCurrency = baseCurrency;
       }
 
+      const key = `${cat}_${displayCurrency}`;
       const entry = map.get(key) ?? [];
-      entry.push({ amount: amt, currency, categoryId: cat });
+      entry.push({ amount: amt, currency: displayCurrency, categoryId: cat });
       map.set(key, entry);
     });
     return map;
-  }, [recordsRaw, accounts, convertToUSD, rates]);
+  }, [recordsRaw, accounts, isTotalScope, toBaseAmount, baseCurrency, canConvert]);
 
   const data = React.useMemo((): {
     label: string;
@@ -138,10 +160,10 @@ export const SpendingInsidesWidget: React.FC<{
       0,
     );
 
-    entries.forEach(([key, entries], idx) => {
+    entries.forEach(([, entries], idx) => {
       const catId = entries[0].categoryId;
       const label = categories[catId] ?? "Other";
-      const primaryCurrency = entries[0].currency;
+      const displayCurrency = entries[0].currency;
       let chartValue = 0;
       entries.forEach(({ amount }) => {
         chartValue += amount;
@@ -151,11 +173,11 @@ export const SpendingInsidesWidget: React.FC<{
         grandTotal > 0 ? ((chartValue / grandTotal) * 100).toFixed(1) : "0.0";
       const displayAmount = `${percentage}%`;
       arr.push({
-        label: `${label} (${primaryCurrency})`,
+        label: (isTotalScope && canConvert) ? label : `${label} (${displayCurrency})`,
         value: chartValue,
         color: CATEGORY_COLORS[idx % CATEGORY_COLORS.length],
         categoryId: catId,
-        currency: primaryCurrency,
+        currency: displayCurrency,
         displayAmount,
       });
     });
@@ -167,24 +189,21 @@ export const SpendingInsidesWidget: React.FC<{
     recordsRaw.forEach((r) => {
       if (r.amount === undefined || r.amount === null) return;
       if (r.amount >= 0) return;
-      const originalCurrency = accounts[r.accountId] ?? "PLN";
-
+      const originalCurrency = accounts[r.accountId] ?? baseCurrency;
       let amt = Math.abs(r.amount);
-      let currency = originalCurrency;
-
-      if (convertToUSD) {
-        amt = convertAmountToUSD(amt, originalCurrency, rates);
-        currency = "USD";
+      let displayCurrency = originalCurrency;
+      if (isTotalScope && canConvert) {
+        amt = toBaseAmount(amt, originalCurrency);
+        displayCurrency = baseCurrency;
       }
-
-      const prev = map.get(currency) ?? 0;
-      map.set(currency, prev + amt);
+      const prev = map.get(displayCurrency) ?? 0;
+      map.set(displayCurrency, prev + amt);
     });
     return Array.from(map.entries())
       .sort((a, b) => b[1] - a[1])
       .map(([curr, amt]) => formatCurrency(amt, curr))
       .join(" | ");
-  }, [recordsRaw, accounts, convertToUSD, rates]);
+  }, [recordsRaw, accounts, isTotalScope, toBaseAmount, baseCurrency, canConvert]);
 
   if (!loading && !error && data.length === 0) return null;
 
@@ -203,19 +222,21 @@ export const SpendingInsidesWidget: React.FC<{
               </Text>
             </View>
           ) : (
-            <PolarChart<
-              { label: string; value: number; color: string },
-              "label",
-              "value",
-              "color"
-            >
-              data={data}
-              labelKey={"label"}
-              valueKey={"value"}
-              colorKey={"color"}
-            >
-              <Pie.Chart innerRadius="70%" />
-            </PolarChart>
+            <Animated.View entering={FadeInDown.delay(100).springify().mass(0.6).damping(14)} style={{ flex: 1 }}>
+              <PolarChart<
+                { label: string; value: number; color: string },
+                "label",
+                "value",
+                "color"
+              >
+                data={data}
+                labelKey={"label"}
+                valueKey={"value"}
+                colorKey={"color"}
+              >
+                <Pie.Chart innerRadius="70%" />
+              </PolarChart>
+            </Animated.View>
           )}
         </View>
 
@@ -231,8 +252,8 @@ export const SpendingInsidesWidget: React.FC<{
           </Text>
 
           <View className="mt-2">
-            {data.slice(0, 3).map((d) => (
-              <View key={d.label} className="flex-row items-center py-0.5">
+            {data.slice(0, 3).map((d, index) => (
+              <Animated.View key={d.label} entering={FadeInDown.delay(200 + index * 100).springify().mass(0.6).damping(14)} className="flex-row items-center py-0.5">
                 <View className="flex-row items-center flex-1 mr-2">
                   <MaterialCommunityIcons
                     name={
@@ -253,7 +274,7 @@ export const SpendingInsidesWidget: React.FC<{
                 <Text className="text-theme-text text-sm font-medium">
                   {d.displayAmount}
                 </Text>
-              </View>
+              </Animated.View>
             ))}
           </View>
         </View>

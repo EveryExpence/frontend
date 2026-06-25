@@ -1,7 +1,8 @@
-import { View, Text, Modal, Pressable, useColorScheme } from 'react-native'
+import { View, Text, Modal, Pressable } from 'react-native'
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Colors } from "@/constants/theme";
 import React, { Dispatch, ReactNode, SetStateAction } from 'react'
+import { useTheme } from '@/context/themeContext';
 
 interface Props {
     isVisible: boolean;
@@ -18,7 +19,7 @@ const CustomModal = (props: Props) => {
         props.setIsVisible(false);
     }
 
-    const scheme = useColorScheme() ?? "light";
+    const { theme } = useTheme();
 
     return (
         <Modal visible={props.isVisible} transparent animationType="fade" onRequestClose={onClose}>
@@ -28,7 +29,7 @@ const CustomModal = (props: Props) => {
                         <Text className="text-2xl font-semibold text-theme-text flex-1 pr-2">{props.title}</Text>
                         {props.showCloseIcon && (
                             <Pressable onPress={onClose} className="p-1 -mt-1 -mr-1">
-                                <MaterialCommunityIcons name="close" size={24} color={Colors[scheme].text} />
+                                <MaterialCommunityIcons name="close" size={24} color={Colors[theme].text} />
                             </Pressable>
                         )}
                     </View>

@@ -5,8 +5,10 @@ import {
   Dimensions,
   ActivityIndicator,
   Animated,
+  RefreshControl,
   ScrollView,
   Text,
+  LayoutAnimation,
 } from "react-native";
 import {
   SafeAreaView,
@@ -27,6 +29,7 @@ import IncomeInsightsWidget from "@/components/dashboard/widgets/IncomeInsightsW
 import BalanceTrendWidget from "@/components/dashboard/widgets/BalanceTrendWidget";
 import { ExpenseMapWidget } from "@/components/dashboard/widgets/ExpenseMapWidget";
 import { useTranslation } from "react-i18next";
+import { useSync } from "@/context/syncContext";
 
 const { width } = Dimensions.get("window");
 
@@ -34,24 +37,28 @@ type AccountWithComputed = Account & { computedBalance: number };
 
 const Dashboard = () => {
   const { t } = useTranslation();
-  const colorScheme: "light" | "dark" = useColorScheme() ?? "light";
+  const colorScheme = useColorScheme() ?? "light";
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
   const { accounts, loading, error, totalsByCurrency, refetch } =
     useAccountsData();
+  const { triggerSync, isSyncing } = useSync();
   const [pageIndex, setPageIndex] = React.useState(0);
   const [scrollEnabled, setScrollEnabled] = React.useState(true);
   const animatedIndex = React.useRef(new Animated.Value(0)).current;
+  const flatListRef = React.useRef<FlatList>(null);
+  const [listHeight, setListHeight] = React.useState<number | null>(null);
+  const pageHeights = React.useRef<{ [key: string]: number }>({}).current;
 
-  useFocusEffect(
-    useCallback(() => {
-      refetch();
-    }, [refetch]),
-  );
-
-  const pages: ({ type: "total" } | AccountWithComputed)[] = 
+  const pages: ({ type: "total" } | AccountWithComputed)[] =
     accounts.length <= 1 ? accounts : [{ type: "total" }, ...accounts];
+
+  React.useEffect(() => {
+    if (pages.length > 0 && pageIndex >= pages.length) {
+      setPageIndex(pages.length - 1);
+    }
+  }, [pages.length, pageIndex]);
 
   React.useEffect(() => {
     Animated.spring(animatedIndex, {
@@ -59,36 +66,79 @@ const Dashboard = () => {
       useNativeDriver: false,
       speed: 8,
     }).start();
-  }, [pageIndex, animatedIndex]);
 
-  const onMomentumScrollEnd = (e: any) => {
-    const newIndex = Math.round(e.nativeEvent.contentOffset.x / width);
-    setPageIndex(newIndex);
-  };
+    const currentKey = pages[pageIndex] && ("type" in pages[pageIndex] ? "total" : pages[pageIndex].id);
+    if (currentKey && pageHeights[currentKey]) {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setListHeight(pageHeights[currentKey]);
+    }
+  }, [pageIndex, animatedIndex, pages]);
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
+
+  const onRefresh = useCallback(async () => {
+    await triggerSync();
+    await refetch();
+  }, [triggerSync, refetch]);
+
+  const onViewableItemsChanged = React.useRef(({ viewableItems }: any) => {
+    if (viewableItems && viewableItems.length > 0 && viewableItems[0].index !== null) {
+      setPageIndex(viewableItems[0].index);
+    }
+  }).current;
+
+  const viewabilityConfig = React.useRef({ itemVisiblePercentThreshold: 50 }).current;
+
+  const activePage = pages[pageIndex];
+  const isTotalScope = !!activePage && "type" in activePage;
+  const activeAccountId =
+    activePage && "id" in activePage ? activePage.id : undefined;
+  const widgetScope: "total" | "account" = isTotalScope
+    ? "total"
+    : "account";
 
   const renderPage = ({ item }: { item: any }) => {
-    if (item.type === "total") {
-      return <TotalBalancePage totalsByCurrency={totalsByCurrency} />;
-    }
-
-    return <AccountPage account={item} />;
+    const isTotal = item.type === "total";
+    const key = isTotal ? "total" : item.id;
+    
+    return (
+      <View 
+        onLayout={(e) => {
+          const height = e.nativeEvent.layout.height;
+          pageHeights[key] = height;
+          if (pages[pageIndex] && ("type" in pages[pageIndex] ? "total" : pages[pageIndex].id) === key) {
+             if (listHeight !== height) {
+               LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+               setListHeight(height);
+             }
+          }
+        }}
+      >
+        {isTotal ? (
+          <TotalBalancePage totalsByCurrency={totalsByCurrency} />
+        ) : (
+          <AccountPage account={item} />
+        )}
+      </View>
+    );
   };
 
   return (
-    <LinearGradient
-      colors={[Colors[colorScheme].surface, Colors[colorScheme].tint]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      className="flex flex-1"
-    >
-      <SafeAreaView className="flex flex-1">
+    <View className="flex flex-1 bg-transparent">
+      <SafeAreaView className="flex flex-1 bg-transparent">
         {loading ? (
           <View className="flex-1 justify-center items-center">
             <ActivityIndicator size="large" color={Colors[colorScheme].tint} />
           </View>
         ) : error ? (
           <View className="p-4">
-            <Text className="text-theme-text">{t("common.error")}: {error}</Text>
+            <Text className="text-theme-text">
+              {t("common.error")}: {error}
+            </Text>
           </View>
         ) : (
           <ScrollView
@@ -100,16 +150,28 @@ const Dashboard = () => {
               paddingTop: Math.max(insets.top, 8),
               paddingBottom: 50 + insets.bottom,
             }}
+            refreshControl={
+              <RefreshControl
+                refreshing={isSyncing}
+                onRefresh={onRefresh}
+                tintColor={Colors[colorScheme].tint}
+                colors={[Colors[colorScheme].tint]}
+                progressBackgroundColor={Colors[colorScheme].surface}
+              />
+            }
           >
             <FlatList
-              style={{ flexGrow: 0, marginHorizontal: -16 }}
-              contentContainerStyle={{ flexGrow: 0 }}
+              ref={flatListRef}
+              initialScrollIndex={pageIndex}
+              style={{ flexGrow: 0, marginHorizontal: -16, height: listHeight ?? undefined }}
+              contentContainerStyle={{ flexGrow: 0, alignItems: 'flex-start' }}
               data={pages}
               keyExtractor={(i) => ("type" in i ? "total" : i.id)}
               horizontal
               pagingEnabled
               showsHorizontalScrollIndicator={false}
-              onMomentumScrollEnd={onMomentumScrollEnd}
+              onViewableItemsChanged={onViewableItemsChanged}
+              viewabilityConfig={viewabilityConfig}
               renderItem={renderPage}
               getItemLayout={(_, index) => ({
                 length: width,
@@ -125,45 +187,70 @@ const Dashboard = () => {
             />
 
             <TransactionHistoryWidget
-              accountId={pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
+              accountId={activeAccountId}
+              scope={widgetScope}
               onSeeAllPress={() => {
-                const id = pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
-                router.push(id ? { pathname: "/records", params: { accountId: id } } : "/records");
+                router.push(
+                  activeAccountId
+                    ? { pathname: "/records", params: { accountId: activeAccountId } }
+                    : "/records",
+                );
               }}
             />
 
             <SpendingInsidesWidget
-              accountId={pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
+              accountId={activeAccountId}
+              scope={widgetScope}
               onShowMore={() => {
-                const id = pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
-                router.push(id ? { pathname: "/spending-insights", params: { accountId: id } } : "/spending-insights");
+                router.push(
+                  activeAccountId
+                    ? {
+                        pathname: "/spending-insights",
+                        params: { accountId: activeAccountId },
+                      }
+                    : "/spending-insights",
+                );
               }}
             />
 
             <IncomeInsightsWidget
-              accountId={pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
+              accountId={activeAccountId}
+              scope={widgetScope}
               onShowMore={() => {
-                const id = pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
-                router.push(id ? { pathname: "/income-insights", params: { accountId: id } } : "/income-insights");
+                router.push(
+                  activeAccountId
+                    ? {
+                        pathname: "/income-insights",
+                        params: { accountId: activeAccountId },
+                      }
+                    : "/income-insights",
+                );
               }}
             />
 
-            <BalanceTrendWidget 
-              accountId={pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
+            <BalanceTrendWidget
+              accountId={activeAccountId}
               onShowMore={() => {
-                const id = pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined;
-                router.push(id ? { pathname: "/balance-trend", params: { accountId: id } } : "/balance-trend");
+                router.push(
+                  activeAccountId
+                    ? { pathname: "/balance-trend", params: { accountId: activeAccountId } }
+                    : "/balance-trend",
+                );
               }}
             />
 
             <ExpenseMapWidget
-              accountId={pages[pageIndex] && "id" in pages[pageIndex] ? pages[pageIndex].id : undefined}
+              accountId={
+                pages[pageIndex] && "id" in pages[pageIndex]
+                  ? pages[pageIndex].id
+                  : undefined
+              }
               setScrollEnabled={setScrollEnabled}
             />
           </ScrollView>
         )}
       </SafeAreaView>
-    </LinearGradient>
+    </View>
   );
 };
 

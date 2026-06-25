@@ -3,7 +3,7 @@ import React from "react";
 import { BalanceDataPoint, calculateBalanceTrend } from "@/utils/trendCalculations";
 import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/context/authContext';
+import { fetchExchangeRates } from "@/utils/exchangeRates";
 
 export const useBalanceTrend = (accountId?: string) => {
     const db = useSQLiteContext();
@@ -13,8 +13,8 @@ export const useBalanceTrend = (accountId?: string) => {
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
     const { t } = useTranslation();
-    const { user } = useAuth();
-    const convertToUSD = !!user;
+    const baseCurrency = "USD";
+    const shouldConvert = !accountId;
 
     const fetchTrend = React.useCallback(async () => {
         if (!db) return;
@@ -23,9 +23,18 @@ export const useBalanceTrend = (accountId?: string) => {
             const now = new Date();
             const start = new Date();
             start.setDate(now.getDate() - 30);
-            
-            const result = await calculateBalanceTrend(db, start, now, accountId, convertToUSD);
-            
+
+            let rates: Record<string, number> = {};
+            if (shouldConvert) {
+                rates = await fetchExchangeRates(baseCurrency);
+            }
+
+            const result = await calculateBalanceTrend(db, start, now, accountId, {
+                shouldConvert,
+                baseCurrency,
+                rates
+            });
+
             setData(result.points);
             setPercentageChange(result.percentageChange);
             setCurrency(result.primaryCurrency);
@@ -36,7 +45,7 @@ export const useBalanceTrend = (accountId?: string) => {
         } finally {
             setLoading(false);
         }
-    }, [db, accountId, convertToUSD]);
+    }, [db, accountId, shouldConvert, baseCurrency]);
 
     React.useEffect(() => {
         fetchTrend();

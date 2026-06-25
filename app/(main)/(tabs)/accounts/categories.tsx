@@ -5,7 +5,6 @@ import {
   Text,
   TouchableOpacity,
   View,
-  useColorScheme,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
@@ -30,13 +29,14 @@ import CategoryFormModal, {
 import DeleteCategoryModal from "@/components/categories/DeleteCategoryModal";
 import { useSync } from "@/context/syncContext";
 import { useTranslation } from "react-i18next";
+import { useTheme } from "@/context/themeContext";
 
 export default function CategoriesScreen() {
   const { t } = useTranslation();
   const { triggerSync } = useSync();
   const db = useSQLiteContext();
-  const scheme = useColorScheme() ?? "light";
-  const colors = Colors[scheme];
+  const { theme } = useTheme();
+  const colors = Colors[theme];
 
   const [categories, setCategories] = useState<CategoryCardItem[]>([]);
   const [editingCategory, setEditingCategory] =
@@ -129,7 +129,7 @@ export default function CategoriesScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-theme-background">
+    <SafeAreaView className="flex-1 bg-transparent">
       <Topbar title={t("tabs.categories")} />
       <View className="px-4 pt-2">
         <AccountsSectionTabs />
@@ -150,9 +150,10 @@ export default function CategoriesScreen() {
                 {t("categories.no_categories")}
               </Text>
             }
-            renderItem={({ item }) => (
+            renderItem={({ item, index }) => (
               <CategoryCard
                 item={item}
+                index={index}
                 onEdit={() => openEdit(item)}
                 onDelete={() => openDelete(item)}
               />

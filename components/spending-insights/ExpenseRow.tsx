@@ -3,6 +3,7 @@ import { View, Text, useColorScheme } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Colors } from "@/constants/theme";
 import { CategoryExpenseItem } from "@/hooks/use-spending-insights";
+import { formatCurrency } from "@/utils/formatCurrency";
 
 interface ExpenseRowProps {
     item: CategoryExpenseItem;
@@ -27,11 +28,7 @@ export function ExpenseRow({ item }: ExpenseRowProps) {
                 </Text>
             </View>
             <Text className="text-[16px] text-theme-text font-medium">
-                {item.amount.toLocaleString(undefined, {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 2,
-                })}{" "}
-                {item.currency}
+                {formatCurrency(item.amount, item.currency)}
             </Text>
         </View>
     );

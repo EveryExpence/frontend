@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { ActivityIndicator, FlatList, Text, TouchableOpacity, View, useColorScheme } from 'react-native';
+import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { useFocusEffect } from 'expo-router';
@@ -14,13 +14,14 @@ import PaymentMethodFormModal, { PaymentMethodFormData } from '@/components/paym
 import DeletePaymentMethodModal from '@/components/payments/DeletePaymentMethodModal';
 import { useSync } from '@/context/syncContext';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@/context/themeContext';
 
 export default function PaymentsScreen() {
 	const { t } = useTranslation();
 	const { triggerSync } = useSync();
 	const db = useSQLiteContext();
-	const scheme = useColorScheme() ?? 'light';
-	const colors = Colors[scheme];
+	const { theme } = useTheme();
+	const colors = Colors[theme];
 
 	const [paymentMethods, setPaymentMethods] = useState<PaymentMethodCardItem[]>([]);
 	const [editingPaymentMethod, setEditingPaymentMethod] = useState<PaymentMethodCardItem | null>(null);
@@ -107,7 +108,7 @@ export default function PaymentsScreen() {
 	};
 
 	return (
-		<SafeAreaView className="flex-1 bg-theme-background">
+		<SafeAreaView className="flex-1 bg-transparent">
 			<Topbar title={t("tabs.payments")} />
 			<View className="px-4 pt-2">
 				<AccountsSectionTabs />
@@ -124,9 +125,10 @@ export default function PaymentsScreen() {
 						showsVerticalScrollIndicator={false}
 						contentContainerStyle={{ paddingBottom: 24 }}
 						ListEmptyComponent={<Text className="pt-4 text-lg text-theme-icon mb-4">{t("payments.no_payments")}</Text>}
-						renderItem={({ item }) => (
+						renderItem={({ item, index }) => (
 							<PaymentMethodCard
 								item={item}
+								index={index}
 								onEdit={() => openEdit(item)}
 								onDelete={() => openDelete(item)}
 							/>

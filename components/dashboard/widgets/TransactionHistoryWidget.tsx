@@ -11,11 +11,13 @@ import {
 } from "@/hooks/use-expense-records";
 import { getCategoryIcon } from "@/types/data/category";
 import { useTranslation } from "react-i18next";
+import Animated, { FadeInDown, Layout } from "react-native-reanimated";
 
 interface TransactionHistoryWidgetProps {
   records?: TransactionRecord[];
   onSeeAllPress: () => void;
   accountId?: string;
+  scope?: "total" | "account";
 }
 
 export const TransactionHistoryRow = ({
@@ -29,49 +31,66 @@ export const TransactionHistoryRow = ({
   const router = useRouter();
 
   return (
-    <TouchableOpacity
-      className="flex-row items-center justify-between py-1"
-      onPress={() => router.push(`/record-details/${record.id}`)}
-    >
-      <View className="flex-1 flex-row items-center">
-        <View className="h-11 w-11 items-center justify-center rounded-full bg-theme-tint">
-          <MaterialCommunityIcons
-            name={
-              (record.categoryIcon as any) ||
-              getCategoryIcon(record.categoryName)
-            }
-            size={20}
-            color={colors.textLight}
-          />
-        </View>
-
-        <View className="ml-3 flex-1">
-          <Text
-            className="text-[18px] font-medium text-theme-text"
-            numberOfLines={1}
-          >
-            {record.title}
-          </Text>
-        </View>
-      </View>
-
-      <Text
-        className={`text-[18px] font-medium ${record.kind === "income" ? "text-theme-success" : "text-theme-text"}`}
+    <Animated.View entering={FadeInDown.springify().mass(0.5).damping(12)}>
+      <TouchableOpacity
+        className="flex-row items-center justify-between py-1"
+        onPress={() => router.push(`/record-details/${record.id}`)}
       >
-        {formatCurrency(record.amount, record.currency)}
-      </Text>
-    </TouchableOpacity>
+        <View className="flex-1 flex-row items-center">
+          <View className="h-11 w-11 items-center justify-center rounded-full bg-theme-tint">
+            <MaterialCommunityIcons
+              name={
+                (record.categoryIcon as any) ||
+                getCategoryIcon(record.categoryName)
+              }
+              size={20}
+              color={colors.textLight}
+            />
+          </View>
+
+          <View className="ml-3 flex-1">
+            <Text
+              className="text-[18px] font-medium text-theme-text"
+              numberOfLines={1}
+            >
+              {record.title}
+            </Text>
+            <Text
+              className="text-[13px] text-theme-text opacity-60"
+              numberOfLines={1}
+            >
+              {record.title === record.categoryName ? record.paymentMethodName : `${record.categoryName} • ${record.paymentMethodName}`}
+            </Text>
+          </View>
+        </View>
+
+        <View className="items-end">
+          <Text
+            className={`text-[18px] font-medium ${record.kind === "income" ? "text-theme-success" : "text-theme-text"}`}
+          >
+            {record.kind === "income" ? "+" : "-"}{formatCurrency(record.amount, record.currency)}
+          </Text>
+          {record.changeRate !== undefined && (
+            <Text
+              className={`text-[13px] ${record.changeRate >= 0 ? "text-[#208c05]" : "text-red-600"}`}
+            >
+              {record.changeRate >= 0 ? "+" : "-"}{Math.abs(record.changeRate).toFixed(1)}%
+            </Text>
+          )}
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
   );
 };
 
 export const TransactionHistoryWidget: React.FC<
   TransactionHistoryWidgetProps
-> = ({ records: propRecords, onSeeAllPress, accountId }) => {
+> = ({ records: propRecords, onSeeAllPress, accountId, scope = "account" }) => {
   const {
     records: localRecords,
     loading,
     error,
-  } = useExpenseRecords(accountId);
+  } = useExpenseRecords(accountId, scope);
   const { t } = useTranslation();
 
   const toShow =

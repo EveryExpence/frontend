@@ -5,6 +5,7 @@ import './global.css'
 import '@/locales/i18n'
 import { AuthProvider } from '@/context/authContext'
 import { ThemeProvider } from '@/context/themeContext'
+import AnimatedBackground from '@/components/AnimatedBackground'
 import CustomizedToast from '@/components/Toast'
 import { SQLiteProvider } from 'expo-sqlite';
 import { migrateDatabase } from '@/data/init'
@@ -12,6 +13,7 @@ import 'react-native-get-random-values';
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { SyncProvider } from '@/context/syncContext'
 import * as Notifications from 'expo-notifications';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -25,28 +27,31 @@ Notifications.setNotificationHandler({
 
 const RootLayout = () => {
   return (
-    <SafeAreaProvider>
-      <View
-        style={{
-          flex: 1,
-        }}
-        className="bg-theme-background"
-      >
-        <ThemeProvider>
-          <AuthProvider>
-            <SQLiteProvider
-              databaseName="app.db"
-              onInit={migrateDatabase}
-            >
-              <SyncProvider>
-                <Slot />
-              </SyncProvider>
-            </SQLiteProvider>
-          </AuthProvider>
-        </ThemeProvider>
-        <CustomizedToast />
-      </View>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <View
+          style={{
+            flex: 1,
+          }}
+          className="bg-theme-background"
+        >
+          <ThemeProvider>
+            <AnimatedBackground />
+            <AuthProvider>
+                <SQLiteProvider
+                  databaseName="app.db"
+                  onInit={migrateDatabase}
+                >
+                  <SyncProvider>
+                    <Slot />
+                  </SyncProvider>
+                </SQLiteProvider>
+            </AuthProvider>
+            <CustomizedToast />
+          </ThemeProvider>
+        </View>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   )
 }
 

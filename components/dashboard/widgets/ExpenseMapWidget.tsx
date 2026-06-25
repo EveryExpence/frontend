@@ -25,7 +25,8 @@ const ExpenseMapWidgetComponent: React.FC<ExpenseMapWidgetProps> = ({
   accountId,
   setScrollEnabled,
 }) => {
-  const { records, loading, error } = useExpenseRecords(accountId);
+  const scope = accountId ? "account" : "total";
+  const { records, loading, error } = useExpenseRecords(accountId, scope);
   const { t } = useTranslation();
   const webViewRef = useRef<any>(null);
   const scheme = useColorScheme() ?? "light";

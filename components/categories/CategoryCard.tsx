@@ -1,8 +1,10 @@
 import React from 'react';
-import { Text, TouchableOpacity, View, useColorScheme } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Colors } from '@/constants/theme';
 import { getCategoryIcon } from '@/types/data/category';
+import { useTheme } from '@/context/themeContext';
 
 export type CategoryCardItem = {
   id: string;
@@ -13,19 +15,21 @@ export type CategoryCardItem = {
 
 type CategoryCardProps = {
   item: CategoryCardItem;
+  index?: number;
   onEdit?: () => void;
   onDelete?: () => void;
 };
 
-export default function CategoryCard({ item, onEdit, onDelete }: CategoryCardProps) {
-  const scheme = useColorScheme() ?? 'light';
-  const colors = Colors[scheme];
+export default function CategoryCard({ item, index = 0, onEdit, onDelete }: CategoryCardProps) {
+  const { theme } = useTheme();
+  const colors = Colors[theme];
 
   return (
-    <View
-      className="mb-6 flex-row items-center justify-between rounded-md px-4 py-4"
-      style={{ backgroundColor: colors.surface }}
-    >
+    <Animated.View entering={FadeInDown.delay(index * 100).springify().mass(0.6).damping(14)}>
+      <View
+        className="mb-6 flex-row items-center justify-between rounded-md px-4 py-4"
+        style={{ backgroundColor: colors.surface }}
+      >
       <View className="flex-row items-center self-stretch min-w-0 flex-1">
         <MaterialCommunityIcons
           name={(item.icon as any) || getCategoryIcon(item.name)}
@@ -60,6 +64,7 @@ export default function CategoryCard({ item, onEdit, onDelete }: CategoryCardPro
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+      </View>
+    </Animated.View>
   );
 }

@@ -15,10 +15,13 @@
     "yesterday": "Учора",
     "other": "Іншае",
     "total": "Вынік",
-    "sync_error": "Памылка сінхранізацыі"
+    "sync_error": "Памылка сінхранізацыі",
+    "sync_success": "Сінхранізацыя прайшла паспяхова",
+    "sync_offline": "Няма падлучэння да інтэрнэту"
   },
   "dashboard": {
     "total_balance": "Агульны баланс",
+    "combined_from_n_currencies": "Аб'яднана з {{count}} валют у {{currency}}",
     "transaction_history": "Гісторыя транзакцый",
     "balance_trend": "Трэнд балансу",
     "spending_insights": "Аналіз выдаткаў",
@@ -103,6 +106,11 @@
     "appearance": "Знешні выгляд",
     "language": "Мова",
     "dark_mode": "Цёмны рэжым",
+    "theme": "Тэма",
+    "base_currency": "Базавая валюта",
+    "select_base_currency": "Выберыце базавую валюту",
+    "base_currency_hint": "Выкарыстоўваецца для аб'яднання балансаў на галоўным экране і ў віджэтах.",
+    "base_currency_updated": "Базавая валюта ўсталявана на {{currency}}",
     "change_password": "Змяніць пароль",
     "logout": "Выхад",
     "profile_update_success": "Профіль паспяхова зменены",
