@@ -5,7 +5,7 @@ import { useLocalSearchParams } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 
 import { Account } from "@/types/data/account";
-import { Category } from "@/types/data/category";
+import { Category , getCategoryIcon } from "@/types/data/category";
 import { PaymentMethod } from "@/types/data/paymentMethod";
 import { Coordinates } from "@/types/data/location";
 
@@ -34,7 +34,6 @@ import * as FileSystem from 'expo-file-system/legacy';
 import Toast from "react-native-toast-message";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { formatCurrency } from "@/utils/formatCurrency";
-import { getCategoryIcon } from "@/types/data/category";
 
 export default function RecordDetailsScreen() {
   const { t } = useTranslation();

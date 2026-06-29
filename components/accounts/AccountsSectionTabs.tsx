@@ -17,7 +17,7 @@ export default function AccountsSectionTabs() {
     const { theme } = useTheme();
     const colors = Colors[theme];
 
-    const sections: Array<{ key: SectionKey; label: string; path: SectionPath }> = [
+    const sections: { key: SectionKey; label: string; path: SectionPath }[] = [
         { key: "accounts", label: t("tabs.accounts"), path: "/accounts" },
         { key: "payments", label: t("tabs.payments"), path: "/accounts/payments" },
         { key: "categories", label: t("tabs.categories"), path: "/accounts/categories" },
