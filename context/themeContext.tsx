@@ -27,6 +27,7 @@ const ALL_THEMES: readonly AppTheme[] = [
   "catppuccin",
   "cyberpunk",
   "pride",
+  "high-contrast",
 ];
 
 type ThemeContextValue = {
