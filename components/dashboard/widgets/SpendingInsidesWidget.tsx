@@ -40,7 +40,7 @@ export const SpendingInsidesWidget: React.FC<{
   React.useEffect(() => {
     let mounted = true;
     (async () => {
-      if (!db) return;
+      if (!db) { return; }
       try {
         const cats = await getAllCategories(db);
         const accMap: Record<string, string> = {};
@@ -62,7 +62,7 @@ export const SpendingInsidesWidget: React.FC<{
           filteredLocal = local.filter((r) => r.accountId === accountId);
         }
 
-        if (!mounted) return;
+        if (!mounted) { return; }
         setAccounts(accMap);
         setCategories(catMap);
         setCategoryIcons(iconMap);
@@ -81,7 +81,7 @@ export const SpendingInsidesWidget: React.FC<{
             );
           if (needsConversion) {
             const fetchedRates = await fetchExchangeRates(baseCurrency);
-            if (mounted) setRates(fetchedRates);
+            if (mounted) { setRates(fetchedRates); }
           } else {
             setRates({});
           }
@@ -89,9 +89,9 @@ export const SpendingInsidesWidget: React.FC<{
           setRates({});
         }
       } catch (e: any) {
-        if (mounted) setError(e?.message ?? String(e));
+        if (mounted) { setError(e?.message ?? String(e)); }
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) { setLoading(false); }
       }
     })();
     return () => {
@@ -113,8 +113,8 @@ export const SpendingInsidesWidget: React.FC<{
       { amount: number; currency: string; categoryId: string }[]
     >();
     recordsRaw.forEach((r) => {
-      if (r.amount === undefined || r.amount === null) return;
-      if (r.amount >= 0) return;
+      if (r.amount === undefined || r.amount === null) { return; }
+      if (r.amount >= 0) { return; }
       const cat = r.categoryId ?? "uncategorized";
       const originalCurrency = accounts[r.accountId] ?? baseCurrency;
 
@@ -187,8 +187,8 @@ export const SpendingInsidesWidget: React.FC<{
   const totalsByCurrency = React.useMemo(() => {
     const map = new Map<string, number>();
     recordsRaw.forEach((r) => {
-      if (r.amount === undefined || r.amount === null) return;
-      if (r.amount >= 0) return;
+      if (r.amount === undefined || r.amount === null) { return; }
+      if (r.amount >= 0) { return; }
       const originalCurrency = accounts[r.accountId] ?? baseCurrency;
       let amt = Math.abs(r.amount);
       let displayCurrency = originalCurrency;
@@ -205,7 +205,7 @@ export const SpendingInsidesWidget: React.FC<{
       .join(" | ");
   }, [recordsRaw, accounts, isTotalScope, toBaseAmount, baseCurrency, canConvert]);
 
-  if (!loading && !error && data.length === 0) return null;
+  if (!loading && !error && data.length === 0) { return null; }
 
   return (
     <DashboardWidgetCard

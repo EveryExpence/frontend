@@ -42,7 +42,7 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
   const canSave = name.trim() && !isSaving;
 
   useEffect(() => {
-    if (!visible) return;
+    if (!visible) { return; }
 
     if (editingCategory) {
       setName(editingCategory.name);
@@ -56,7 +56,7 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
   }, [visible, editingCategory]);
 
   const handleSave = async () => {
-    if (!canSave) return;
+    if (!canSave) { return; }
 
     setIsSaving(true);
     try {
@@ -70,7 +70,7 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
     <CustomModal
       isVisible={visible}
       setIsVisible={(next) => {
-        if (!next) onClose();
+        if (!next) { onClose(); }
       }}
       title={isEditing ? t("categories.edit_category") : t("categories.add_category")}
       cancelAction={

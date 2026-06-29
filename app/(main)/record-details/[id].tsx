@@ -64,10 +64,10 @@ export default function RecordDetailsScreen() {
 
   useEffect(() => {
     const fetchRecord = async () => {
-      if (!id) return;
+      if (!id) { return; }
       try {
         const record = await getExpenseRecordById(db, id);
-        if (!record) return;
+        if (!record) { return; }
 
         const accounts = await getAllAccounts(db);
         const categories = await getAllCategories(db);

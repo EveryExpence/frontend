@@ -15,10 +15,12 @@ const Topbar = ({ title, onBack }: TopbarProps) => {
     <View className="flex-row items-center mb-4 px-4">
       {onBack ? (
         <TouchableOpacity
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
           onPress={onBack}
           className="p-2 mr-2"
           activeOpacity={0.8}
-          accessibilityLabel="Go back"
         >
           <Ionicons name="chevron-back" size={26} color={iconColor} />
         </TouchableOpacity>

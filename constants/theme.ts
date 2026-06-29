@@ -134,6 +134,22 @@ const pride: ThemePalette = {
   success: "#00ff7f",
 };
 
+/* ─── High Contrast Theme ─── */
+const highContrast: ThemePalette = {
+  text: "#FFFFFF",
+  background: "#000000",
+  tint: "#FFFF00",
+  surface: "#1A1A1A",
+  icon: "#FFFFFF",
+  tabIconDefault: "#FFFFFF",
+  tabIconSelected: "#FFFF00",
+  textLight: "#FFFFFF",
+  textDark: "#000000",
+  error: "#FF0000",
+  warning: "#FFA500",
+  success: "#00FF00",
+};
+
 /* ─── Palette Map ─── */
 
 export const themePalettes: Record<AppTheme, ThemePalette> = {
@@ -172,13 +188,14 @@ export const themePalettes: Record<AppTheme, ThemePalette> = {
   catppuccin,
   cyberpunk,
   pride,
+  "high-contrast": highContrast,
 };
 
 /* ─── Re-export for backward compatibility ─── */
 
 export const Colors = themePalettes;
 
-export { gruvbox, cherryBlossom, nord, oneDark, catppuccin, cyberpunk, pride };
+export { gruvbox, cherryBlossom, nord, oneDark, catppuccin, cyberpunk, pride, highContrast };
 
 export const Fonts = Platform.select({
   ios: {

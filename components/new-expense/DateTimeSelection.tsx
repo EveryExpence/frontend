@@ -44,7 +44,7 @@ const DateTimeSelection = ({ selectedDateTime, setSelectedDateTime, disabled }: 
                             setShowTimeSelection(true);
                             return;
                         }
-                        if (!value) return;
+                        if (!value) { return; }
                         setSelectedDate(value);
                         setSelectedDateTime(value)
                         setShowDateSelection(false);
@@ -63,7 +63,7 @@ const DateTimeSelection = ({ selectedDateTime, setSelectedDateTime, disabled }: 
                             setShowTimeSelection(false);
                             return;
                         }
-                        if (!value) return;
+                        if (!value) { return; }
                         setSelectedTime(value);
                         setSelectedDateTime(prev => {
                             const newDate = new Date(prev);

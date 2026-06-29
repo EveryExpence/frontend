@@ -64,6 +64,9 @@ export default function AccountCard({
 
         <View className="flex-row items-center">
           <TouchableOpacity
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel="Edit account"
             activeOpacity={0.8}
             style={{ padding: 4, marginRight: 8 }}
             onPress={onEdit}
@@ -72,6 +75,9 @@ export default function AccountCard({
           </TouchableOpacity>
 
           <TouchableOpacity
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel="Delete account"
             activeOpacity={0.8}
             style={{ padding: 4 }}
             onPress={onDelete}

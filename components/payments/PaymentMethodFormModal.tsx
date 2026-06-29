@@ -42,7 +42,7 @@ export default function PaymentMethodFormModal({
   const canSave = name.trim() && !isSaving;
 
   useEffect(() => {
-    if (!visible) return;
+    if (!visible) { return; }
 
     if (editingPaymentMethod) {
       setName(editingPaymentMethod.name);
@@ -54,7 +54,7 @@ export default function PaymentMethodFormModal({
   }, [visible, editingPaymentMethod]);
 
   const handleSave = async () => {
-    if (!canSave) return;
+    if (!canSave) { return; }
 
     setIsSaving(true);
     try {
@@ -68,7 +68,7 @@ export default function PaymentMethodFormModal({
     <CustomModal
       isVisible={visible}
       setIsVisible={(next) => {
-        if (!next) onClose();
+        if (!next) { onClose(); }
       }}
       title={isEditing ? t("payments.edit_payment_method") : t("payments.add_payment_method")}
       cancelAction={

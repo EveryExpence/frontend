@@ -53,10 +53,10 @@ const toCssVar = (key: string) =>
 
 /* ─── Web: update DOM custom properties ─── */
 const applyThemeToDocument = (theme: AppTheme) => {
-  if (typeof document === "undefined") return;
+  if (typeof document === "undefined") { return; }
 
   const palette = Colors[theme];
-  if (!palette) return;
+  if (!palette) { return; }
 
   const root = document.documentElement;
   (Object.entries(palette) as [string, string][]).forEach(([key, value]) => {
@@ -70,7 +70,7 @@ const applyThemeToDocument = (theme: AppTheme) => {
  *  colour is always the palette colour regardless of the system scheme.   */
 const applyThemeToNativeWind = (theme: AppTheme) => {
   const palette = Colors[theme];
-  if (!palette) return;
+  if (!palette) { return; }
 
   const rootVariables: Record<string, { light: string; dark: string }> = {};
 

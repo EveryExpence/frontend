@@ -22,10 +22,10 @@ const fetchPaymentMethods = async (db: SQLiteDatabase, callback: Dispatch<SetSta
 
 const getPaymentMethodIcon = (name: string): any => {
     const lowercaseName = name.toLowerCase();
-    if (lowercaseName.includes("cash") || lowercaseName.includes("gotówka")) return "cash";
-    if (lowercaseName.includes("card") || lowercaseName.includes("karta")) return "credit-card";
-    if (lowercaseName.includes("blik") || lowercaseName.includes("phone") || lowercaseName.includes("telefon")) return "cellphone-nfc";
-    if (lowercaseName.includes("bank") || lowercaseName.includes("transfer") || lowercaseName.includes("przelew")) return "bank-transfer";
+    if (lowercaseName.includes("cash") || lowercaseName.includes("gotówka")) { return "cash"; }
+    if (lowercaseName.includes("card") || lowercaseName.includes("karta")) { return "credit-card"; }
+    if (lowercaseName.includes("blik") || lowercaseName.includes("phone") || lowercaseName.includes("telefon")) { return "cellphone-nfc"; }
+    if (lowercaseName.includes("bank") || lowercaseName.includes("transfer") || lowercaseName.includes("przelew")) { return "bank-transfer"; }
     return "cash-register";
 }
 

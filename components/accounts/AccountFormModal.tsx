@@ -44,7 +44,7 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
   );
 
   useEffect(() => {
-    if (!visible) return;
+    if (!visible) { return; }
 
     if (editingAccount) {
       setName(editingAccount.name);
@@ -58,7 +58,7 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
   }, [visible, editingAccount]);
 
   const handleSave = async () => {
-    if (!canSave) return;
+    if (!canSave) { return; }
 
     const parsed = balanceField.trim() === '' ? 0 : parseBalanceInput(balanceField);
     if (!Number.isFinite(parsed)) return;
@@ -77,7 +77,7 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
     <CustomModal
       isVisible={visible}
       setIsVisible={(next) => {
-        if (!next) onClose();
+        if (!next) { onClose(); }
       }}
       title={isEditing ? t("accounts.edit_account") : t("accounts.add_account")}
       cancelAction={

@@ -50,11 +50,19 @@ export default function PaymentMethodCard({ item, index = 0, onEdit, onDelete }:
 
       <View className="items-end justify-between self-stretch">
         <View className="flex-row items-center">
-          <TouchableOpacity activeOpacity={0.8} style={{ marginRight: 8, padding: 4 }} onPress={onEdit}>
+          <TouchableOpacity 
+            accessible 
+            accessibilityRole="button" 
+            accessibilityLabel="Edit payment method" 
+            activeOpacity={0.8} style={{ marginRight: 8, padding: 4 }} onPress={onEdit}>
             <MaterialCommunityIcons name="pencil-outline" size={32} color={colors.text} />
           </TouchableOpacity>
 
-          <TouchableOpacity activeOpacity={0.8} style={{ padding: 4 }} onPress={onDelete}>
+          <TouchableOpacity 
+            accessible 
+            accessibilityRole="button" 
+            accessibilityLabel="Delete payment method" 
+            activeOpacity={0.8} style={{ padding: 4 }} onPress={onDelete}>
             <MaterialCommunityIcons name="delete-outline" size={32} color={colors.text} />
           </TouchableOpacity>
         </View>

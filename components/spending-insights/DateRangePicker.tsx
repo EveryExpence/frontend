@@ -95,9 +95,9 @@ export function DateRangePicker({
                     mode="date"
                     value={startDate}
                     onChange={(event, value) => {
-                        if (Platform.OS !== "ios") setShowStartPicker(false);
-                        if (event.type === "dismissed") return;
-                        if (!value) return;
+                        if (Platform.OS !== "ios") { setShowStartPicker(false); }
+                        if (event.type === "dismissed") { return; }
+                        if (!value) { return; }
                         onStartDateChange(value);
                     }}
                 />
@@ -109,9 +109,9 @@ export function DateRangePicker({
                     mode="date"
                     value={endDate}
                     onChange={(event, value) => {
-                        if (Platform.OS !== "ios") setShowEndPicker(false);
-                        if (event.type === "dismissed") return;
-                        if (!value) return;
+                        if (Platform.OS !== "ios") { setShowEndPicker(false); }
+                        if (event.type === "dismissed") { return; }
+                        if (!value) { return; }
                         const eod = new Date(value);
                         eod.setHours(23, 59, 59, 999);
                         onEndDateChange(eod);
