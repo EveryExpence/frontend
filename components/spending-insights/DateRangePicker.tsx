@@ -59,6 +59,10 @@ export function DateRangePicker({
                 </View>
 
                 <TouchableOpacity
+                    accessible
+                    accessibilityRole="button"
+                    accessibilityLabel={`Start date ${formatDateDisplay(startDate)}`}
+                    accessibilityHint="Double tap to change the start date"
                     onPress={() => setShowStartPicker(true)}
                     style={{
                         flex: 1,
@@ -75,6 +79,10 @@ export function DateRangePicker({
                 </TouchableOpacity>
 
                 <TouchableOpacity
+                    accessible
+                    accessibilityRole="button"
+                    accessibilityLabel={`End date ${formatDateDisplay(endDate)}`}
+                    accessibilityHint="Double tap to change the end date"
                     onPress={() => setShowEndPicker(true)}
                     style={{
                         flex: 1,

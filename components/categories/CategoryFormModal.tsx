@@ -74,12 +74,22 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
       }}
       title={isEditing ? t("categories.edit_category") : t("categories.add_category")}
       cancelAction={
-        <TouchableOpacity onPress={onClose} style={{ padding: 10 }}>
+        <TouchableOpacity 
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel={t("common.cancel")}
+          onPress={onClose} 
+          style={{ padding: 10 }}
+        >
           <Text className="text-lg text-theme-icon">{t("common.cancel")}</Text>
         </TouchableOpacity>
       }
       confirmAction={
         <TouchableOpacity
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel={isSaving ? t("common.loading") : t("common.save")}
+          accessibilityState={{ disabled: !canSave }}
           onPress={handleSave}
           disabled={!canSave}
           style={{
@@ -101,6 +111,9 @@ export default function CategoryFormModal({ visible, editingCategory, onClose, o
           {t("categories.name")}
         </Text>
         <TextInput
+          accessible
+          accessibilityLabel={t("categories.name")}
+          accessibilityHint="Enter category name"
           className="text-lg text-theme-text"
           value={name}
           onChangeText={setName}

@@ -19,6 +19,9 @@ export default function IconPicker({ icons, selectedIcon, onSelect }: Props) {
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 {icons.map((icon) => (
                     <TouchableOpacity
+                        accessible
+                        accessibilityRole="button"
+                        accessibilityLabel={`Select icon ${icon}`}
                         key={icon}
                         onPress={() => onSelect(icon)}
                         style={[

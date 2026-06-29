@@ -72,12 +72,22 @@ export default function PaymentMethodFormModal({
       }}
       title={isEditing ? t("payments.edit_payment_method") : t("payments.add_payment_method")}
       cancelAction={
-        <TouchableOpacity onPress={onClose} style={{ padding: 10 }}>
+        <TouchableOpacity 
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel={t("common.cancel")}
+          onPress={onClose} 
+          style={{ padding: 10 }}
+        >
           <Text className="text-lg text-theme-icon">{t("common.cancel")}</Text>
         </TouchableOpacity>
       }
       confirmAction={
         <TouchableOpacity
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel={isSaving ? t("common.loading") : t("common.save")}
+          accessibilityState={{ disabled: !canSave }}
           onPress={handleSave}
           disabled={!canSave}
           style={{
@@ -99,6 +109,9 @@ export default function PaymentMethodFormModal({
           {t("payments.name")}
         </Text>
         <TextInput
+          accessible
+          accessibilityLabel={t("payments.name")}
+          accessibilityHint="Enter payment method name"
           className="text-lg text-theme-text"
           value={name}
           onChangeText={setName}

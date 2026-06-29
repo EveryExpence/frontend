@@ -81,12 +81,22 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
       }}
       title={isEditing ? t("accounts.edit_account") : t("accounts.add_account")}
       cancelAction={
-        <TouchableOpacity onPress={onClose} style={{ padding: 10 }}>
+        <TouchableOpacity 
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel={t("common.cancel")}
+          onPress={onClose} 
+          style={{ padding: 10 }}
+        >
           <Text className="text-lg text-theme-icon">{t("common.cancel")}</Text>
         </TouchableOpacity>
       }
       confirmAction={
         <TouchableOpacity
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel={isSaving ? t("common.loading") : t("common.save")}
+          accessibilityState={{ disabled: !canSave }}
           onPress={handleSave}
           disabled={!canSave}
           style={{
@@ -106,6 +116,9 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
       <ScrollView keyboardShouldPersistTaps="handled">
         <Text className="text-lg text-theme-icon" style={{ marginBottom: 6 }}>{t("accounts.name")}</Text>
         <TextInput
+          accessible
+          accessibilityLabel={t("accounts.name")}
+          accessibilityHint="Enter account name"
           className="text-lg text-theme-text"
           value={name}
           onChangeText={setName}
@@ -121,6 +134,9 @@ export default function AccountFormModal({ visible, editingAccount, onClose, onS
 
         <Text className="text-lg text-theme-icon" style={{ marginBottom: 6 }}>{t("accounts.balance")}</Text>
         <TextInput
+          accessible
+          accessibilityLabel={t("accounts.balance")}
+          accessibilityHint={balanceField && !isBalanceValid ? "Invalid account balance" : "Enter account balance"}
           className="text-lg text-theme-text"
           value={balanceField}
           onChangeText={setBalanceField}

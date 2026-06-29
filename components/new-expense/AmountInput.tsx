@@ -30,6 +30,10 @@ const AmountInput = ({ selectedAccount, amount, setAmount, isValid, disabled }: 
                     className="absolute left-3 text-theme-icon z-50"
                 />
                 <TextInput
+                    accessible
+                    accessibilityLabel={t("new_expense.amount")}
+                    accessibilityHint="Enter the expense amount"
+                    keyboardType="numeric"
                     placeholder={t("new_expense.enter_amount")}
                     placeholderTextColor={colors.icon}
                     value={amount}
