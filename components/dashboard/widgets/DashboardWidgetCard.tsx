@@ -26,9 +26,11 @@ export const DashboardWidgetCard: React.FC<DashboardWidgetCardProps> = ({
 
         {actionLabel && onActionPress ? (
           <Pressable
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel={actionLabel}
             onPress={onActionPress}
             hitSlop={10}
-            accessibilityRole="button"
           >
             <Text className="text-[17px] font-medium text-theme-tint">
               {actionLabel}

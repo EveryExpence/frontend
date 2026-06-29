@@ -18,6 +18,9 @@ const SettingsActionRow = ({ title, iconName, tone, showChevron = false, onPress
 
   return (
     <TouchableOpacity
+      accessible
+      accessibilityRole="button"
+      accessibilityLabel={title}
       activeOpacity={0.8}
       className="h-[75px] flex-row items-center px-3 justify-between bg-theme-surface"
       onPress={onPress}

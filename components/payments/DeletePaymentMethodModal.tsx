@@ -27,7 +27,7 @@ export default function DeletePaymentMethodModal({
     <CustomModal
       isVisible={visible}
       setIsVisible={(next) => {
-        if (!next) onClose();
+        if (!next) { onClose(); }
       }}
       title={t("payments.delete_payment_method")}
       cancelAction={

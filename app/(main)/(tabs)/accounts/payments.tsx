@@ -90,7 +90,7 @@ export default function PaymentsScreen() {
 	};
 
 	const handleDelete = async () => {
-		if (!deletingPaymentMethod) return;
+		if (!deletingPaymentMethod) { return; }
 
 		setIsDeleting(true);
 		try {

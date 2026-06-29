@@ -15,6 +15,10 @@ const SettingsPreferenceRow = ({ title, iconName, currentValue, onPress }: Props
 
   return (
     <TouchableOpacity
+      accessible
+      accessibilityRole="button"
+      accessibilityLabel={`${title}, current value ${currentValue}`}
+      accessibilityHint="Double tap to change this preference"
       activeOpacity={0.8}
       className="h-[75px] flex-row items-center px-3 justify-between bg-theme-surface"
       onPress={onPress}

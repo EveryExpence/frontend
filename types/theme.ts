@@ -7,7 +7,8 @@ export type AppTheme =
   | "one-dark"
   | "catppuccin"
   | "cyberpunk"
-  | "pride";
+  | "pride"
+  | "high-contrast";
 
 export const THEME_LABELS: Record<AppTheme, string> = {
   light: "Light",
@@ -19,4 +20,5 @@ export const THEME_LABELS: Record<AppTheme, string> = {
   catppuccin: "Catppuccin",
   cyberpunk: "Cyberpunk",
   pride: "Pride",
+  "high-contrast": "High Contrast",
 };

@@ -26,9 +26,9 @@ describe("data module", () => {
     });
 
     test("categories should be added", async () => {
-        await createCategory(db, { name: "Transport", type: "expense" });
-        await createCategory(db, { name: "Job", type: "income" });
-        await createCategory(db, { name: "Food", type: "expense" });
+        await createCategory(db, { name: "Transport", type: "expense", icon: "train" });
+        await createCategory(db, { name: "Job", type: "income", icon: "briefcase" });
+        await createCategory(db, { name: "Food", type: "expense", icon: "food" });
 
         const categories = await getAllCategories(db);
         expect(categories.length).toBe(3);
@@ -47,7 +47,7 @@ describe("data module", () => {
     test("category should be updated", async () => {
         let categories = await getAllCategories(db);
         const category = categories.find((category) => category.name === "Transport")!;
-        await updateCategory(db, category.id, { name: "Gifts", type: "income" });
+        await updateCategory(db, category.id, { name: "Gifts", type: "income", icon: "gift" });
         
         categories = await getAllCategories(db);
         const edited = categories.find((category) => category.name === "Gifts");
@@ -69,9 +69,9 @@ describe("data module", () => {
     });
 
     test("payment methods should be added", async () => {
-        await createPaymentMethod(db, { name: "Card" });
-        await createPaymentMethod(db, { name: "Cash" });
-        await createPaymentMethod(db, { name: "BLIK" });
+        await createPaymentMethod(db, { name: "Card", icon: "credit-card" });
+        await createPaymentMethod(db, { name: "Cash", icon: "cash" });
+        await createPaymentMethod(db, { name: "BLIK", icon: "cellphone-nfc" });
 
         const paymentMethods = await getAllPaymentMethods(db);
         expect(paymentMethods.length).toBe(3);
@@ -86,7 +86,7 @@ describe("data module", () => {
         let paymentMethods = await getAllPaymentMethods(db);
         const paymentMethod = paymentMethods.find((paymentMethod) => paymentMethod.name === "Card");
         expect(paymentMethod).not.toBeUndefined();
-        await updatePaymentMethod(db, paymentMethod!.id, { name: "Credit Card" });
+        await updatePaymentMethod(db, paymentMethod!.id, { name: "Credit Card", icon: "credit-card" });
         
         paymentMethods = await getAllPaymentMethods(db);
         const edited = paymentMethods.find((paymentMethod) => paymentMethod.name === "Credit Card");

@@ -27,7 +27,7 @@ export default function DeleteCategoryModal({
     <CustomModal
       isVisible={visible}
       setIsVisible={(next) => {
-        if (!next) onClose();
+        if (!next) { onClose(); }
       }}
       title={t("categories.delete_category")}
       cancelAction={

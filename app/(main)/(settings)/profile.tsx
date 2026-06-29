@@ -48,13 +48,13 @@ const ProfileScreen = () => {
       });
     }
   }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   useEffect(() => {
     loadUser()
   },[])
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) { return; }
 
     const nextUserName = user.publicUsername ?? "User";
     const nextEmail = user.email ?? "None";
@@ -75,7 +75,7 @@ const ProfileScreen = () => {
       setIsSaving(true);
       const token = await EncryptedStorage.getItem(accessTokenKey)
 
-      if (!token) throw new Error("No access token");
+      if (!token) { throw new Error("No access token"); }
 
       const updateRequests = [
         updateUserEmail(token, email),

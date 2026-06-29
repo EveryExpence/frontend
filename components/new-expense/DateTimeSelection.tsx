@@ -25,6 +25,10 @@ const DateTimeSelection = ({ selectedDateTime, setSelectedDateTime, disabled }: 
             <Text className="text-2xl text-theme-text font-bold">{t("new_expense.date")}</Text>
 
             <TouchableOpacity
+                accessible
+                accessibilityRole="button"
+                accessibilityLabel={t("new_expense.date")}
+                accessibilityHint="Double tap to change the date and time"
                 onPress={() => disabled ? null : setShowDateSelection(true)}
                 activeOpacity={disabled ? 1 : 0.2}
                 className="bg-theme-surface py-4 px-3 rounded-md flex-row items-center gap-2"
@@ -44,7 +48,7 @@ const DateTimeSelection = ({ selectedDateTime, setSelectedDateTime, disabled }: 
                             setShowTimeSelection(true);
                             return;
                         }
-                        if (!value) return;
+                        if (!value) { return; }
                         setSelectedDate(value);
                         setSelectedDateTime(value)
                         setShowDateSelection(false);
@@ -63,7 +67,7 @@ const DateTimeSelection = ({ selectedDateTime, setSelectedDateTime, disabled }: 
                             setShowTimeSelection(false);
                             return;
                         }
-                        if (!value) return;
+                        if (!value) { return; }
                         setSelectedTime(value);
                         setSelectedDateTime(prev => {
                             const newDate = new Date(prev);

@@ -79,7 +79,7 @@ export const migrateDatabase = async (db: SQLiteDatabase) => {
         const accounts = await db.getAllAsync<{id: string}>("SELECT id FROM accounts LIMIT 1");
         if (accounts.length === 0) {
             const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
                 return v.toString(16);
             });
             await db.execAsync(`INSERT INTO accounts (id, name, currency, balance, syncState) VALUES ('${uuid}', 'Main Account', 'USD', 0, 'created');`);

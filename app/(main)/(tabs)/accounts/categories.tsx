@@ -111,7 +111,7 @@ export default function CategoriesScreen() {
   };
 
   const handleDelete = async () => {
-    if (!deletingCategory) return;
+    if (!deletingCategory) { return; }
 
     setIsDeleting(true);
     try {

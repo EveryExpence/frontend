@@ -177,7 +177,7 @@ export default function RecordsScreen() {
   };
 
   const confirmDelete = async () => {
-    if (!recordToDelete) return;
+    if (!recordToDelete) { return; }
     setIsDeleting(true);
     try {
       await deleteExpenseRecord(db, recordToDelete.id);

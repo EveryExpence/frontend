@@ -98,7 +98,7 @@ export const TransactionHistoryWidget: React.FC<
       ? propRecords
       : (localRecords ?? []).slice(0, 3);
 
-  if (!loading && !error && toShow.length === 0) return null;
+  if (!loading && !error && toShow.length === 0) { return null; }
 
   return (
     <DashboardWidgetCard

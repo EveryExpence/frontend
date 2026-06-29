@@ -28,6 +28,7 @@ const ALL_THEMES: AppTheme[] = [
   "catppuccin",
   "cyberpunk",
   "pride",
+  "high-contrast",
 ];
 
 const ThemeSwatch = ({ theme, size = 24 }: { theme: AppTheme; size?: number }) => {

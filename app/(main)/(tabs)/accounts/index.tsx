@@ -86,7 +86,7 @@ export default function AccountsScreen() {
   };
 
   const handleDelete = async () => {
-    if (!deletingAccount) return;
+    if (!deletingAccount) { return; }
 
     setIsDeleting(true);
     try {

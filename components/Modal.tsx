@@ -23,12 +23,29 @@ const CustomModal = (props: Props) => {
 
     return (
         <Modal visible={props.isVisible} transparent animationType="fade" onRequestClose={onClose}>
-            <Pressable onPress={onClose} className="flex-1 bg-black/35 flex items-center justify-center">
-                <Pressable onPress={() => { }} className="bg-theme-surface rounded-md w-11/12 p-6">
+            <Pressable 
+                accessible
+                accessibilityRole="button"
+                accessibilityLabel="Dismiss modal"
+                onPress={onClose} 
+                className="flex-1 bg-black/35 flex items-center justify-center"
+            >
+                <Pressable 
+                    accessible={false}
+                    importantForAccessibility="no"
+                    onPress={() => { }} 
+                    className="bg-theme-surface rounded-md w-11/12 p-6"
+                >
                     <View className="flex-row justify-between items-start mb-4">
                         <Text className="text-2xl font-semibold text-theme-text flex-1 pr-2">{props.title}</Text>
                         {props.showCloseIcon && (
-                            <Pressable onPress={onClose} className="p-1 -mt-1 -mr-1">
+                            <Pressable 
+                                accessible
+                                accessibilityRole="button"
+                                accessibilityLabel="Close"
+                                onPress={onClose} 
+                                className="p-1 -mt-1 -mr-1"
+                            >
                                 <MaterialCommunityIcons name="close" size={24} color={Colors[theme].text} />
                             </Pressable>
                         )}

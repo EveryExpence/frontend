@@ -163,7 +163,7 @@ const AnimatedBackground = () => {
   const { theme } = useTheme();
   const config = BACKGROUNDS[theme];
 
-  if (!config) return null;
+  if (!config) { return null; }
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">

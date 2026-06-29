@@ -27,7 +27,7 @@ export default function DeleteRecordModal({
     <CustomModal
       isVisible={visible}
       setIsVisible={(next) => {
-        if (!next) onClose();
+        if (!next) { onClose(); }
       }}
       title={t("records.delete_record")}
       cancelAction={
