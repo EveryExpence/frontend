@@ -143,7 +143,7 @@ const highContrast: ThemePalette = {
   icon: "#FFFFFF",
   tabIconDefault: "#FFFFFF",
   tabIconSelected: "#FFFF00",
-  textLight: "#FFFFFF",
+  textLight: "#000000",
   textDark: "#000000",
   error: "#FF0000",
   warning: "#FFA500",
