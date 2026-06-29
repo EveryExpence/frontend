@@ -45,7 +45,7 @@ const IncomeInsightsScreen: React.FC = () => {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-theme-background">
+    <SafeAreaView className="flex-1 bg-transparent">
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{

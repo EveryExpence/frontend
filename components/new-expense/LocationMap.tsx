@@ -99,12 +99,12 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
 
   let marker;
   window.setMarker = (lat, lng) => {
-    if (marker) map.removeLayer(marker);
+    if (marker) { map.removeLayer(marker); }
     marker = L.marker([lat, lng]).addTo(map);
   }
 
   map.on('click', (e) => {
-    if (window.disabledMode) return;
+    if (window.disabledMode) { return; }
     window.setMarker(e.latlng.lat, e.latlng.lng);
     window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'coords', latitude: e.latlng.lat, longitude: e.latlng.lng }));
   });
@@ -120,8 +120,8 @@ const LocationSelection = ({ location, setLocation, setScrollEnabled, disabled }
   const onMessage = (event: any) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
-      if (data.type === 'touchstart') setScrollEnabled(false);
-      if (data.type === 'touchend') setScrollEnabled(true);
+      if (data.type === 'touchstart') { setScrollEnabled(false); }
+      if (data.type === 'touchend') { setScrollEnabled(true); }
       if (!disabled && data.type === 'coords' && data.latitude && data.longitude) {
         setLocation({ latitude: data.latitude, longitude: data.longitude });
         setErrorMsg(null);

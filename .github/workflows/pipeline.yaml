@@ -1,0 +1,107 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - dev
+      - release
+      - feature/pipelines-and-build
+  pull_request:
+    branches:
+      - dev
+      - release
+
+jobs:
+  lint:
+    name: Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
+  build:
+    name: EAS Build
+    needs: lint # Only build if linting passes
+    if: github.event_name == 'push' && (github.ref_name == 'release' || github.ref_name == 'feature/pipelines-and-build')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Build for feature branches (No wait, no release)
+      - name: Trigger Builds (Feature Branch)
+        if: github.ref_name != 'release'
+        run: |
+          eas build --platform all --profile production --non-interactive --no-wait
+          eas build --platform android --profile preview --non-interactive --no-wait
+
+      # Build for release branch (Wait, download, and publish)
+      - name: Trigger and Wait for Builds (Release Branch)
+        if: github.ref_name == 'release'
+        run: |
+          # Start builds and wait for them to finish
+          eas build --platform all --profile production --non-interactive
+          eas build --platform android --profile preview --non-interactive
+          
+          mkdir -p artifacts
+          
+          # Use build:list --json to find the latest successful build URLs
+          # Production Android (AAB)
+          AAB_URL=$(eas build:list --platform android --build-profile production --status finished --limit 1 --json --non-interactive | jq -r '.[0].artifacts.buildUrl')
+          curl -L "$AAB_URL" -o artifacts/app-release.aab
+          
+          # Preview Android (APK)
+          APK_URL=$(eas build:list --platform android --build-profile preview --status finished --limit 1 --json --non-interactive | jq -r '.[0].artifacts.buildUrl')
+          curl -L "$APK_URL" -o artifacts/app-preview.apk
+          
+          # Production iOS (Simulator)
+          IOS_URL=$(eas build:list --platform ios --build-profile production --status finished --limit 1 --json --non-interactive | jq -r '.[0].artifacts.buildUrl')
+          curl -L "$IOS_URL" -o artifacts/ios-simulator-build.tar.gz
+
+      - name: Get version from package.json
+        if: github.ref_name == 'release'
+        id: package_version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        if: github.ref_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.package_version.outputs.version }}-${{ github.run_number }}
+          name: Release v${{ steps.package_version.outputs.version }} (Build #${{ github.run_number }})
+          files: |
+            artifacts/app-preview.apk
+            artifacts/app-release.aab
+            artifacts/ios-simulator-build.tar.gz
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ScrollView, TouchableOpacity, StyleSheet, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTheme } from '@/context/themeContext';
 import { Colors } from '@/constants/theme';
 
 type Props = {
@@ -11,21 +11,24 @@ type Props = {
 };
 
 export default function IconPicker({ icons, selectedIcon, onSelect }: Props) {
-    const scheme = useColorScheme() ?? 'light';
-    const colors = Colors[scheme];
+    const { theme } = useTheme();
+    const colors = Colors[theme];
 
     return (
         <View style={styles.container}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 {icons.map((icon) => (
                     <TouchableOpacity
+                        accessible
+                        accessibilityRole="button"
+                        accessibilityLabel={`Select icon ${icon}`}
                         key={icon}
                         onPress={() => onSelect(icon)}
                         style={[
                             styles.iconContainer,
                             { 
                                 backgroundColor: selectedIcon === icon ? colors.tint : colors.surface,
-                                borderColor: selectedIcon === icon ? colors.tint : colors.border
+                                borderColor: selectedIcon === icon ? colors.tint : colors.surface
                             }
                         ]}
                     >

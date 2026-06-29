@@ -1,5 +1,7 @@
 import { exchangeRatesEndpoint } from "@/constants/endpoints";
 import { apiFetch } from "@/utils/apiFetch";
+import EncryptedStorage from "react-native-encrypted-storage";
+import { accessTokenKey } from "@/constants/encryptedStorageKeys";
 
 type CachedRates = {
     rates: Record<string, number>;
@@ -28,6 +30,9 @@ export const fetchExchangeRates = async (
     }
 
     try {
+        const token = await EncryptedStorage.getItem(accessTokenKey);
+        if (!token) return fallbackRates(base);
+
         const res = await apiFetch(exchangeRatesEndpoint(base));
         if (res.ok) {
             const data = await res.json();

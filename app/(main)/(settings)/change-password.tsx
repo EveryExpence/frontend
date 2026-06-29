@@ -34,7 +34,7 @@ const ChangePasswordScreen = () => {
       setIsSaving(true);
       const token = await EncryptedStorage.getItem(accessTokenKey);
 
-      if (!token) throw new Error("No access token");
+      if (!token) { throw new Error("No access token"); }
 
       await updateUserPassword(token, oldPassword, newPassword);
       reset();
@@ -58,7 +58,7 @@ const ChangePasswordScreen = () => {
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-theme-background"
+      className="flex-1 bg-transparent"
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
     >

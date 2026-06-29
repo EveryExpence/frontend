@@ -19,6 +19,9 @@ const DescriptionInput = ({ description, setDescription, disabled }: Props) => {
             <Text className="text-2xl text-theme-text font-bold">{t("new_expense.description")}</Text>
 
             <TextInput
+                accessible
+                accessibilityLabel={t("new_expense.description")}
+                accessibilityHint="Enter a description for this expense"
                 placeholder={t("new_expense.enter_description")}
                 placeholderTextColor={colors.icon}
                 value={description}

@@ -9,23 +9,50 @@ import SettingsToggleRow from "@/components/settings/SettingsToggleRow";
 import SettingsActionRow from "@/components/settings/SettingsActionRow";
 import Topbar from "@/components/Topbar";
 import { useTheme } from "@/context/themeContext";
-import { useBaseCurrency } from "@/context/baseCurrencyContext";
+import type { AppTheme } from "@/types/theme";
+import { THEME_LABELS } from "@/types/theme";
+import { themePalettes } from "@/constants/theme";
 import Toast from 'react-native-toast-message';
 import { scheduleDailyReminder, cancelDailyReminder, checkNotificationStatus } from "@/utils/notifications";
 import { useTranslation } from "react-i18next";
 import CustomModal from "@/components/Modal";
-import SettingsBaseCurrencyModal from "@/components/settings/SettingsBaseCurrencyModal";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Colors } from "@/constants/theme";
-import { getCurrencyInfo } from "@/constants/currencies";
+
+const ALL_THEMES: AppTheme[] = [
+  "light",
+  "dark",
+  "gruvbox",
+  "cherry-blossom",
+  "nord",
+  "one-dark",
+  "catppuccin",
+  "cyberpunk",
+  "pride",
+  "high-contrast",
+];
+
+const ThemeSwatch = ({ theme, size = 24 }: { theme: AppTheme; size?: number }) => {
+  const palette = themePalettes[theme];
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        backgroundColor: palette.tint,
+        borderWidth: 1,
+        borderColor: palette.surface,
+      }}
+    />
+  );
+};
 
 const Divider = () => <View className="h-px bg-theme-icon opacity-20 mx-6" />;
 
 const SettingsScreen = () => {
   const router = useRouter();
   const { logout, user } = useAuth();
-  const { theme, toggleTheme } = useTheme();
-  const { baseCurrency, setBaseCurrency } = useBaseCurrency();
+  const { theme, setTheme } = useTheme();
   const { t, i18n } = useTranslation();
 
   useEffect(() => {
@@ -35,6 +62,7 @@ const SettingsScreen = () => {
     })();
   }, []);
   const [isLanguageModalVisible, setIsLanguageModalVisible] = useState(false);
+  const [isThemeModalVisible, setIsThemeModalVisible] = useState(false);
   const [isBaseCurrencyModalVisible, setIsBaseCurrencyModalVisible] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
@@ -70,9 +98,9 @@ const SettingsScreen = () => {
   };
 
   return (
-    <SafeAreaView>
+    <SafeAreaView className="flex-1 bg-theme-background">
       <Topbar title={t("settings.title")} />
-      <ScrollView className="px-4">
+      <ScrollView className="flex-1 px-4">
         <Text className="text-2xl font-bold text-theme-text" selectable={false}>
           {t("settings.profile")}
         </Text>
@@ -99,17 +127,10 @@ const SettingsScreen = () => {
           />
           <Divider />
           <SettingsPreferenceRow
-            title={t("settings.base_currency")}
-            iconName="cash-outline"
-            currentValue={getCurrencyInfo(baseCurrency).code}
-            onPress={() => setIsBaseCurrencyModalVisible(true)}
-          />
-          <Divider />
-          <SettingsPreferenceRow
-            title={t("settings.dark_mode")}
+            title={t("settings.theme")}
             iconName="contrast-outline"
-            currentValue={theme === "light" ? t("settings.light", "Light") : t("settings.dark", "Dark")}
-            onPress={toggleTheme}
+            currentValue={THEME_LABELS[theme]}
+            onPress={() => setIsThemeModalVisible(true)}
           />
         </View>
 
@@ -163,6 +184,7 @@ const SettingsScreen = () => {
         ) : null}
       </ScrollView>
 
+      {/* ─── Language Picker Modal ─── */}
       <CustomModal
         isVisible={isLanguageModalVisible}
         setIsVisible={setIsLanguageModalVisible}
@@ -177,7 +199,7 @@ const SettingsScreen = () => {
             <Text className={`text-xl ${i18n.language === "en" ? "text-theme-textLight font-bold" : "text-theme-text"}`}>
               {t("settings.english")}
             </Text>
-            {i18n.language === "en" && <MaterialCommunityIcons name="check" size={24} color={Colors.light.textLight} />}
+            {i18n.language === "en" && <MaterialCommunityIcons name="check" size={24} color="#FFFFFF" />}
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => changeLanguage("pl")}
@@ -186,25 +208,59 @@ const SettingsScreen = () => {
             <Text className={`text-xl ${i18n.language === "pl" ? "text-theme-textLight font-bold" : "text-theme-text"}`}>
               {t("settings.polish")}
             </Text>
-            {i18n.language === "pl" && <MaterialCommunityIcons name="check" size={24} color={Colors.light.textLight} />}
+            {i18n.language === "pl" && <MaterialCommunityIcons name="check" size={24} color="#FFFFFF" />}
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => changeLanguage("be")}
+            className={`flex-row justify-between items-center p-4 rounded-md ${i18n.language === "be" ? "bg-theme-tint" : "bg-theme-background"}`}
+          >
+            <Text className={`text-xl ${i18n.language === "be" ? "text-theme-textLight font-bold" : "text-theme-text"}`}>
+              {t("settings.belarusian")}
+            </Text>
+            {i18n.language === "be" && <MaterialCommunityIcons name="check" size={24} color="#FFFFFF" />}
           </TouchableOpacity>
         </View>
       </CustomModal>
 
-      <SettingsBaseCurrencyModal
-        isVisible={isBaseCurrencyModalVisible}
-        setIsVisible={setIsBaseCurrencyModalVisible}
-        baseCurrency={baseCurrency}
-        onSelect={(code) => {
-          void setBaseCurrency(code);
-          Toast.show({
-            type: "success",
-            text1: t("settings.base_currency_updated", {
-              currency: getCurrencyInfo(code).code,
-            }),
-          });
-        }}
-      />
+      <CustomModal
+        isVisible={isThemeModalVisible}
+        setIsVisible={setIsThemeModalVisible}
+        title={t("settings.theme")}
+        showCloseIcon={true}
+      >
+        <View className="w-full mt-2">
+          {ALL_THEMES.map((t) => {
+            const isActive = theme === t;
+            return (
+              <TouchableOpacity
+                key={t}
+                activeOpacity={0.7}
+                onPress={() => {
+                  setTheme(t);
+                  setIsThemeModalVisible(false);
+                }}
+                className={`flex-row items-center justify-between px-4 py-4 rounded-md mb-2 ${
+                  isActive ? "bg-theme-tint" : "bg-theme-background"
+                }`}
+              >
+                <View className="flex-row items-center gap-3">
+                  <ThemeSwatch theme={t} />
+                  <Text
+                    className={`text-xl ${
+                      isActive ? "text-theme-textLight font-bold" : "text-theme-text"
+                    }`}
+                  >
+                    {THEME_LABELS[t]}
+                  </Text>
+                </View>
+                {isActive && (
+                  <MaterialCommunityIcons name="check" size={24} color="#FFFFFF" />
+                )}
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </CustomModal>
     </SafeAreaView>
   );
 };

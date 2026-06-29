@@ -2,6 +2,7 @@ import { View, Text, Dimensions } from "react-native";
 import { formatCurrency } from "@/utils/formatCurrency";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import Animated, { FadeInDown } from "react-native-reanimated";
 import { useAutoFitText } from "@/hooks/useAutoFitText";
 
 const { width } = Dimensions.get("window");
@@ -41,7 +42,7 @@ export const TotalBalancePage: React.FC<TotalBalancePageProps> = ({
   const { t } = useTranslation();
 
   return (
-    <View style={{ width, paddingHorizontal: 24, paddingVertical: 24 }}>
+    <Animated.View entering={FadeInDown.springify().mass(0.6).damping(14)} style={{ width, paddingHorizontal: 24, paddingVertical: 24 }}>
       <AutoFitText
         text={t("dashboard.total_balance")}
         maxFontSize={MAX_TITLE_FONT_SIZE}
@@ -55,22 +56,23 @@ export const TotalBalancePage: React.FC<TotalBalancePageProps> = ({
         <>
           {Object.entries(totalsByCurrency)
             .slice(0, 3)
-            .map(([currency, value]) => (
-              <AutoFitText
-                key={currency}
-                text={formatCurrency(value, currency)}
-                maxFontSize={MAX_BALANCE_FONT_SIZE}
-                className="mt-4 text-center text-theme-text"
-              />
+            .map(([currency, value], idx) => (
+              <Animated.View key={currency} entering={FadeInDown.delay(100 + idx * 50).springify().mass(0.6).damping(14)}>
+                <AutoFitText
+                  text={formatCurrency(value, currency)}
+                  maxFontSize={MAX_BALANCE_FONT_SIZE}
+                  className="mt-4 text-center text-theme-text"
+                />
+              </Animated.View>
             ))}
           {Object.entries(totalsByCurrency).length > 3 && (
-            <Text className="text-2xl mt-4 text-center text-theme-text opacity-70">
+            <Animated.Text entering={FadeInDown.delay(250).springify().mass(0.6).damping(14)} className="text-2xl mt-4 text-center text-theme-text opacity-70">
               +{Object.entries(totalsByCurrency).length - 3}{" "}
               {t("dashboard.others", "others")}
-            </Text>
+            </Animated.Text>
           )}
         </>
       )}
-    </View>
+    </Animated.View>
   );
 };

@@ -7,6 +7,7 @@ import {
   type ColorSchemeName,
   useColorScheme as useSystemColorScheme,
 } from "react-native";
+import { StyleSheet } from "nativewind";
 import {
   createContext,
   useCallback,
@@ -15,6 +16,19 @@ import {
   useMemo,
   useState,
 } from "react";
+
+const ALL_THEMES: readonly AppTheme[] = [
+  "light",
+  "dark",
+  "gruvbox",
+  "cherry-blossom",
+  "nord",
+  "one-dark",
+  "catppuccin",
+  "cyberpunk",
+  "pride",
+  "high-contrast",
+];
 
 type ThemeContextValue = {
   theme: AppTheme;
@@ -30,23 +44,42 @@ const ThemeContext = createContext<ThemeContextValue>({
   toggleTheme: async () => undefined,
 });
 
-const isAppTheme = (value: ColorSchemeName): value is AppTheme => {
-  return value === "light" || value === "dark";
+const isAppTheme = (value: ColorSchemeName | string | null | undefined): value is AppTheme => {
+  return ALL_THEMES.includes((value ?? "") as AppTheme);
 };
 
+/* ─── CSS variable name from a camelCase token ─── */
+const toCssVar = (key: string) =>
+  `--theme-${key.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`)}`;
+
+/* ─── Web: update DOM custom properties ─── */
 const applyThemeToDocument = (theme: AppTheme) => {
-  if (typeof document === "undefined") {
-    return;
-  }
+  if (typeof document === "undefined") { return; }
+
+  const palette = Colors[theme];
+  if (!palette) { return; }
 
   const root = document.documentElement;
+  (Object.entries(palette) as [string, string][]).forEach(([key, value]) => {
+    root.style.setProperty(toCssVar(key), value);
+  });
+  root.setAttribute("data-theme", theme);
+};
 
-  Object.entries(Colors[theme]).forEach(([key, value]) => {
-    const cssVarName = `--theme-${key.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`)}`;
-    root.style.setProperty(cssVarName, value);
+/* ─── Native / Web: update NativeWind's CSS variable observables ───
+ *  Setting both `light` and `dark` to the same value means the resolved
+ *  colour is always the palette colour regardless of the system scheme.   */
+const applyThemeToNativeWind = (theme: AppTheme) => {
+  const palette = Colors[theme];
+  if (!palette) { return; }
+
+  const rootVariables: Record<string, { light: string; dark: string }> = {};
+
+  (Object.entries(palette) as [string, string][]).forEach(([key, value]) => {
+    rootVariables[toCssVar(key)] = { light: value, dark: value };
   });
 
-  root.setAttribute("data-theme", theme);
+  StyleSheet.registerCompiled({ $compiled: true, rootVariables });
 };
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
@@ -54,14 +87,14 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const [preferredTheme, setPreferredTheme] = useState<AppTheme | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
 
-  const theme = preferredTheme ?? (isAppTheme(systemTheme) ? systemTheme : "light");
+  const theme: AppTheme = preferredTheme ?? (isAppTheme(systemTheme) ? systemTheme : "light");
 
   useEffect(() => {
     const loadThemePreference = async () => {
       try {
         const storedTheme = await EncryptedStorage.getItem(themePreferenceKey);
 
-        if (storedTheme === "light" || storedTheme === "dark") {
+        if (isAppTheme(storedTheme)) {
           setPreferredTheme(storedTheme);
         }
       } catch (error) {
@@ -74,13 +107,22 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     loadThemePreference();
   }, []);
 
+  /* ─── Apply theme whenever preferredTheme or resolved theme changes ─── */
   useEffect(() => {
+    /* Keep the OS colour scheme in sync so system UI (status bar, etc.)
+       follows the selected theme. */
     if (preferredTheme) {
-      Appearance.setColorScheme(preferredTheme);
+      Appearance.setColorScheme(
+        preferredTheme === "light" || preferredTheme === "dark"
+          ? preferredTheme
+          : "dark",
+      );
     } else {
       Appearance.setColorScheme(null);
     }
 
+    /* Update CSS-variable-backed theme colours for both platforms */
+    applyThemeToNativeWind(theme);
     applyThemeToDocument(theme);
   }, [preferredTheme, theme]);
 
@@ -94,7 +136,8 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const toggleTheme = useCallback(async () => {
-    await setTheme(theme === "dark" ? "light" : "dark");
+    const next = theme === "dark" ? "light" : "dark";
+    await setTheme(next);
   }, [setTheme, theme]);
 
   const value = useMemo(

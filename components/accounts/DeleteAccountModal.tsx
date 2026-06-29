@@ -21,7 +21,7 @@ export default function DeleteAccountModal({ visible, name, isDeleting = false, 
     <CustomModal
       isVisible={visible}
       setIsVisible={(next) => {
-        if (!next) onClose();
+        if (!next) { onClose(); }
       }}
       title={t("accounts.delete_account")}
       cancelAction={

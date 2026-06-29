@@ -32,8 +32,11 @@ export const apiFetch = async (input: RequestInfo | URL, init?: RequestInit): Pr
         const refreshToken = await EncryptedStorage.getItem(refreshTokenKey);
 
         if (!refreshToken) {
-            await EncryptedStorage.removeItem(accessTokenKey);
-            router.replace('/login');
+            const loggedIn = await EncryptedStorage.getItem("loggedIn");
+            if (loggedIn !== "true") {
+                await EncryptedStorage.removeItem(accessTokenKey);
+                router.replace('/login');
+            }
             return response;
         }
 
@@ -67,7 +70,10 @@ export const apiFetch = async (input: RequestInfo | URL, init?: RequestInit): Pr
                 try {
                     await EncryptedStorage.removeItem(accessTokenKey);
                 } catch { }
-                router.replace('/login');
+                const loggedIn = await EncryptedStorage.getItem("loggedIn");
+                if (loggedIn !== "true") {
+                    router.replace('/login');
+                }
                 return response;
             }
 
@@ -91,7 +97,10 @@ export const apiFetch = async (input: RequestInfo | URL, init?: RequestInit): Pr
                     await EncryptedStorage.removeItem(accessTokenKey);
                     await EncryptedStorage.removeItem(refreshTokenKey);
                 } catch { }
-                router.replace('/login');
+                const loggedIn = await EncryptedStorage.getItem("loggedIn");
+                if (loggedIn !== "true") {
+                    router.replace('/login');
+                }
                 return response;
             }
 

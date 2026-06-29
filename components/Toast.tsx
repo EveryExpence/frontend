@@ -1,11 +1,11 @@
 import { Colors } from '@/constants/theme';
 import { useSegments } from 'expo-router';
 import React from 'react'
-import { useColorScheme } from 'react-native';
+import { useTheme } from '@/context/themeContext';
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
 
 function CustomizedToast() {
-  const theme = useColorScheme() ?? 'light';
+  const { theme } = useTheme();
   const colors = Colors[theme];
   const segments = useSegments();
   const inAuthGroup = segments[0] === '(auth)';

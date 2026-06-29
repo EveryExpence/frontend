@@ -1,16 +1,11 @@
-import { Colors } from "@/constants/theme";
 import { Stack } from "expo-router";
-import { useColorScheme } from "react-native";
 
 export default function MainLayout() {
-  const scheme = useColorScheme() ?? "light";
-  const colors = Colors[scheme];
-
   return (
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: colors.background },
+        contentStyle: { backgroundColor: "transparent" },
       }}
     >
       <Stack.Screen name="(tabs)" />

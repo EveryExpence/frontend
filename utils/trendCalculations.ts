@@ -114,10 +114,12 @@ export const calculateBalanceTrend = async (
         const initialBalance = reversedPoints[0].balance;
         const finalBalance = reversedPoints[reversedPoints.length - 1].balance;
 
-        if (initialBalance !== 0) {
+        if (Math.abs(initialBalance) > 0.01) {
             percentageChange = ((finalBalance - initialBalance) / Math.abs(initialBalance)) * 100;
-        } else if (finalBalance !== 0) {
-            percentageChange = 100;
+        } else if (Math.abs(finalBalance) > 0.01) {
+            percentageChange = finalBalance > 0 ? 100 : -100;
+        } else {
+            percentageChange = 0;
         }
     }
 

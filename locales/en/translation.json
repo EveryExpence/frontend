@@ -106,6 +106,7 @@
     "appearance": "Appearance",
     "language": "Language",
     "dark_mode": "Dark Mode",
+    "theme": "Theme",
     "base_currency": "Base Currency",
     "select_base_currency": "Select Base Currency",
     "base_currency_hint": "Used to combine balances on the dashboard and totals in widgets.",

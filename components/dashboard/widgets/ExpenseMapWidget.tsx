@@ -39,7 +39,7 @@ const ExpenseMapWidgetComponent: React.FC<ExpenseMapWidgetProps> = ({
       .map((r) => {
         try {
           const [lat, lng] = r.location!.split(";");
-          if (!lat || !lng) return null;
+          if (!lat || !lng) { return null; }
           return {
             id: r.id,
             title: r.title,
@@ -73,7 +73,7 @@ const ExpenseMapWidgetComponent: React.FC<ExpenseMapWidgetProps> = ({
     setIsFetching(true);
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") return;
+      if (status !== "granted") { return; }
 
       const { coords } = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
@@ -141,7 +141,7 @@ const ExpenseMapWidgetComponent: React.FC<ExpenseMapWidgetProps> = ({
 
   window.setMarkers = (locations) => {
     window.clearMarkers();
-    if (!locations || locations.length === 0) return;
+    if (!locations || locations.length === 0) { return; }
     
     const newMarkers = [];
     locations.forEach(loc => {
@@ -178,8 +178,8 @@ const ExpenseMapWidgetComponent: React.FC<ExpenseMapWidgetProps> = ({
   const onMessage = (event: any) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
-      if (data.type === "touchstart") setScrollEnabled?.(false);
-      if (data.type === "touchend") setScrollEnabled?.(true);
+      if (data.type === "touchstart") { setScrollEnabled?.(false); }
+      if (data.type === "touchend") { setScrollEnabled?.(true); }
     } catch {}
   };
 

@@ -12,7 +12,7 @@ import { useTranslation } from "react-i18next";
 import { PolarChart, Pie } from "victory-native";
 import { CATEGORY_COLORS } from "@/constants/categoryColors";
 import { fetchExchangeRates, convertAmount } from "@/utils/exchangeRates";
-import { useBaseCurrency } from "@/context/baseCurrencyContext";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 export const SpendingInsidesWidget: React.FC<{
   onShowMore?: () => void;
@@ -33,14 +33,14 @@ export const SpendingInsidesWidget: React.FC<{
     Record<string, string>
   >({});
   const [rates, setRates] = React.useState<Record<string, number>>({});
-  const { baseCurrency } = useBaseCurrency();
+  const baseCurrency = "USD";
 
   const isTotalScope = scope === "total";
 
   React.useEffect(() => {
     let mounted = true;
     (async () => {
-      if (!db) return;
+      if (!db) { return; }
       try {
         const cats = await getAllCategories(db);
         const accMap: Record<string, string> = {};
@@ -62,7 +62,7 @@ export const SpendingInsidesWidget: React.FC<{
           filteredLocal = local.filter((r) => r.accountId === accountId);
         }
 
-        if (!mounted) return;
+        if (!mounted) { return; }
         setAccounts(accMap);
         setCategories(catMap);
         setCategoryIcons(iconMap);
@@ -81,7 +81,7 @@ export const SpendingInsidesWidget: React.FC<{
             );
           if (needsConversion) {
             const fetchedRates = await fetchExchangeRates(baseCurrency);
-            if (mounted) setRates(fetchedRates);
+            if (mounted) { setRates(fetchedRates); }
           } else {
             setRates({});
           }
@@ -89,9 +89,9 @@ export const SpendingInsidesWidget: React.FC<{
           setRates({});
         }
       } catch (e: any) {
-        if (mounted) setError(e?.message ?? String(e));
+        if (mounted) { setError(e?.message ?? String(e)); }
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) { setLoading(false); }
       }
     })();
     return () => {
@@ -105,20 +105,22 @@ export const SpendingInsidesWidget: React.FC<{
     [baseCurrency, rates],
   );
 
+  const canConvert = Object.keys(rates).length > 1;
+
   const totalsByCategory = React.useMemo(() => {
     const map = new Map<
       string,
       { amount: number; currency: string; categoryId: string }[]
     >();
     recordsRaw.forEach((r) => {
-      if (r.amount === undefined || r.amount === null) return;
-      if (r.amount >= 0) return;
+      if (r.amount === undefined || r.amount === null) { return; }
+      if (r.amount >= 0) { return; }
       const cat = r.categoryId ?? "uncategorized";
       const originalCurrency = accounts[r.accountId] ?? baseCurrency;
 
       let amt = Math.abs(r.amount);
       let displayCurrency = originalCurrency;
-      if (isTotalScope) {
+      if (isTotalScope && canConvert) {
         amt = toBaseAmount(amt, originalCurrency);
         displayCurrency = baseCurrency;
       }
@@ -129,7 +131,7 @@ export const SpendingInsidesWidget: React.FC<{
       map.set(key, entry);
     });
     return map;
-  }, [recordsRaw, accounts, isTotalScope, toBaseAmount, baseCurrency]);
+  }, [recordsRaw, accounts, isTotalScope, toBaseAmount, baseCurrency, canConvert]);
 
   const data = React.useMemo((): {
     label: string;
@@ -171,7 +173,7 @@ export const SpendingInsidesWidget: React.FC<{
         grandTotal > 0 ? ((chartValue / grandTotal) * 100).toFixed(1) : "0.0";
       const displayAmount = `${percentage}%`;
       arr.push({
-        label: `${label} (${displayCurrency})`,
+        label: (isTotalScope && canConvert) ? label : `${label} (${displayCurrency})`,
         value: chartValue,
         color: CATEGORY_COLORS[idx % CATEGORY_COLORS.length],
         categoryId: catId,
@@ -185,12 +187,12 @@ export const SpendingInsidesWidget: React.FC<{
   const totalsByCurrency = React.useMemo(() => {
     const map = new Map<string, number>();
     recordsRaw.forEach((r) => {
-      if (r.amount === undefined || r.amount === null) return;
-      if (r.amount >= 0) return;
+      if (r.amount === undefined || r.amount === null) { return; }
+      if (r.amount >= 0) { return; }
       const originalCurrency = accounts[r.accountId] ?? baseCurrency;
       let amt = Math.abs(r.amount);
       let displayCurrency = originalCurrency;
-      if (isTotalScope) {
+      if (isTotalScope && canConvert) {
         amt = toBaseAmount(amt, originalCurrency);
         displayCurrency = baseCurrency;
       }
@@ -201,9 +203,9 @@ export const SpendingInsidesWidget: React.FC<{
       .sort((a, b) => b[1] - a[1])
       .map(([curr, amt]) => formatCurrency(amt, curr))
       .join(" | ");
-  }, [recordsRaw, accounts, isTotalScope, toBaseAmount, baseCurrency]);
+  }, [recordsRaw, accounts, isTotalScope, toBaseAmount, baseCurrency, canConvert]);
 
-  if (!loading && !error && data.length === 0) return null;
+  if (!loading && !error && data.length === 0) { return null; }
 
   return (
     <DashboardWidgetCard
@@ -220,19 +222,21 @@ export const SpendingInsidesWidget: React.FC<{
               </Text>
             </View>
           ) : (
-            <PolarChart<
-              { label: string; value: number; color: string },
-              "label",
-              "value",
-              "color"
-            >
-              data={data}
-              labelKey={"label"}
-              valueKey={"value"}
-              colorKey={"color"}
-            >
-              <Pie.Chart innerRadius="70%" />
-            </PolarChart>
+            <Animated.View entering={FadeInDown.delay(100).springify().mass(0.6).damping(14)} style={{ flex: 1 }}>
+              <PolarChart<
+                { label: string; value: number; color: string },
+                "label",
+                "value",
+                "color"
+              >
+                data={data}
+                labelKey={"label"}
+                valueKey={"value"}
+                colorKey={"color"}
+              >
+                <Pie.Chart innerRadius="70%" />
+              </PolarChart>
+            </Animated.View>
           )}
         </View>
 
@@ -248,8 +252,8 @@ export const SpendingInsidesWidget: React.FC<{
           </Text>
 
           <View className="mt-2">
-            {data.slice(0, 3).map((d) => (
-              <View key={d.label} className="flex-row items-center py-0.5">
+            {data.slice(0, 3).map((d, index) => (
+              <Animated.View key={d.label} entering={FadeInDown.delay(200 + index * 100).springify().mass(0.6).damping(14)} className="flex-row items-center py-0.5">
                 <View className="flex-row items-center flex-1 mr-2">
                   <MaterialCommunityIcons
                     name={
@@ -270,7 +274,7 @@ export const SpendingInsidesWidget: React.FC<{
                 <Text className="text-theme-text text-sm font-medium">
                   {d.displayAmount}
                 </Text>
-              </View>
+              </Animated.View>
             ))}
           </View>
         </View>
